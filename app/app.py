@@ -16,6 +16,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -25,6 +26,172 @@ st.set_page_config(
     page_icon="🕵️",
     layout="wide",
     initial_sidebar_state="expanded",
+)
+
+# ---------------------------------------------------------------------------
+# Visual theme — "FraudIntel" dark/graph-intelligence look
+# ---------------------------------------------------------------------------
+_INK = "#0A0E17"
+_PANEL = "#0B1020"
+_LINE = "rgba(0, 217, 255, 0.16)"
+_TEXT = "#E8ECF4"
+_MUTED = "#8B95A7"
+_CYAN = "#00D9FF"
+_VIOLET = "#7C5CFF"
+_DANGER = "#FF3B69"
+_GOOD = "#33E6A0"
+_AMBER = "#FFB800"
+
+FRAUDINTEL_TEMPLATE = go.layout.Template(
+    layout=go.Layout(
+        paper_bgcolor=_PANEL,
+        plot_bgcolor=_PANEL,
+        font=dict(family="JetBrains Mono, monospace", color=_TEXT, size=12),
+        title=dict(font=dict(family="Space Grotesk, sans-serif", size=16, color=_TEXT)),
+        colorway=[_CYAN, _VIOLET, _DANGER, _GOOD, _AMBER],
+        xaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
+        yaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
+        legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color=_MUTED)),
+        margin=dict(t=48, b=32, l=48, r=24),
+        hoverlabel=dict(bgcolor=_INK, font=dict(family="JetBrains Mono, monospace")),
+    )
+)
+pio.templates["fraudintel"] = FRAUDINTEL_TEMPLATE
+pio.templates.default = "fraudintel"
+
+st.markdown(
+    f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    html, body, [class*="css"] {{
+        font-family: 'JetBrains Mono', monospace;
+    }}
+
+    .stApp {{
+        background:
+            radial-gradient(circle at 12% 18%, rgba(0, 217, 255, 0.07), transparent 42%),
+            radial-gradient(circle at 88% 78%, rgba(124, 92, 255, 0.08), transparent 46%),
+            {_INK};
+        background-attachment: fixed;
+    }}
+
+    h1, h2, h3 {{
+        font-family: 'Space Grotesk', sans-serif !important;
+        color: {_TEXT} !important;
+        letter-spacing: -0.01em;
+    }}
+
+    h1 {{
+        background: linear-gradient(90deg, {_CYAN} 0%, {_VIOLET} 55%, {_TEXT} 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+        position: relative;
+        padding-bottom: 10px;
+    }}
+
+    h1::after {{
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 2px;
+        width: 100%;
+        background: linear-gradient(90deg, {_CYAN}, transparent);
+        animation: scanline 3.2s ease-in-out infinite;
+    }}
+
+    @keyframes scanline {{
+        0%, 100% {{ opacity: .35; transform: scaleX(0.4); transform-origin: left; }}
+        50% {{ opacity: 1; transform: scaleX(1); transform-origin: left; }}
+    }}
+
+    section[data-testid="stSidebar"] {{
+        background: {_PANEL};
+        border-right: 1px solid {_LINE};
+    }}
+
+    section[data-testid="stSidebar"] .stRadio label {{
+        font-family: 'JetBrains Mono', monospace;
+        color: {_MUTED};
+    }}
+
+    section[data-testid="stSidebar"] .stRadio [data-testid="stMarkdownContainer"] p {{
+        font-size: 0.92rem;
+    }}
+
+    [data-testid="stMetric"] {{
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid {_LINE};
+        border-radius: 6px;
+        padding: 14px 16px;
+    }}
+
+    [data-testid="stMetricValue"] {{
+        font-family: 'JetBrains Mono', monospace;
+        color: {_CYAN};
+    }}
+
+    [data-testid="stMetricLabel"] {{
+        color: {_MUTED};
+    }}
+
+    .stButton>button, .stDownloadButton>button {{
+        background: transparent;
+        border: 1px solid {_CYAN};
+        color: {_CYAN};
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        transition: all .15s ease;
+    }}
+
+    .stButton>button:hover, .stDownloadButton>button:hover {{
+        background: rgba(0, 217, 255, 0.12);
+        box-shadow: 0 0 12px rgba(0, 217, 255, 0.35);
+        color: {_TEXT};
+        border-color: {_CYAN};
+    }}
+
+    [data-testid="stDataFrame"] {{
+        border: 1px solid {_LINE};
+        border-radius: 6px;
+        overflow: hidden;
+    }}
+
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 4px;
+        border-bottom: 1px solid {_LINE};
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+        color: {_MUTED};
+        font-family: 'JetBrains Mono', monospace;
+    }}
+
+    .stTabs [aria-selected="true"] {{
+        color: {_CYAN} !important;
+        border-bottom: 2px solid {_CYAN} !important;
+    }}
+
+    .stAlert {{
+        border-radius: 6px;
+        border-left-width: 3px;
+    }}
+
+    [data-testid="stForm"] {{
+        border: 1px solid {_LINE};
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.015);
+    }}
+
+    hr {{
+        border-color: {_LINE};
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 # ---------------------------------------------------------------------------
@@ -109,7 +276,7 @@ if page == "🏠 Overview":
         nbins=60,
         barmode="overlay",
         opacity=0.65,
-        color_discrete_map={"Normal": "#4C78A8", "Fraud (label)": "#E45756"},
+        color_discrete_map={"Normal": _CYAN, "Fraud (label)": _DANGER},
         title="Anomaly scores (higher = more anomalous) — sampled",
     )
     fig.update_layout(height=360, margin=dict(t=40, b=20))
@@ -324,13 +491,13 @@ elif page == "📈 Model Performance":
     col_a, col_b = st.columns(2)
     with col_a:
         fig1 = go.Figure()
-        fig1.add_trace(go.Scatter(x=rec, y=prec, mode="lines", name="PR"))
+        fig1.add_trace(go.Scatter(x=rec, y=prec, mode="lines", name="PR", line=dict(color=_CYAN, width=2)))
         fig1.update_layout(title="Precision-Recall", xaxis_title="Recall", yaxis_title="Precision", height=360)
         st.plotly_chart(fig1, use_container_width=True)
     with col_b:
         fig2 = go.Figure()
-        fig2.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name="ROC"))
-        fig2.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Random", line=dict(dash="dash")))
+        fig2.add_trace(go.Scatter(x=fpr, y=tpr, mode="lines", name="ROC", line=dict(color=_CYAN, width=2)))
+        fig2.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Random", line=dict(dash="dash", color=_MUTED)))
         fig2.update_layout(title="ROC", xaxis_title="FPR", yaxis_title="TPR", height=360)
         st.plotly_chart(fig2, use_container_width=True)
 
