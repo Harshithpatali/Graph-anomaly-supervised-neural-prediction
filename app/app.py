@@ -72,7 +72,6 @@ page = st.sidebar.radio(
         "🚨 Anomaly Ranking",
         "🔍 Investigation Workbench",
         "📈 Model Performance",
-        "🎯 Supervised Fraud Classifier",
         "🧠 Neural Fraud Classifier",
         "📋 Stakeholder Findings",
         "ℹ️ About",
@@ -342,8 +341,6 @@ elif page == "📈 Model Performance":
     )
     fig.update_layout(height=340)
     st.plotly_chart(fig, use_container_width=True)
-
-
 
 
 
