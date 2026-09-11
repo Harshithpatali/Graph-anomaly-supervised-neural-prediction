@@ -1,0 +1,152 @@
+{
+  "model_name": "LogisticRegression | class_weight",
+  "validation_threshold_f1": 0.5916669530285661,
+  "validation_threshold_precision_50": 0.5916669530285661,
+  "validation_threshold_precision_70": 0.5916669530285661,
+  "default_threshold": 0.5916669530285661,
+  "test_metrics": {
+    "threshold": 0.5916669530285661,
+    "pr_auc": 0.1343182032522544,
+    "roc_auc": 0.6373081109248077,
+    "accuracy": 0.9198835311245422,
+    "precision": 0.2288488210818308,
+    "recall": 0.3191489361702128,
+    "f1": 0.2665589660743134,
+    "balanced_accuracy": 0.633872993486114,
+    "tn": 20521,
+    "fp": 1112,
+    "fn": 704,
+    "tp": 330,
+    "majority_baseline_accuracy": 0.954383023779062,
+    "beats_majority_accuracy": false,
+    "base_rate": 0.045616976220937924
+  },
+  "comparison": [
+    {
+      "model": "LogisticRegression",
+      "strategy": "class_weight",
+      "validation_pr_auc": 0.12142998218092062,
+      "validation_roc_auc": 0.6137562644273006,
+      "name": "LogisticRegression | class_weight"
+    },
+    {
+      "model": "LightGBM",
+      "strategy": "class_weight",
+      "validation_pr_auc": 0.04874989706169456,
+      "validation_roc_auc": 0.5042749269965251,
+      "name": "LightGBM | class_weight"
+    },
+    {
+      "model": "XGBoost",
+      "strategy": "class_weight",
+      "validation_pr_auc": 0.04857976617667642,
+      "validation_roc_auc": 0.5099672418024478,
+      "name": "XGBoost | class_weight"
+    }
+  ],
+  "precision_at_k_test": 0.2379110251450677,
+  "k": 1034,
+  "operating_points_test": [
+    {
+      "label": "Max F1 (validation-tuned)",
+      "threshold": 0.5916669530285661,
+      "precision": 0.2288488210818308,
+      "recall": 0.3191489361702128,
+      "f1": 0.2665589660743134,
+      "accuracy": 0.9198835311245422,
+      "tp": 330,
+      "fp": 1112,
+      "fn": 704,
+      "tn": 20521
+    },
+    {
+      "label": "Max recall @ precision\u22650.50",
+      "threshold": 0.5916669530285661,
+      "precision": 0.2288488210818308,
+      "recall": 0.3191489361702128,
+      "f1": 0.2665589660743134,
+      "accuracy": 0.9198835311245422,
+      "tp": 330,
+      "fp": 1112,
+      "fn": 704,
+      "tn": 20521
+    },
+    {
+      "label": "Max recall @ precision\u22650.70",
+      "threshold": 0.5916669530285661,
+      "precision": 0.2288488210818308,
+      "recall": 0.3191489361702128,
+      "f1": 0.2665589660743134,
+      "accuracy": 0.9198835311245422,
+      "tp": 330,
+      "fp": 1112,
+      "fn": 704,
+      "tn": 20521
+    }
+  ],
+  "simple_rule_metrics": {
+    "label": "Simple rule: purchase within 1 second of signup",
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "accuracy": 0.954383023779062,
+    "tp": 0,
+    "fp": 0,
+    "fn": 1034,
+    "tn": 21633
+  },
+  "stakeholder_findings": {
+    "headline": "Fraud risk ranking beats random, but accuracy is the wrong scorecard \u2014 and the strongest historical signal disappears in the future period.",
+    "majority_baseline_accuracy": 0.9544,
+    "fraud_base_rate_test": 0.0456,
+    "key_data_insights": [
+      "In the early (train) period, 7,600 purchases happen within 1 second of signup \u2014 and 100% of them are labeled fraud. That alone is 63% of train fraud.",
+      "In validation and test (later time), there are ZERO instant-signup purchases. The strongest train signal does not appear in the future window.",
+      "Fraud rate drops from ~11.4% (train) to ~4.6% (val/test). The problem is non-stationary.",
+      "Therefore a model that overfits the 'instant purchase' pattern looks strong on train and weak on locked future test."
+    ],
+    "simple_rule_train": {
+      "rule": "Flag if purchase within 1 second of signup",
+      "train_precision": 1.0,
+      "train_recall_of_fraud": 0.63,
+      "val_test_recall": 0.0,
+      "note": "Perfect on historical burst fraud; useless on later period where that attack pattern is gone."
+    },
+    "model_on_locked_test": {
+      "selected_model": "LogisticRegression | class_weight",
+      "pr_auc": 0.134,
+      "roc_auc": 0.637,
+      "precision_at_k": 0.238,
+      "enrichment_at_k": 5.22,
+      "k": 1034,
+      "accuracy": 0.92,
+      "beats_majority_accuracy": false,
+      "interpretation": "Top-k investigation queue is ~5\u00d7 richer in fraud than random sampling. Overall accuracy is below the 95% majority baseline because the model trades false positives for fraud recall."
+    },
+    "why_accuracy_misleads": "Always predicting 'normal' scores ~95% accuracy when fraud is only ~4.6% of test. A useful fraud system must surface risky cases for review; that increases false positives and lowers accuracy while improving ranking metrics (PR-AUC, Precision@k).",
+    "recommended_use": [
+      "Use model scores to rank an investigation queue (Precision@k / enrichment), not as a hard automatic block at 0.5.",
+      "Do not judge success by accuracy alone.",
+      "Monitor concept drift: attack patterns (e.g. instant signup\u2192buy) can vanish over time.",
+      "Retrain on recent windows; keep a locked chronological holdout for honest reporting."
+    ],
+    "operating_guidance": {
+      "default": "Rank by fraud probability; review top-N daily",
+      "threshold_policy": "Precision \u2265 0.50 was not achievable on the locked test PR curve for this model \u2014 max precision in useful recall range stays ~0.23. Prefer ranking + capacity-based top-N over a high precision cutoff."
+    }
+  },
+  "raw_required_columns": [
+    "user_id",
+    "signup_time",
+    "purchase_time",
+    "purchase_value",
+    "device_id",
+    "source",
+    "browser",
+    "sex",
+    "age",
+    "ip_address"
+  ],
+  "target": "class",
+  "primary_selection_metric": "validation PR-AUC"
+}

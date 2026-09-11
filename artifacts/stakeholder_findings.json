@@ -1,0 +1,40 @@
+{
+  "headline": "Fraud risk ranking beats random, but accuracy is the wrong scorecard \u2014 and the strongest historical signal disappears in the future period.",
+  "majority_baseline_accuracy": 0.9544,
+  "fraud_base_rate_test": 0.0456,
+  "key_data_insights": [
+    "In the early (train) period, 7,600 purchases happen within 1 second of signup \u2014 and 100% of them are labeled fraud. That alone is 63% of train fraud.",
+    "In validation and test (later time), there are ZERO instant-signup purchases. The strongest train signal does not appear in the future window.",
+    "Fraud rate drops from ~11.4% (train) to ~4.6% (val/test). The problem is non-stationary.",
+    "Therefore a model that overfits the 'instant purchase' pattern looks strong on train and weak on locked future test."
+  ],
+  "simple_rule_train": {
+    "rule": "Flag if purchase within 1 second of signup",
+    "train_precision": 1.0,
+    "train_recall_of_fraud": 0.63,
+    "val_test_recall": 0.0,
+    "note": "Perfect on historical burst fraud; useless on later period where that attack pattern is gone."
+  },
+  "model_on_locked_test": {
+    "selected_model": "LogisticRegression | class_weight",
+    "pr_auc": 0.134,
+    "roc_auc": 0.637,
+    "precision_at_k": 0.238,
+    "enrichment_at_k": 5.22,
+    "k": 1034,
+    "accuracy": 0.92,
+    "beats_majority_accuracy": false,
+    "interpretation": "Top-k investigation queue is ~5\u00d7 richer in fraud than random sampling. Overall accuracy is below the 95% majority baseline because the model trades false positives for fraud recall."
+  },
+  "why_accuracy_misleads": "Always predicting 'normal' scores ~95% accuracy when fraud is only ~4.6% of test. A useful fraud system must surface risky cases for review; that increases false positives and lowers accuracy while improving ranking metrics (PR-AUC, Precision@k).",
+  "recommended_use": [
+    "Use model scores to rank an investigation queue (Precision@k / enrichment), not as a hard automatic block at 0.5.",
+    "Do not judge success by accuracy alone.",
+    "Monitor concept drift: attack patterns (e.g. instant signup\u2192buy) can vanish over time.",
+    "Retrain on recent windows; keep a locked chronological holdout for honest reporting."
+  ],
+  "operating_guidance": {
+    "default": "Rank by fraud probability; review top-N daily",
+    "threshold_policy": "Precision \u2265 0.50 was not achievable on the locked test PR curve for this model \u2014 max precision in useful recall range stays ~0.23. Prefer ranking + capacity-based top-N over a high precision cutoff."
+  }
+}

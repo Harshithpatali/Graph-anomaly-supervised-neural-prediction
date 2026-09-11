@@ -1,0 +1,43 @@
+{
+  "val_metrics": {
+    "roc_auc": 0.532348112486797,
+    "pr_auc": 0.0746396689931799,
+    "precision_at_k": 0.11461318051575932,
+    "recall_at_k": 0.11461318051575932
+  },
+  "test_metrics": {
+    "roc_auc": 0.5393566600265376,
+    "pr_auc": 0.07071586007917258,
+    "precision_at_k": 0.10943124550035997,
+    "recall_at_k": 0.10943124550035997
+  },
+  "n_features": 26,
+  "features": [
+    "account_age_hours",
+    "account_age_seconds",
+    "age",
+    "device_degree",
+    "device_time_since_prev",
+    "device_transaction_count",
+    "device_tx_count",
+    "instant_purchase",
+    "ip_degree",
+    "ip_time_since_prev",
+    "ip_transaction_count",
+    "ip_tx_count",
+    "ips_on_device",
+    "is_night",
+    "is_weekend",
+    "purchase_dayofweek",
+    "purchase_hour",
+    "purchase_value",
+    "purchase_value_log1p",
+    "same_day_purchase",
+    "user_degree",
+    "user_time_since_prev",
+    "user_transaction_count",
+    "user_tx_count",
+    "users_on_device",
+    "users_on_ip"
+  ]
+}

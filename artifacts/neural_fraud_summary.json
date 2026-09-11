@@ -1,0 +1,49 @@
+{
+  "champion_type": "mlp",
+  "champion_config": {
+    "hidden": [
+      128,
+      64
+    ],
+    "dropout": 0.25,
+    "lr": 0.0005,
+    "weight_decay": 0.0001,
+    "batch_size": 2048,
+    "epochs": 20,
+    "patience": 4
+  },
+  "threshold": 0.939209520816803,
+  "validation_metrics": {
+    "threshold": 0.939209520816803,
+    "pr_auc": 0.68706742248,
+    "roc_auc": 0.8245477257869969,
+    "accuracy": 0.9538536197997088,
+    "precision": 0.9711286089238845,
+    "recall": 0.5228450306170513,
+    "f1": 0.679730557256583,
+    "balanced_accuracy": 0.7606193611029182,
+    "tn": 20511,
+    "fp": 33,
+    "fn": 1013,
+    "tp": 1110
+  },
+  "test_metrics": {
+    "threshold": 0.939209520816803,
+    "pr_auc": 0.6895530155788994,
+    "roc_auc": 0.8212481784657434,
+    "accuracy": 0.9555300657343274,
+    "precision": 0.9720338983050848,
+    "recall": 0.5405278039585297,
+    "f1": 0.6947304663840097,
+    "balanced_accuracy": 0.7694607868660986,
+    "tn": 20512,
+    "fp": 33,
+    "fn": 975,
+    "tp": 1147
+  },
+  "precision_at_k": 0.6338360037700282,
+  "enrichment_at_k": 6.770575257990212,
+  "k": 2122,
+  "split": "stratified_random_70_15_15",
+  "note": "MLP trained on stratified train; threshold on val; test locked once."
+}

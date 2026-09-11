@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+.DS_Store
+
+# heavy intermediates not required for Streamlit runtime
+data/processed/X_*.parquet
+data/processed/fraud_enriched.parquet
+data/processed/train.parquet
+data/processed/val.parquet
+data/processed/test.parquet
+data/processed/test_scored.parquet
+data/processed/dashboard.pkl
+
+# optional older models (keep neural joblib tracked)
+artifacts/fraud_classifier.joblib
+artifacts/fraud_classifier_mlp.joblib
+models/isolation_forest.joblib
+models/final_model.joblib
+
+# notebooks checkpoints
+**/.ipynb_checkpoints/

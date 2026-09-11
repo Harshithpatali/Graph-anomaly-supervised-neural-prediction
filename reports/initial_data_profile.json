@@ -1,0 +1,42 @@
+{
+  "fraud_rows": 151112,
+  "fraud_columns": 11,
+  "ip_rows": 138846,
+  "ip_columns": 3,
+  "fraud_columns_list": [
+    "user_id",
+    "signup_time",
+    "purchase_time",
+    "purchase_value",
+    "device_id",
+    "source",
+    "browser",
+    "sex",
+    "age",
+    "ip_address",
+    "class"
+  ],
+  "ip_columns_list": [
+    "lower_bound_ip_address",
+    "upper_bound_ip_address",
+    "country"
+  ],
+  "missing_by_column": {
+    "user_id": 0,
+    "signup_time": 0,
+    "purchase_time": 0,
+    "purchase_value": 0,
+    "device_id": 0,
+    "source": 0,
+    "browser": 0,
+    "sex": 0,
+    "age": 0,
+    "ip_address": 0,
+    "class": 0
+  },
+  "duplicates": 0,
+  "target_counts": {
+    "0": 136961,
+    "1": 14151
+  }
+}
