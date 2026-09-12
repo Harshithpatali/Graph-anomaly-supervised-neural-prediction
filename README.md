@@ -1,191 +1,276 @@
-# Fraud Graph Anomaly Intelligence
+<div align="center">
 
-<p align="center">
-  <strong>Graph Anomaly Detection · Neural Fraud Classification · Temporal Analysis · Investigator Workflows</strong>
-</p>
+# 🕵️ Fraud Graph Anomaly Intelligence
 
-<p align="center">
-  <a href="https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/">
-    <img src="https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Live Demo" />
-  </a>
-  <a href="https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction">
-    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
-  </a>
-</p>
+### E-Commerce Fraud Detection with Graph Anomaly Detection, Neural Fraud Classification, Temporal Analysis, and Investigator Workflows
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/PyTorch-MLP-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch" />
-  <img src="https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?style=flat-square&logo=streamlit&logoColor=white" alt="Streamlit" />
-  <img src="https://img.shields.io/badge/scikit--learn-ML%20%26%20Evaluation-F7931E?style=flat-square&logo=scikit-learn&logoColor=white" alt="scikit-learn" />
-  <img src="https://img.shields.io/badge/PR--AUC-0.696-00C853?style=flat-square" alt="PR-AUC" />
-  <img src="https://img.shields.io/badge/ROC--AUC-0.829-2196F3?style=flat-square" alt="ROC-AUC" />
-</p>
+[![Live Demo](https://img.shields.io/badge/Live-Demo-FF4B4B?logo=streamlit&logoColor=white)](https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-Neural%20Model-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-Evaluation-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Viz-3F4F75?logo=plotly&logoColor=white)](https://plotly.com/)
 
-<p align="center">
-  <em>An end-to-end fraud intelligence system that combines relationship-aware anomaly detection with supervised neural risk scoring.</em>
-</p>
+![Repo stars](https://img.shields.io/github/stars/Harshithpatali/Graph-anomaly-supervised-neural-prediction?style=social)
+![Last commit](https://img.shields.io/github/last-commit/Harshithpatali/Graph-anomaly-supervised-neural-prediction?color=blue)
+![Top language](https://img.shields.io/github/languages/top/Harshithpatali/Graph-anomaly-supervised-neural-prediction)
+
+</div>
+
+A portfolio-grade e-commerce fraud intelligence system combining **unsupervised graph anomaly detection** with a **supervised neural fraud classifier**, exposed through an investigator-oriented Streamlit dashboard.
 
 ---
 
-## Overview
+## 📌 Table of Contents
 
-This project is a portfolio-grade **e-commerce fraud intelligence platform** built around two complementary modeling tracks:
-
-| Track | Learning | Core question | Output |
-|---|---|---|---|
-| **Graph Anomaly** | Unsupervised | **Does this behavior look unusual?** | `anomaly_score`, `anomaly_rank` |
-| **Neural Fraud** | Supervised | **How likely is this transaction to be fraudulent?** | `fraud_probability`, `predicted_class` |
-
-Both tracks are exposed through a single **Streamlit investigation dashboard**.
-
-The key design decision is to keep the two modeling problems separate. The graph anomaly model does **not** train on the fraud label; the label is used only for post-hoc evaluation. The neural classifier is explicitly supervised and is evaluated using a locked test set.
-
-### What makes the project different?
-
-- Relationship-aware fraud analysis using users, devices, IP addresses, and transaction activity.
-- A dedicated unsupervised anomaly-detection track rather than relying only on classification.
-- A final PyTorch MLP for supervised fraud prediction.
-- Validation-based threshold selection instead of blindly using `0.50`.
-- Locked test-set evaluation and precomputed test predictions.
-- Explicit analysis of severe temporal distribution shift.
-- Investigator-oriented ranking and drill-down workflows.
-- Manual **new transaction prediction without CSV upload**.
-- Frozen artifacts that preserve the training-to-serving feature pipeline.
+- [Key Metrics at a Glance](#-key-metrics-at-a-glance)
+- [Two Complementary Modeling Tracks](#-two-complementary-modeling-tracks)
+- [Live Application](#-live-application)
+- [Project Objective](#-project-objective)
+- [System Architecture](#-system-architecture)
+- [Modeling Philosophy](#-modeling-philosophy)
+- [Track B — Supervised Neural Fraud Detection](#-track-b--supervised-neural-fraud-detection)
+- [Dataset](#-dataset)
+- [Temporal Regime Shift](#️-temporal-regime-shift)
+- [Development Split](#-development-split)
+- [Final Neural Model](#-final-neural-model)
+- [Decision Threshold](#️-decision-threshold)
+- [Precision vs Recall](#-precision-vs-recall)
+- [Investigator Workflow](#-investigator-workflow)
+- [Supervised Fraud Detection Dashboard](#️-supervised-fraud-detection-dashboard)
+- [Risk Bands](#-risk-bands)
+- [New Transaction Prediction](#-new-transaction-prediction)
+- [Model Artifacts](#-model-artifacts)
+- [Project Structure](#-project-structure)
+- [Notebook Workflow](#-notebook-workflow)
+- [Notebook 13 — Neural Fraud Detection](#-notebook-13--neural-fraud-detection)
+- [Evaluation Philosophy](#-evaluation-philosophy)
+- [Data Leakage Controls](#-data-leakage-controls)
+- [Why Two Models?](#-why-two-models)
+- [Limitations](#️-limitations)
+- [Installation](#️-installation)
+- [Run the Streamlit Application](#️-run-the-streamlit-application)
+- [Required Runtime Artifacts](#-required-runtime-artifacts)
+- [Running the Notebooks](#-running-the-notebooks)
+- [Reproducibility](#-reproducibility)
+- [Training-to-Serving Contract](#-training-to-serving-contract)
+- [Example Investigation Scenario](#-example-investigation-scenario)
+- [Design Principles](#-design-principles)
+- [Technology Stack](#️-technology-stack)
+- [Links](#-links)
+- [Author](#-author)
+- [Final Takeaway](#-final-takeaway)
 
 ---
 
-## Live Demo
+## 📊 Key Metrics at a Glance
 
-### [Open the Fraud Intelligence Dashboard](https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/)
+Final locked-test performance of the supervised neural champion (PyTorch MLP):
 
-The deployed application contains the complete analytical workflow:
+![PR-AUC](https://img.shields.io/badge/PR--AUC-0.6956-2563EB)
+![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.8294-2563EB)
+![Accuracy](https://img.shields.io/badge/Accuracy-95.59%25-64748B)
+![Precision](https://img.shields.io/badge/Precision-97.95%25-16A34A)
+![Recall](https://img.shields.io/badge/Recall-54.05%25-F59E0B)
+![F1](https://img.shields.io/badge/F1-0.6966-16A34A)
+![Threshold](https://img.shields.io/badge/Decision%20Threshold-0.9374-6D28D9)
 
-| Dashboard page | Purpose |
+| Metric | Result |
+|---|---:|
+| Threshold | **0.937358** |
+| PR-AUC | **0.695629** |
+| ROC-AUC | **0.829392** |
+| Accuracy | **0.955927** |
+| Precision | **0.979505** |
+| Recall | **0.540528** |
+| F1 | **0.696629** |
+| Balanced Accuracy | **0.769680** |
+
+The model is deliberately **high-precision / conservative-recall**: it rarely flags a legitimate transaction as fraud, but knowingly misses some fraud in exchange for that reliability — full reasoning in [Precision vs Recall](#-precision-vs-recall).
+
+---
+
+## 🧭 Two Complementary Modeling Tracks
+
+<table>
+<tr>
+<th align="left">🕸️ Track A — Graph Anomaly (Unsupervised)</th>
+<th align="left">🧠 Track B — Neural Fraud Classifier (Supervised)</th>
+</tr>
+<tr>
+<td valign="top">
+
+- Detects unusual transaction and entity behavior **without** using the fraud label during training
+- Models relationships among users, devices, IP addresses, and transaction activity
+- Produces anomaly scores and rankings for investigation
+- Uses fraud labels **only** for post-hoc validation
+
+</td>
+<td valign="top">
+
+- Learns directly from historical fraud labels
+- Uses a **PyTorch MLP** as the final neural champion
+- Uses **PR-AUC** as the primary model-selection metric
+- Selects the decision threshold on validation data before locked test evaluation
+- Saves the complete feature-engineering / preprocessing / model contract
+- Supports manual scoring of a brand-new transaction
+
+</td>
+</tr>
+</table>
+
+The result is an end-to-end fraud intelligence system spanning data audit, temporal analysis, graph construction, feature engineering, anomaly detection, supervised learning, model evaluation, artifact management, and investigator workflows.
+
+---
+
+## 🚀 Live Application
+
+<div align="center">
+
+**[▶️ Open the Live Streamlit Application](https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/)**
+&nbsp;·&nbsp;
+**[💻 View the GitHub Repository](https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction)**
+
+</div>
+
+### Main application areas
+
+| | Section |
 |---|---|
-| 🏠 **Overview** | Transaction volume, fraud rate, anomaly distribution, top anomalies |
-| 📊 **Data Explorer** | Interactive filtering and transaction exploration |
-| 🕸️ **Graph Insights** | User/device/IP relationships and entity reuse |
-| 🚨 **Anomaly Ranking** | Highest-risk anomaly scores and ranked transactions |
-| 🔍 **Investigation Workbench** | Drill into users, devices, ranks, and related activity |
-| 🛡️ **Fraud Detection Model** | Locked test report and new-transaction prediction |
-| 📈 **Model Performance** | Metrics, confusion matrix, review queue, evaluation views |
-| ℹ️ **About** | Methodology, project context, and architecture |
+| 🏠 | **Overview** |
+| 📊 | **Data Explorer** |
+| 🕸️ | **Graph Insights** |
+| 🚨 | **Anomaly Ranking** |
+| 🔍 | **Investigation Workbench** |
+| 🛡️ | **Fraud Detection Model** |
+| 📈 | **Model Performance** |
+| ℹ️ | **About** |
 
-### New transaction prediction
+The **Fraud Detection Model** section contains two workflows:
 
-The application can score a single transaction directly from the UI. No CSV upload is required.
+### Model Report
 
-Inputs include:
+A locked test-set report based on `artifacts/final_test_predictions.csv`.
 
-```text
-User ID
-Signup time
-Purchase time
-Purchase value
-Device ID
-Source
-Browser
-Sex
-Age
-IP address
-```
+> The dashboard does not retrain the model and does not use the locked test set for model selection.
 
-The frozen neural artifact returns:
+### New Transaction Prediction
 
-- Fraud probability
-- Risk band
-- Decision against the frozen threshold
-- Model name
-- Submitted transaction payload
+An investigator can enter a transaction manually — no CSV upload required:
+
+`User ID` · `Signup time` · `Purchase time` · `Purchase value` · `Device ID` · `Source` · `Browser` · `Sex` · `Age` · `IP address`
+
+The saved neural artifact returns: **fraud probability**, **risk level**, **decision threshold**, **fraud / legitimate decision**, **model name**, and the **transaction details sent to the model**.
 
 ---
 
-## Why Two Modeling Tracks?
+## 🎯 Project Objective
 
-Fraud is rarely a purely row-level problem.
+E-commerce fraud is not purely a transaction-level classification problem. A transaction can look normal in isolation but become suspicious when relationships are considered:
 
-A transaction can appear ordinary by itself while its relationships reveal suspicious behavior:
+- multiple users sharing one device
+- multiple users appearing from the same IP address
+- unusual behavioral patterns
+- unusual transaction timing
+- unusual purchase values
+- entity reuse
+- combinations of otherwise ordinary signals
 
-```text
-                         Transaction
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-              ▼               ▼               ▼
-            User           Device             IP
-              │               │               │
-              └───────────────┼───────────────┘
-                              │
-                              ▼
-                     Behavioral context
-```
+At the same time, a supervised classifier can learn direct relationships between transaction attributes and the historical fraud label. This project therefore asks **two different questions**:
 
-The project therefore answers two different questions:
+> 🕸️ **Unsupervised —** Does this transaction or entity behave unusually compared with the rest of the system?
+>
+> 🧠 **Supervised —** Given historical labeled transactions, how likely is this transaction to be fraudulent?
 
-| Question | Method | Fraud label used during training? |
-|---|---|---:|
-| **Is this behavior unusual?** | Graph anomaly detection | ❌ No |
-| **Does this resemble historical fraud?** | Supervised PyTorch MLP | ✅ Yes |
-
-This separation is important. **Anomaly does not mean fraud**, and a supervised classifier cannot guarantee that a novel fraud strategy will resemble historical examples.
-
-Together, the models provide complementary evidence for investigation.
+These questions are related but not identical. Keeping them separate makes the modeling methodology more defensible.
 
 ---
 
-# System Architecture
+## 🧠 System Architecture
 
-```text
-                         ┌─────────────────────────┐
-                         │    E-Commerce Data      │
-                         └────────────┬────────────┘
-                                      │
-                                      ▼
-                         ┌─────────────────────────┐
-                         │       Data Audit        │
-                         │ types · missingness     │
-                         │ target · temporal data  │
-                         └────────────┬────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │                                   │
-                    ▼                                   ▼
-          ┌──────────────────┐                ┌──────────────────┐
-          │  GRAPH / ANOMALY │                │ SUPERVISED NEURAL│
-          │      TRACK       │                │      TRACK       │
-          └────────┬─────────┘                └────────┬─────────┘
-                   │                                   │
-                   ▼                                   ▼
-          Graph construction                   Feature preparation
-          Entity relationships                 Encoding / scaling
-          Behavioral features                  MLP training
-          Temporal features                    Validation selection
-          Graph embeddings                      Threshold selection
-          Anomaly scoring                       Locked test
-                   │                                   │
-                   ▼                                   ▼
-          anomaly_score                         fraud_probability
-          anomaly_rank                          predicted_class
-                   │                                   │
-                   └─────────────────┬─────────────────┘
-                                     │
-                                     ▼
-                         ┌─────────────────────────┐
-                         │  FRAUD INTELLIGENCE    │
-                         │       DASHBOARD        │
-                         └────────────┬────────────┘
-                                      │
-                ┌─────────────────────┼─────────────────────┐
-                ▼                     ▼                     ▼
-         Explore / Explain       Investigate         Score New Tx
+```mermaid
+flowchart TD
+    A[("E-Commerce Data")] --> B["Data Audit — Missingness · Types · Temporal Structure"]
+
+    subgraph TrackA["🕸️ Graph / Anomaly Track (Unsupervised)"]
+        C1["Graph construction<br/>Entity relationships"] --> C2["Behavioral + Temporal features<br/>Embeddings"] --> C3["Anomaly scoring<br/>anomaly_score · anomaly_rank"]
+    end
+
+    subgraph TrackB["🧠 Supervised Neural Track"]
+        D1["Feature transformation<br/>Categorical + numeric encoding"] --> D2["MLP training<br/>Threshold selection"] --> D3["Locked test evaluation<br/>fraud_probability · predicted_class"]
+    end
+
+    B --> C1
+    B --> D1
+
+    C3 --> E["Fraud Intelligence Dashboard"]
+    D3 --> E
+
+    E --> F1["Data exploration &<br/>graph insights"]
+    E --> F2["Anomaly ranking &<br/>entity drill-down"]
+    E --> F3["New transaction<br/>risk scoring"]
 ```
 
 ---
 
-# Dataset
+## 🔬 Modeling Philosophy
 
-The project uses transaction-level e-commerce fraud data with the following core fields:
+### Track A — Unsupervised Graph Anomaly Detection
+
+The graph track discovers unusual behavior without using the fraud label as a training signal. The transaction ecosystem can be represented as a multipartite relationship structure:
+
+```mermaid
+graph LR
+    T((Transaction)) --- U[User]
+    T --- D[Device]
+    T --- I[IP Address]
+    T --- S[Source]
+    T --- B[Browser]
+    T --- Tm[Temporal Context]
+```
+
+This representation exposes relationship-level behavior that a simple row-wise classifier may not capture. Potential signals include:
+
+- one device associated with many users
+- one IP associated with multiple accounts
+- unusual combinations of entities
+- entities connected to anomalous transactions
+- behavior that is rare relative to the rest of the graph
+
+> The anomaly score is therefore an **investigation ranking signal**, not proof of fraud.
+
+### Scientific constraint
+
+The fraud label is **not** used to train the anomaly model. It is used only afterward to evaluate ROC-AUC, PR-AUC, precision at a selected operating point, enrichment, and concentration of fraud near the top of the ranking.
+
+---
+
+## 🤖 Track B — Supervised Neural Fraud Detection
+
+The supervised track uses the historical fraud label. The final neural champion is a **PyTorch MLP**.
+
+```mermaid
+flowchart TD
+    A[Raw transaction data] --> B[Feature preparation]
+    B --> C[Stratified development split]
+    C --> D[Train]
+    C --> E[Validation]
+    D --> F[Model selection]
+    E --> F
+    F --> G[Threshold selection]
+    G --> H[Lock final model]
+    H --> I[One-time locked test evaluation]
+    I --> J[("Saved neural artifact")]
+```
+
+The saved artifact owns the serving contract required to transform raw transaction fields into predictions — this reduces the risk of training/serving skew.
+
+---
+
+## 📊 Dataset
+
+The project uses an e-commerce fraud transaction dataset with transaction-level attributes:
 
 | Feature | Description |
 |---|---|
@@ -199,670 +284,617 @@ The project uses transaction-level e-commerce fraud data with the following core
 | `sex` | User sex |
 | `age` | User age |
 | `ip_address` | IP address |
-| `class` | Historical fraud label: `0` legitimate, `1` fraud |
+| `class` | Historical fraud label (`0` = legitimate, `1` = fraud) |
 
-### Dataset size
-
-```text
-Transactions      151,112
-Legitimate        136,961
-Fraud              14,151
-Fraud prevalence      9.36%
+```mermaid
+pie showData
+    title Transaction Class Distribution — 151,112 total
+    "Legitimate (136,961)" : 136961
+    "Fraud (14,151)" : 14151
 ```
 
-The positive class is therefore sufficiently imbalanced that **accuracy alone is not an appropriate primary model-selection metric**.
+```text
+Legitimate  ██████████████████░░  90.64%
+Fraud       ██░░░░░░░░░░░░░░░░░░   9.36%
+```
 
 ---
 
-# Critical Finding: Temporal Regime Shift
+## ⚠️ Temporal Regime Shift
 
-One of the most important findings in the project is that fraud behavior is **not stationary over time**.
+A major finding is that fraud behavior is **not stationary** across the dataset. January 2015 has a dramatically different fraud rate from the following months:
 
-| Period | Fraud rate |
-|---|---:|
-| **January 2015** | **76.49%** |
-| February onward | **~4.5%** |
+```text
+January 2015     ███████████████░░░░░  76.49%
+February onward  █░░░░░░░░░░░░░░░░░░░   ~4.5%
+```
 
-This creates an important distinction between two evaluation strategies:
+This matters because random and chronological splits answer different questions:
 
-- **Stratified random split** — useful for controlled model development and benchmarking.
-- **Chronological split** — useful for testing generalization to a future behavioral regime.
+| Split type | Answers |
+|---|---|
+| **Random stratified** | Useful for controlled model development and benchmarking |
+| **Chronological** | Useful for testing whether a model generalizes to future behavioral regimes |
 
-The chronological experiments showed substantial degradation under temporal shift.
-
-The January regime was **not silently removed** to make the model look better. It is treated as a genuine distribution-shift finding and an important limitation of the dataset/modeling setup.
+The chronological experiments showed substantial temporal degradation. **The January regime was therefore not silently removed merely to improve model performance** — it is treated as a robustness and distribution-shift finding.
 
 ---
 
-# Supervised Modeling
+## 🧪 Development Split
 
-## Development split
+The supervised development benchmark uses a stratified random split:
 
-The supervised benchmark uses a stratified random split:
-
-```text
-Train        105,778
-Validation    22,667
-Test          22,667   ← locked during development
+```mermaid
+pie showData
+    title Development Split — 151,112 rows
+    "Train (105,778)" : 105778
+    "Validation (22,667)" : 22667
+    "Test (22,667)" : 22667
 ```
 
-The responsibilities are deliberately separated:
-
-```text
-TRAIN
-  └── Learn model parameters
-
-VALIDATION
-  ├── Compare models
-  ├── Tune development choices
-  └── Select operating threshold
-
-TEST
-  └── One-time final evaluation after decisions are frozen
-```
-
-The test set is not used for iterative model selection or threshold tuning.
+The test set remains **locked** during model development. Validation is used for model comparison, development diagnostics, and threshold selection. The final test set is evaluated only after these decisions have been frozen.
 
 ---
 
-# Final Neural Champion
+## 🏆 Final Neural Model
 
-The final supervised model is a **PyTorch MLP**.
+```text
+Model:           MLP
+Framework:       PyTorch
+Primary metric:  PR-AUC
+```
 
-### Locked test results
+Final locked test results:
 
 | Metric | Result |
 |---|---:|
-| **Primary metric: PR-AUC** | **0.695629** |
-| ROC-AUC | 0.829392 |
-| Accuracy | 0.955927 |
-| Precision | 0.979505 |
-| Recall | 0.540528 |
-| F1 | 0.696629 |
-| Balanced Accuracy | 0.769680 |
-| Decision threshold | **0.937358** |
-
-### Confusion matrix
-
-```text
-                         Predicted
-                    Legitimate     Fraud
-Actual Legitimate     20,521         24
-Actual Fraud             975      1,147
-```
-
-Therefore:
-
-- **True negatives:** 20,521
-- **False positives:** 24
-- **False negatives:** 975
-- **True positives:** 1,147
-
-The operating point gives very high precision but moderate recall. This makes the model useful as a **high-confidence review signal**, while clearly leaving room for investigation and complementary anomaly detection.
+| Threshold | **0.937358** |
+| PR-AUC | **0.695629** |
+| ROC-AUC | **0.829392** |
+| Accuracy | **0.955927** |
+| Precision | **0.979505** |
+| Recall | **0.540528** |
+| F1 | **0.696629** |
+| Balanced Accuracy | **0.769680** |
+| True Negatives | **20,521** |
+| False Positives | **24** |
+| False Negatives | **975** |
+| True Positives | **1,147** |
 
 ---
 
-# Why PR-AUC?
+## 🎚️ Decision Threshold
 
-Fraud detection is an imbalanced classification problem.
+The frozen threshold is **`0.9373584389686584`**, selected on validation data before final test evaluation.
 
-A model can achieve high accuracy simply by predicting the majority class frequently. That does not mean it is useful for fraud investigation.
+```mermaid
+flowchart TD
+    A["fraud_probability"] --> B{"≥ 0.9373584389686584 ?"}
+    B -- Yes --> C["🚨 Fraud / Review"]
+    B -- No --> D["✅ Legitimate"]
+```
 
-The project therefore uses **Precision-Recall AUC (PR-AUC)** as the primary model-selection metric because it focuses directly on the quality of positive-class retrieval.
-
-ROC-AUC remains useful as a secondary ranking metric, while threshold-dependent metrics are reported separately.
+The probability should still be interpreted separately from the binary decision.
 
 ---
 
-# Threshold Selection
+## 🧮 Precision vs Recall
 
-The final decision threshold is:
-
-```text
-0.9373584389686584
-```
-
-The threshold was selected on validation data and frozen before the locked test evaluation.
+At the selected operating threshold:
 
 ```text
-fraud_probability >= 0.9373584389686584
-                    │
-              ┌─────┴─────┐
-              ▼           ▼
-        FRAUD / REVIEW   LEGITIMATE
+Precision  ████████████████████  97.95%
+Recall     ███████████░░░░░░░░░  54.05%
 ```
 
-This is intentionally different from the default `0.50` threshold.
+This means the model is highly selective among transactions it flags, while still missing a meaningful number of fraudulent transactions.
 
-The dashboard displays both:
+**Locked test confusion matrix:**
 
-1. the continuous **fraud probability**, and
-2. the resulting **binary decision**.
+| | Predicted Legitimate | Predicted Fraud |
+|---|---:|---:|
+| **Actual Legitimate** | ✅ 20,521 (TN) | ⚠️ 24 (FP) |
+| **Actual Fraud** | ❌ 975 (FN) | ✅ 1,147 (TP) |
 
-That distinction is important because probability is evidence, while the threshold is an operational policy choice.
+- False positives = **24**
+- False negatives = **975**
+
+> This is why the application is designed as a **decision-support system**, not an autonomous fraud adjudication system.
 
 ---
 
-# Risk Bands
+## 🔎 Investigator Workflow
 
-The dashboard uses the following presentation bands:
+The dashboard is designed around an investigation workflow rather than only model metrics.
 
-| Risk band | Probability |
+**1. Overview** — transaction volume, labeled fraud rate, unique users, unique devices, anomaly-score distribution, top anomalous transactions.
+
+**2. Data Explorer** — exploration by country, fraud label, purchase value, transaction time, and other transaction attributes.
+
+**3. Graph Insights** — examines relationships among:
+
+```mermaid
+graph LR
+    U[User] --- D[Device]
+    U --- I[IP]
+    Tx[Transaction] --- D
+    Tx --- I
+```
+
+Shared devices and IP addresses provide relationship-level context.
+
+**4. Anomaly Ranking** — ranks transactions by `anomaly_score` / `anomaly_rank`; investigators can focus on the highest-ranked transactions.
+
+**5. Investigation Workbench** — drill-down by anomaly rank, user ID, or device ID. The selected transaction can be examined alongside anomaly score, anomaly rank, purchase value, account age, country, same-user activity, same-device activity, same-IP activity, and related transactions.
+
+---
+
+## 🛡️ Supervised Fraud Detection Dashboard
+
+The supervised section contains two tabs.
+
+### Model Report
+
+Uses `artifacts/final_test_predictions.csv` to present: locked test size, PR-AUC, ROC-AUC, threshold, accuracy, precision, recall, F1, balanced accuracy, confusion matrix, fraud review queue, risk distribution, temporal findings, and the complete locked test data.
+
+**Fraud Review Queue** — predicted-fraud transactions are sorted by `fraud_probability`, turning model output into an investigator-oriented queue.
+
+---
+
+## 🚨 Risk Bands
+
+The UI groups probabilities into presentation bands:
+
+![Very Low](https://img.shields.io/badge/Very%20Low-%3C10%25-2ECC71)
+![Low](https://img.shields.io/badge/Low-10--25%25-A3E635)
+![Moderate](https://img.shields.io/badge/Moderate-25--50%25-FACC15)
+![Elevated](https://img.shields.io/badge/Elevated-50--75%25-FB923C)
+![High](https://img.shields.io/badge/High-75--90%25-F97316)
+![Critical](https://img.shields.io/badge/Critical-90%25%2B-EF4444)
+
+| Risk Band | Probability |
 |---|---:|
-| Very Low | `< 10%` |
-| Low | `10–25%` |
-| Moderate | `25–50%` |
-| Elevated | `50–75%` |
-| High | `75–90%` |
-| **Critical** | **≥ 90%** |
+| 🟢 Very Low | < 10% |
+| 🟡 Low | 10–25% |
+| 🟠 Moderate | 25–50% |
+| 🟠 Elevated | 50–75% |
+| 🔴 High | 75–90% |
+| 🔴 Critical | 90%+ |
 
-These bands are **UI presentation categories**, not additional model classes. The actual binary decision continues to use the frozen validation-selected threshold.
+These are **presentation bands**, not additional model classes — the actual binary decision still uses the frozen model threshold.
 
 ---
 
-# Graph Anomaly Track
+## 🔮 New Transaction Prediction
 
-The unsupervised track models the transaction ecosystem as a relationship structure involving entities such as:
+The application supports manual scoring without CSV upload.
 
-```text
-Transaction
-   ├── User
-   ├── Device
-   ├── IP address
-   ├── Source
-   ├── Browser
-   └── Temporal context
+**Inputs:** `User ID` · `Signup time` · `Purchase time` · `Purchase value` · `Device ID` · `Source` · `Browser` · `Sex` · `Age` · `IP address`
+
+```mermaid
+flowchart LR
+    A[Manual transaction input] --> B[Single-row dataframe]
+    B --> C[Saved neural artifact]
+    C --> D["Fraud probability"]
+    D --> E{"≥ threshold?"}
+    E -- Yes --> F["🚨 FRAUD — REVIEW"]
+    E -- No --> G["✅ LEGITIMATE"]
 ```
 
-### Signals the graph can surface
-
-- One device associated with many users.
-- One IP associated with multiple accounts.
-- Rare entity combinations.
-- Entity reuse across suspicious activity.
-- Unusual behavioral patterns relative to the graph population.
-
-The anomaly model produces:
-
-```text
-anomaly_score
-anomaly_rank
-```
-
-These values are used to prioritize investigation.
-
-> **Important:** the fraud label is not used to train the anomaly detector. Fraud labels are used only for post-hoc evaluation such as PR-AUC, ROC-AUC, precision@k, and enrichment.
+The application also displays risk band, probability, threshold, model name, and the transaction submitted to the model. **No retraining occurs during prediction.**
 
 ---
 
-# Investigator Workflow
-
-The application is designed around a practical investigation sequence:
-
-```text
-1. Understand the population
-        ↓
-2. Identify unusual behavior
-        ↓
-3. Rank suspicious transactions
-        ↓
-4. Drill into graph relationships
-        ↓
-5. Review supervised fraud probability
-        ↓
-6. Score new transactions when needed
-        ↓
-7. Make an informed investigation decision
-```
-
-### Overview
-
-High-level operational view including transaction volume, fraud rate, anomaly distribution, and top anomalies.
-
-### Data Explorer
-
-Interactive exploration of transaction attributes and population segments.
-
-### Graph Insights
-
-Relationship-level analysis across users, devices, IP addresses, and transaction activity.
-
-### Anomaly Ranking
-
-Prioritizes transactions by anomaly score.
-
-### Investigation Workbench
-
-Supports drill-down by anomaly rank, user, and device, with related activity and contextual signals.
-
-### Fraud Detection Model
-
-Provides the locked test report and manual new-transaction prediction.
-
-### Model Performance
-
-Presents evaluation metrics, confusion matrix information, and fraud review outputs.
-
----
-
-# New Transaction Prediction
-
-A key application feature is the ability to score a transaction that was **not part of the original test CSV**.
-
-The investigator enters the transaction directly in the UI.
-
-```text
-Raw transaction
-      │
-      ▼
-Saved feature transformer
-      │
-      ▼
-Saved preprocessing
-      │
-      ▼
-Frozen PyTorch MLP
-      │
-      ▼
-Fraud probability
-      │
-      ▼
-Frozen decision threshold
-      │
-      ▼
-Risk / review decision
-```
-
-The model is not retrained during this process.
-
----
-
-# Training-to-Serving Contract
-
-The final supervised artifact is designed to preserve the same transformation logic used during development.
-
-```text
-Training
-────────
-Raw fields
-   ↓
-Feature engineering
-   ↓
-Preprocessing
-   ↓
-MLP
-   ↓
-Validation threshold
-   ↓
-Frozen artifact
-
-Serving
-───────
-New raw transaction
-   ↓
-Same artifact-owned transformation
-   ↓
-Same MLP
-   ↓
-Fraud probability
-   ↓
-Frozen threshold
-```
-
-This avoids re-implementing training-time feature engineering inside the dashboard and reduces the risk of training/serving mismatch.
-
----
-
-# Data Leakage Controls
-
-| Area | Control |
-|---|---|
-| Unsupervised anomaly model | Fraud label is not used during training |
-| Supervised development | Test set is kept locked |
-| Threshold selection | Selected using validation data before test evaluation |
-| Test reporting | Uses precomputed locked predictions |
-| New transaction scoring | Inference only; no retraining |
-
-The distinction between **model training**, **validation decisions**, and **final test evaluation** is intentionally preserved throughout the project.
-
----
-
-# Notebook Roadmap
-
-The project is organized as a progressive analytical workflow rather than jumping directly to a final model.
-
-## Graph / Unsupervised Track
-
-| Notebook | Focus |
-|---|---|
-| **01** | Data Audit |
-| **02** | Temporal EDA |
-| **03** | Graph Construction / Network EDA |
-| **04** | Node & Behavioral Feature Engineering |
-| **05** | Statistical Anomaly Baselines |
-| **06** | Classical Unsupervised ML |
-| **07** | Graph Representation / Embeddings |
-| **08** | Temporal Anomaly Detection |
-| **09** | Hybrid Scoring / Ablation |
-| **10** | Synthetic Anomaly Stress Testing |
-| **11** | Final Evaluation / Model Freeze |
-| **12** | Investigation / Explainability |
-
-## Supervised Neural Track
-
-### Notebook 13 — Neural Fraud Detection
-
-```text
-Load train / validation / test
-        ↓
-Feature preparation
-        ↓
-MLP experiments
-        ↓
-Validation model selection
-        ↓
-Threshold selection
-        ↓
-Lock champion
-        ↓
-One-time test evaluation
-        ↓
-Save serving artifact
-        ↓
-Generate final test predictions
-```
-
----
-
-# Key Artifacts
+## 📦 Model Artifacts
 
 ```text
 artifacts/
-│
 ├── final_model.joblib
-│     └── Frozen graph/anomaly model and transformation components
-│
 ├── final_supervised_neural_model.joblib
-│     └── Frozen supervised neural serving artifact
-│
 ├── final_test_predictions.csv
-│     └── Locked test predictions used by the dashboard
-│
+├── classical_models.joblib
+├── classical_preprocessor.joblib
 ├── graph_svd.joblib
 ├── graph_train_embedding.npy
 ├── graph_validation_embedding.npy
-│
 ├── train_features.parquet
 ├── validation_features.parquet
 ├── test_features.parquet
-│
 ├── validation_ranked.parquet
 ├── investigation_ranked.parquet
 ├── temporal_daily_scores.parquet
-│
-├── classical_models.joblib
-├── classical_preprocessor.joblib
 ├── feature_config.json
 └── hybrid_config.json
 ```
 
-### Locked test prediction schema
+| Artifact | Purpose |
+|---|---|
+| `final_model.joblib` | Frozen unsupervised graph/anomaly model and associated transformation components |
+| `final_supervised_neural_model.joblib` | Final neural fraud artifact used for new transaction inference |
+| `final_test_predictions.csv` | Locked test-set predictions used by the Streamlit model report |
 
-The final prediction file contains the original transaction fields plus:
+Expected fields in `final_test_predictions.csv`:
 
 ```text
-actual_class
-fraud_probability
-predicted_class
+user_id, signup_time, purchase_time, purchase_value, device_id,
+source, browser, sex, age, ip_address,
+actual_class, fraud_probability, predicted_class
 ```
-
-This allows the dashboard to build a reproducible test report without repeatedly re-scoring the locked test set.
 
 ---
 
-# Repository Structure
+## 📁 Project Structure
 
 ```text
-Graph-anomaly-supervised-neural-prediction/
+fraud_ecommerce_graph_anomaly_and_ml/
 │
 ├── app/
-│   └── app.py                         # Streamlit application
+│   └── app.py
 │
-├── artifacts/                         # Frozen models and generated artifacts
+├── artifacts/
+│   ├── final_model.joblib
+│   ├── final_supervised_neural_model.joblib
+│   ├── final_test_predictions.csv
+│   ├── graph_svd.joblib
+│   ├── graph_train_embedding.npy
+│   ├── graph_validation_embedding.npy
+│   ├── train_features.parquet
+│   ├── validation_features.parquet
+│   ├── test_features.parquet
+│   ├── validation_ranked.parquet
+│   ├── investigation_ranked.parquet
+│   └── temporal_daily_scores.parquet
 │
 ├── data/
-│   ├── raw/                           # Raw dataset
+│   ├── raw/
 │   └── processed/
-│       └── dashboard.parquet          # Precomputed dashboard table
+│       └── dashboard.parquet
 │
-├── notebooks/                         # 01 → 13 research workflow
+├── notebooks/
+│   ├── 01_...
+│   ├── 02_...
+│   ├── ...
+│   ├── 11_...
+│   ├── 12_...
+│   └── 13_...
 │
-├── reports/                           # Evaluation reports and model card
+├── reports/
+│   ├── data_audit.json
+│   ├── initial_data_profile.json
+│   ├── graph_profile.json
+│   ├── final_test_evaluation.json
+│   ├── model_card.md
+│   └── synthetic_stress_test.csv
 │
 ├── src/
-│   ├── anomaly.py                     # Anomaly methods
-│   ├── data_utils.py                  # Data loading / persistence
-│   ├── embeddings.py                  # Graph representations
-│   ├── evaluation.py                  # Evaluation utilities
-│   ├── final_pipeline.py              # Final anomaly scoring pipeline
-│   ├── graph_features.py              # Graph-derived features
-│   ├── graph_utils.py                 # Graph construction utilities
-│   ├── pipeline_utils.py              # Shared pipeline helpers
-│   ├── supervised_fraud.py            # Neural fraud model / serving artifact
-│   └── temporal_features.py           # Time-aware features
+│   ├── anomaly.py
+│   ├── data_utils.py
+│   ├── embeddings.py
+│   ├── evaluation.py
+│   ├── final_pipeline.py
+│   ├── graph_features.py
+│   ├── graph_utils.py
+│   ├── pipeline_utils.py
+│   ├── supervised_fraud.py
+│   └── temporal_features.py
 │
 ├── requirements.txt
-└── README.md
+├── README.md
+└── ...
 ```
 
 ---
 
-# Installation
+## 📓 Notebook Workflow
 
-## 1. Clone
+The project follows a progressive analytical workflow.
+
+```mermaid
+flowchart LR
+    N1[01 Data Audit] --> N2[02 Temporal EDA] --> N3[03 Graph Construction] --> N4[04 Feature Engineering] --> N5[05 Statistical Baselines]
+    N5 --> N6[06 Classical ML] --> N7[07 Embeddings] --> N8[08 Temporal Anomaly] --> N9[09 Hybrid Scoring] --> N10[10 Synthetic Stress Test]
+    N10 --> N11[11 Final Evaluation] --> N12[12 Investigation / Explainability] --> N13[13 Neural Fraud Detection]
+```
+
+### Unsupervised / Graph Track
+
+| Notebook | Focus |
+|---|---|
+| **01 — Data Audit** | Dataset shape, data types, missing values, duplicates, target distribution, data quality |
+| **02 — Temporal EDA** | Transaction timing, fraud over time, temporal concentration, regime changes, daily/monthly behavior |
+| **03 — Graph Construction / Network EDA** | Builds transaction/entity relationships; shared devices, shared IPs, graph connectivity, entity reuse |
+| **04 — Node / Behavioral Feature Engineering** | Creates graph-derived and behavioral signals |
+| **05 — Statistical Anomaly Baselines** | Establishes simpler anomaly baselines |
+| **06 — Classical Unsupervised ML** | Benchmarks classical anomaly-detection approaches |
+| **07 — Graph Representation / Embeddings** | Builds graph representations and embeddings |
+| **08 — Temporal Anomaly Detection** | Adds time-aware anomaly analysis |
+| **09 — Hybrid Scoring / Ablation** | Investigates combinations of anomaly signals and their contribution |
+| **10 — Synthetic Anomaly Stress Testing** | Tests anomaly methods using controlled synthetic perturbations |
+| **11 — Final Evaluation / Model Freeze** | Produces the final anomaly artifact |
+| **12 — Investigation / Explainability** | Converts model output into investigator-oriented analysis |
+
+---
+
+## 🧠 Notebook 13 — Neural Fraud Detection
+
+Notebook 13 focuses on the supervised neural track.
+
+```mermaid
+flowchart TD
+    A[Load train / validation / test] --> B[Define X and y]
+    B --> C[Feature preparation]
+    C --> D[MLP experiments]
+    D --> E[Embedding-based neural experiments]
+    E --> F[Validation model selection]
+    F --> G[Threshold selection]
+    G --> H[Final neural champion]
+    H --> I[Locked test evaluation]
+    I --> J[Save model artifact]
+    J --> K[Generate final test predictions]
+```
+
+Final artifact: `artifacts/final_supervised_neural_model.joblib`
+Final locked prediction file: `artifacts/final_test_predictions.csv`
+
+---
+
+## 🧪 Evaluation Philosophy
+
+The project separates **Training** (model learns from training data), **Validation** (model comparison, hyperparameter decisions, threshold selection), and **Test** (used only after the model and threshold have been frozen). This prevents the final test set from becoming an iterative tuning dataset.
+
+---
+
+## 🔐 Data Leakage Controls
+
+| Component | Control |
+|---|---|
+| Unsupervised model | The fraud label is not used as an input to anomaly-model training — used only for post-hoc validation |
+| Supervised model | The test set is not used for model selection, threshold selection, or iterative tuning |
+| Dashboard | The locked test report reads `final_test_predictions.csv` rather than repeatedly regenerating the test predictions |
+
+---
+
+## 📈 Why Two Models?
+
+The two tracks provide complementary evidence.
+
+| | 🕸️ Anomaly Model | 🧠 Supervised Classifier |
+|---|---|---|
+| **Answers** | Is this behavior unusual? | Does this transaction resemble historically labeled fraud? |
+| **Strength** | Can surface unusual or novel behavior | Directly learns historical fraud patterns |
+| **Limitation** | Anomalous does not necessarily mean fraudulent | Can struggle with novel fraud strategies and distribution shift |
+
+```mermaid
+flowchart TD
+    T[Transaction] --> G["🕸️ Graph anomaly<br/>Is this unusual?"]
+    T --> N["🧠 Neural classifier<br/>Does this resemble fraud?"]
+    G --> R[Investigator review]
+    N --> R
+```
+
+---
+
+## ⚠️ Limitations
+
+1. **Temporal drift** — performance on random splits may not represent future performance because fraud behavior changes over time.
+2. **False negatives** — the final neural threshold produces **975 false negatives** on the locked test set; the classifier should not be treated as a complete fraud filter.
+3. **Historical-label dependence** — the supervised model learns from historical fraud labels; label quality and historical investigation policies can influence the learned decision boundary.
+4. **Novel fraud** — previously unseen attack strategies may not resemble historical fraud examples; the graph anomaly track provides a complementary mechanism for surfacing unusual behavior.
+5. **Manual prediction** — a dashboard prediction is not confirmation of fraud. Investigators should combine model probability, graph relationships, transaction history, temporal context, business rules, and other available evidence.
+
+---
+
+## 🛠️ Installation
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction.git
 cd Graph-anomaly-supervised-neural-prediction
 ```
 
-## 2. Create a virtual environment
+### 2. Create a virtual environment
 
-### Windows PowerShell
+**Windows**
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### macOS / Linux
+**macOS / Linux**
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-## 3. Install dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Core stack:
-
-- Python
-- Pandas
-- NumPy
-- SciPy
-- scikit-learn
-- PyTorch
-- Plotly
-- Matplotlib
-- Streamlit
-- Joblib
-- Jupyter
+Core technologies: `pandas` · `numpy` · `scipy` · `scikit-learn` · `torch` · `plotly` · `matplotlib` · `streamlit` · `joblib` · `jupyter` · `ipykernel` · `ipywidgets`
 
 ---
 
-# Run the Dashboard
+## ▶️ Run the Streamlit Application
 
-From the repository root:
+From the project root:
 
 ```bash
 python -m streamlit run app/app.py
 ```
 
-If port `8501` is occupied:
+Or:
+
+```bash
+streamlit run app/app.py
+```
+
+Default address: `http://localhost:8501`
+
+If the default port is occupied:
 
 ```bash
 python -m streamlit run app/app.py --server.port 8504
 ```
 
-Then open:
+Then open `http://localhost:8504`.
 
-```text
-http://localhost:8501
-```
+---
 
-or:
+## 📦 Required Runtime Artifacts
 
-```text
-http://localhost:8504
-```
-
-### Required runtime artifacts
-
-For the complete dashboard experience, the project expects:
+For the complete application experience:
 
 ```text
 artifacts/final_model.joblib
 artifacts/final_supervised_neural_model.joblib
 artifacts/final_test_predictions.csv
-data/processed/dashboard.parquet
+```
+
+The graph dashboard also expects `data/processed/dashboard.parquet` or `data/processed/dashboard.pkl`.
+
+---
+
+## 📓 Running the Notebooks
+
+Start Jupyter:
+
+```bash
+jupyter notebook
+```
+
+or:
+
+```bash
+jupyter lab
+```
+
+Run the notebooks in their intended sequence because later stages consume artifacts produced earlier:
+
+```mermaid
+flowchart LR
+    A["01 → 02 → 03 → 04 → 05 → 06 → 07"] --> B["08 → 09 → 10 → 11 → 12"] --> C["13"]
+```
+
+Notebook 13 is the final supervised neural modeling stage.
+
+---
+
+## 💾 Reproducibility
+
+The project uses fixed random seeds where applicable and records important modeling decisions, including train/validation/test splits, model configuration, validation threshold, final metrics, and saved artifacts. The application consumes frozen artifacts rather than depending on an interactive notebook state.
+
+---
+
+## 🧱 Training-to-Serving Contract
+
+A central design principle:
+
+```mermaid
+flowchart TD
+    A["Notebook<br/>feature engineering · preprocessing · model · threshold"] --> B["final_supervised_neural_model.joblib"]
+    B --> C["Streamlit"]
+    C --> D["predict_proba(raw transaction)"]
+```
+
+The application does not independently reproduce training-time feature engineering — this helps reduce training/serving skew.
+
+---
+
+## 🔍 Example Investigation Scenario
+
+Suppose a transaction receives `Fraud probability = 0.97` against `Decision threshold = 0.937358`:
+
+```mermaid
+flowchart TD
+    A["Fraud probability = 0.97"] --> B{"≥ 0.937358 ?"}
+    B -- Yes --> C["FRAUD — REVIEW"]
+```
+
+The investigator should then inspect: **1.** Transaction value **2.** User history **3.** Device reuse **4.** IP reuse **5.** Purchase timing **6.** Account age **7.** Graph anomaly rank **8.** Related transactions.
+
+The intended operating model:
+
+```mermaid
+flowchart LR
+    A[Model score] --> E[Fraud decision]
+    B[Graph evidence] --> E
+    C[Behavioral context] --> E
+    D[Investigator judgment] --> E
 ```
 
 ---
 
-# Reproducibility
+## 🧭 Design Principles
 
-The modeling workflow uses fixed random seeds where appropriate and records the important decisions required to reproduce the final artifacts.
-
-The final workflow separates:
-
-```text
-Experimentation
-      ↓
-Validation decisions
-      ↓
-Model freeze
-      ↓
-Locked test evaluation
-      ↓
-Serving artifact
-```
-
-The Streamlit application consumes the frozen outputs rather than depending on an active notebook session.
+| # | Principle | Summary |
+|---|---|---|
+| 1 | Separate discovery from classification | Anomaly detection and supervised classification answer different questions |
+| 2 | Prefer PR-AUC for imbalanced fraud modeling | Accuracy alone is insufficient |
+| 3 | Lock the test set | Test data should not become an iterative tuning set |
+| 4 | Preserve temporal findings | Distribution shift should be reported, not hidden |
+| 5 | Keep inference consistent with training | The saved artifact owns the transformation contract |
+| 6 | Make outputs investigator-friendly | A fraud system should produce actionable queues and context, not only a score |
+| 7 | Do not equate probability with certainty | A prediction is evidence, not proof |
 
 ---
 
-# Limitations
+## 🛠️ Technology Stack
 
-This project is intentionally explicit about what the models can and cannot establish.
-
-### Temporal drift
-
-Random-split performance does not guarantee future performance. The dataset contains a major temporal regime shift.
-
-### False negatives
-
-The final neural model produces **975 false negatives** on the locked test set. It should therefore not be treated as a complete fraud filter.
-
-### Historical labels
-
-The supervised classifier learns from historical fraud labels. Label quality and historical investigation policies can influence the learned decision boundary.
-
-### Novel fraud
-
-Previously unseen fraud strategies may not resemble historical examples. The anomaly track provides a complementary mechanism for surfacing unusual behavior.
-
-### Human review
-
-A model probability is evidence, not proof. Fraud decisions should incorporate graph relationships, transaction history, business rules, and investigator judgment.
-
----
-
-# Design Principles
-
-1. **Separate discovery from classification.** Anomaly detection and supervised classification answer different questions.
-2. **Use PR-AUC for imbalanced fraud modeling.** Accuracy alone is not sufficient.
-3. **Keep the test set locked.** Do not turn final evaluation into another tuning loop.
-4. **Report distribution shift.** Do not hide temporal instability to improve headline metrics.
-5. **Preserve the training-to-serving contract.** The saved artifact owns the transformation pipeline.
-6. **Design for investigation.** Scores should lead to useful queues and contextual evidence.
-7. **Treat predictions as evidence.** A probability is not a confirmation of fraud.
-
----
-
-# Technology Stack
-
-| Technology | Role |
+| Technology | Purpose |
 |---|---|
-| **Python** | Core language |
-| **Pandas / NumPy / SciPy** | Data manipulation and numerical computing |
-| **scikit-learn** | Classical ML utilities and evaluation |
-| **PyTorch** | Final supervised neural model |
-| **Joblib** | Model and artifact serialization |
-| **Plotly** | Interactive visualizations |
-| **Matplotlib** | Research notebook visualizations |
-| **Streamlit** | Investigator-facing application |
-| **Jupyter** | Research and experimentation |
-| **Parquet** | Efficient tabular artifact storage |
+| Python | Core language |
+| Pandas | Data manipulation |
+| NumPy | Numerical computation |
+| SciPy | Scientific computation |
+| scikit-learn | Evaluation and classical ML utilities |
+| PyTorch | Neural fraud model |
+| Joblib | Model/artifact serialization |
+| Plotly | Interactive dashboard visualization |
+| Matplotlib | Notebook visualization |
+| Streamlit | Investigator-facing application |
+| Jupyter | Research and experimentation |
+| Parquet | Efficient tabular artifact storage |
 
 ---
 
-# Project Links
+## 🌐 Links
 
-- 🚀 **Live Demo:** https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/
-- 💻 **GitHub:** https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction
+<div align="center">
 
----
+[![Live Demo](https://img.shields.io/badge/Live-Demo-FF4B4B?logo=streamlit&logoColor=white&style=for-the-badge)](https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white&style=for-the-badge)](https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction)
 
-# Final Takeaway
-
-The complete system follows this path:
-
-```text
-Raw transaction data
-        ↓
-Data audit + temporal analysis
-        ↓
-Graph construction + behavioral features
-        ↓
-Unsupervised anomaly detection
-        ↓
-Anomaly ranking + investigation
-        ↓
-Supervised neural fraud classification
-        ↓
-Validation threshold selection
-        ↓
-Locked test evaluation
-        ↓
-Frozen model artifact
-        ↓
-Interactive fraud intelligence dashboard
-        ↓
-Manual new-transaction prediction
-```
-
-> **Use graph anomaly detection to discover unusual behavior, supervised learning to estimate fraud risk from historical evidence, and an investigator-oriented dashboard to turn both signals into actionable decisions.**
-
-This project is designed as **fraud intelligence and decision support**, not as an autonomous fraud adjudication system.
+</div>
 
 ---
 
-## Author
+## 👤 Author
 
 **Harshith Patali**
+[![GitHub](https://img.shields.io/badge/GitHub-Harshithpatali-181717?logo=github&logoColor=white)](https://github.com/Harshithpatali)
 
-[GitHub](https://github.com/Harshithpatali)
+---
+
+## 📌 Final Takeaway
+
+This project demonstrates more than training a fraud classifier — it demonstrates an end-to-end fraud analytics workflow:
+
+```mermaid
+flowchart TD
+    A[Raw data] --> B[Data audit] --> C[Temporal understanding] --> D[Graph construction]
+    D --> E[Behavioral + graph features] --> F[Unsupervised anomaly detection] --> G[Anomaly ranking]
+    G --> H[Investigation workflows]
+    D --> I[Supervised neural fraud classification] --> J[Validation threshold selection] --> K[Locked test evaluation] --> L[Frozen model artifact]
+    H --> M["Interactive fraud intelligence dashboard"]
+    L --> M
+    M --> N[Manual new-transaction prediction]
+```
+
+> **Use graph anomaly detection to discover unusual behavior, supervised learning to estimate fraud risk from historical evidence, and an investigator-oriented dashboard to combine those signals into an actionable workflow.**
+
+The system is therefore intended as **fraud intelligence and decision support**, not as an autonomous fraud adjudication system.
