@@ -764,7 +764,17 @@ elif page == "🔍 Investigation Workbench":
     if "account_age_hours" in row:
         info["account_age_hours"] = float(row["account_age_hours"]) if pd.notna(row["account_age_hours"]) else None
     import json as _json
-    st.code(_json.dumps(info, indent=2, ensure_ascii=False), language="json", line_numbers=True)
+    import html as _html
+    formatted_info = _html.escape(_json.dumps(info, indent=2, ensure_ascii=False))
+    st.markdown(
+        f"""<div style="background:#0b1422 !important;color:#e8f0fa !important;
+        border:1px solid #38516d;border-radius:12px;padding:18px 20px;
+        overflow-x:auto;box-shadow:0 8px 24px rgba(0,0,0,.18);">
+        <pre style="margin:0;background:transparent !important;color:#e8f0fa !important;
+        font-family:Consolas,'SFMono-Regular',monospace;font-size:14px;
+        line-height:1.7;white-space:pre;tab-size:2;">{formatted_info}</pre></div>""",
+        unsafe_allow_html=True,
+    )
 
     same_user = df[df["user_id"] == row["user_id"]]
     same_device = df[df["device_id"] == row["device_id"]]
