@@ -35,5 +35,10 @@ jobs:
           assert "fonts.googleapis.com" not in source, "Dashboard still depends on a remote Google Font"
           assert 'family="Segoe UI, Arial, sans-serif"' in source, "Dashboard must use a locally available system font stack"
           assert "background-clip: text" not in source, "Gradient text can become invisible in unsupported browsers"
-          print("Dashboard typography checks passed.")
+          # Verify the dark menu portal itself is styled (menus render outside widgets).
+          for selector in ('[data-baseweb="popover"]', '[data-baseweb="menu"]', '[role="listbox"]', '[role="option"]'):
+              assert selector in source, f"Missing dropdown contrast rule: {selector}"
+          assert "background: #111e31 !important" in source, "Dropdown surface must have explicit dark background"
+          assert "background: #24415d !important" in source, "Dropdown hover/selected state must be visible"
+          print("Dashboard typography, dropdown, and contrast checks passed.")
           PY
