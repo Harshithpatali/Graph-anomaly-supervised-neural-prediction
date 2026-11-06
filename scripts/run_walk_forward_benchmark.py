@@ -111,7 +111,9 @@ def make_features(train, valid, test):
 def build_folds(n):
     # Three expanding-window folds. The final 10% of the timeline remains a
     # test set in the last fold; earlier folds provide stability diagnostics.
-    specs = [(0.50, 0.65, 0.80), (0.60, 0.75, 0.90), (0.70, 0.85, 1.00)]
+    # Non-overlapping test windows. Each later fold may use the prior
+    # fold's matured validation/test history as training data.
+    specs = [(0.50, 0.60, 0.73), (0.60, 0.73, 0.86), (0.73, 0.86, 1.00)]
     for i, (tr, va, te) in enumerate(specs, 1):
         yield i, int(n * tr), int(n * va), int(n * te)
 
