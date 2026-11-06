@@ -62,9 +62,10 @@ def psi_numeric(reference, current, bins=10, epsilon=1e-6):
         return None
     quantiles = np.unique(np.quantile(a, np.linspace(0, 1, bins + 1)))
     if len(quantiles) <= 1:
-        return 0.0
-    inner = quantiles[1:-1]
-    edges = np.concatenate(([-np.inf], inner, [np.inf]))
+        edges = np.array([-np.inf, quantiles[0], np.inf])
+    else:
+        inner = quantiles[1:-1]
+        edges = np.concatenate(([-np.inf], inner, [np.inf]))
     ea = np.histogram(a, bins=edges)[0].astype(float) / len(a)
     eb = np.histogram(b, bins=edges)[0].astype(float) / len(b)
     ea = np.clip(ea, epsilon, None)
