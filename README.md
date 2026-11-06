@@ -907,3 +907,22 @@ flowchart TD
 > **Use graph anomaly detection to discover unusual behavior, supervised learning to estimate fraud risk from historical evidence, and an investigator-oriented dashboard to combine those signals into an actionable workflow.**
 
 The system is therefore intended as **fraud intelligence and decision support**, not as an autonomous fraud adjudication system.
+
+
+## 🔬 Walk-Forward Graph Research (November 2026)
+
+A separate research workflow is being added to address the weak chronological generalization found in the first audit. It compares XGBoost, CatBoost and the existing PyTorch MLP over three expanding-window folds with non-overlapping future test periods.
+
+### Methodology
+
+- **Causal event-time graph features:** user, device and IP prior-event counts, elapsed time since prior activity, 7-day/30-day velocity, and historical cross-entity degree. Same-timestamp events are treated as simultaneous; labels are not used in feature construction.
+- **Inductive graph representation:** a sparse transaction/entity incidence matrix is factorized with TruncatedSVD. The vocabulary and components are fitted on each training window only; validation/test entities are projected with the frozen mapping.
+- **Walk-forward validation:** three expanding training windows and sequential, non-overlapping test windows. The final fold is the latest unseen time window and must not be used for model selection.
+- **Investigation capacity:** report precision, recall and F1 when investigators can review the top 1%, 2% and 5% highest-risk transactions. A 2% queue threshold is selected on validation and carried unchanged into the future test window.
+- **Drift monitoring:** feature Population Stability Index (PSI) is reported per fold. PSI >= 0.20 is marked moderate and >= 0.30 high; these are monitoring heuristics, not universal statistical guarantees.
+
+### Run entirely on GitHub
+
+Open **Actions → Walk-forward graph fraud research → Run workflow**. The workflow also runs weekly (Monday 03:00 UTC), executes regression tests, trains all candidates on GitHub-hosted runners, and uploads JSON/CSV reports plus fold-3 model artifacts. No local Python environment is required.
+
+Generated outputs are published as workflow artifacts under `walk-forward-graph-research-<run number>`. Results are not considered validated until the workflow has completed successfully. The earlier random/chronological neural results remain a separate benchmark and must not be mixed with these walk-forward results.
