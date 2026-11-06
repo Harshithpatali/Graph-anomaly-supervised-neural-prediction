@@ -52,8 +52,7 @@ def add_historical_velocity_features(
         return x
 
     x[time_col] = pd.to_datetime(x[time_col], errors="coerce", utc=True)
-    original_order = np.arange(len(x))
-    x["_original_order"] = original_order
+    x["_original_order"] = np.arange(len(x))
 
     entities = [
         ("user_id", "user"),
@@ -83,15 +82,20 @@ def add_historical_velocity_features(
             timeline[time_col] - timeline[f"{prefix}_previous_time"]
         ).dt.total_seconds().fillna(1e7)
 
-        lookup = timeline.set_index([entity, time_col])
-        keys = pd.MultiIndex.from_arrays([x[entity], x[time_col]])
-        aligned = lookup.reindex(keys)
-        x[f"{prefix}_tx_count_prior"] = (
-            aligned[f"{prefix}_prior_count"].fillna(0).to_numpy(dtype=float)
+        keys_frame = pd.DataFrame({
+            entity: x[entity].to_numpy(),
+            time_col: x[time_col].to_numpy(),
+        })
+        aligned = keys_frame.merge(
+            timeline[[entity, time_col, f"{prefix}_prior_count",
+                      f"{prefix}_time_since_prev_seconds"]],
+            on=[entity, time_col],
+            how="left",
+            sort=False,
+            validate="many_to_one",
         )
-        x[f"{prefix}_time_since_prev_seconds"] = (
-            aligned[f"{prefix}_time_since_prev_seconds"].fillna(1e7).to_numpy(dtype=float)
-        )
+        x[f"{prefix}_tx_count_prior"] = aligned[f"{prefix}_prior_count"].fillna(0).to_numpy(dtype=float)
+        x[f"{prefix}_time_since_prev_seconds"] = aligned[f"{prefix}_time_since_prev_seconds"].fillna(1e7).to_numpy(dtype=float)
 
     return x.sort_values("_original_order", kind="mergesort").drop(columns="_original_order")
 
