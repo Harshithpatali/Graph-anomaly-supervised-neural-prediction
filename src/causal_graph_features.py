@@ -60,15 +60,18 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
             by_entity["purchase_time"].diff().dt.total_seconds().fillna(1e7)
         ).astype("float32")
 
+        # Vectorized grouped time rolling; the left-closed boundary excludes
+        # all transactions sharing the current timestamp.
         for window in ("7D", "30D"):
-            out = np.zeros(len(timeline), dtype=np.float32)
-            # Iterate over entity groups to ensure time windows never cross entities.
-            for _, idx in timeline.groupby(entity, sort=False).groups.items():
-                g = timeline.loc[idx].sort_values("purchase_time")
-                series = g.set_index("purchase_time")["events"]
-                rolled = series.rolling(window, closed="left").sum()
-                out[timeline.index.get_indexer(g.index)] = rolled.fillna(0).to_numpy(dtype=np.float32)
-            timeline[f"{prefix}_events_prior_{window.lower()}"] = out
+            rolled = (
+                timeline.groupby(entity, sort=False)
+                        .rolling(window, on="purchase_time", closed="left")["events"]
+                        .sum()
+            )
+            timeline[f"{prefix}_events_prior_{window.lower()}"] = (
+                rolled.reset_index(level=0, drop=True)
+                      .reindex(timeline.index).fillna(0).to_numpy(dtype=np.float32)
+            )
 
         lookup_cols = [
             entity, "purchase_time", f"{prefix}_events_prior",
@@ -102,24 +105,18 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
             events.groupby(shared_entity, sort=False)["new_links"].cumsum()
             - events["new_links"]
         )
-        join = x[[shared_entity, "purchase_time"]].merge(
-            events, left_on=[shared_entity, "purchase_time"],
-            right_on=[shared_entity, "first_seen"], how="left", sort=False
-        )
-        # Sum only links whose first appearance precedes this event timestamp.
-        prior = np.zeros(len(x), dtype=np.float32)
-        for key, idx in x.groupby(shared_entity, sort=False, dropna=True).groups.items():
-            e = events[events[shared_entity] == key]
-            if e.empty:
-                continue
-            times = e["first_seen"].astype("int64").to_numpy()
-            cumulative = e["new_links"].cumsum().to_numpy()
-            row_times = x.loc[idx, "purchase_time"].astype("int64").to_numpy()
-            positions = np.searchsorted(times, row_times, side="left") - 1
-            valid_pos = positions >= 0
-            vals = np.zeros(len(idx), dtype=np.float32)
-            vals[valid_pos] = cumulative[positions[valid_pos]]
-            prior[x.index.get_indexer(idx)] = vals
-        x[name] = prior
+        # As-of join returns the latest link-creation timestamp strictly
+        # before each transaction; sorting by event time is required by pandas.
+        left = x[[shared_entity, "purchase_time"]].copy()
+        left["_row"] = np.arange(len(left))
+        right = events[[shared_entity, "first_seen", "new_links"]].copy()
+        right["prior_links"] = right.groupby(shared_entity, sort=False)["new_links"].cumsum()
+        aligned = pd.merge_asof(
+            left.sort_values("purchase_time"),
+            right.sort_values("first_seen"),
+            left_on="purchase_time", right_on="first_seen",
+            by=shared_entity, direction="backward", allow_exact_matches=False
+        ).sort_values("_row")
+        x[name] = aligned["prior_links"].fillna(0).to_numpy(dtype=np.float32)
 
     return x.sort_values("_row_order").drop(columns="_row_order").reset_index(drop=True)
