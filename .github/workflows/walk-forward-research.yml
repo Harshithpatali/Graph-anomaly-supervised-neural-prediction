@@ -1,0 +1,83 @@
+name: Walk-forward graph fraud research
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
+  push:
+    branches: ["research/**"]
+    paths:
+      - "src/causal_graph_features.py"
+      - "src/graph_embedding.py"
+      - "scripts/run_walk_forward_benchmark.py"
+      - "tests/test_walk_forward_features.py"
+      - "requirements-research.txt"
+      - ".github/workflows/walk-forward-research.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: walk-forward-research-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+      PYTHONHASHSEED: "42"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-research.txt
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-research.txt
+          pip uninstall -y torch
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+      - name: Run tests
+        env:
+          PYTHONPATH: src
+        run: pytest -q
+      - name: Run walk-forward benchmark
+        env:
+          PYTHONPATH: src
+          OMP_NUM_THREADS: "2"
+          MKL_NUM_THREADS: "2"
+          OPENBLAS_NUM_THREADS: "2"
+        run: python scripts/run_walk_forward_benchmark.py
+      - name: Publish drift and model summary
+        if: always()
+        run: |
+          if [ -f reports/research/walk_forward_report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          report = json.loads(Path("reports/research/walk_forward_report.json").read_text())
+          print("# Walk-forward fraud benchmark")
+          print("| Model | Mean PR-AUC | Mean ROC-AUC | Recall at validation 2% queue threshold |")
+          print("|---|---:|---:|---:|")
+          for name, metrics in report["models"].items():
+              print(f"| {name} | {metrics['pr_auc']:.4f} | {metrics['roc_auc']:.4f} | {metrics['recall_at_validation_threshold']:.2%} |")
+          print("\\n## Feature drift")
+          for fold in report["folds"]:
+              print(f"- Fold {fold['fold']}: **{fold['drift_status']}** (max PSI {max(fold['feature_drift_psi'].values(), default=0):.3f})")
+          PY
+          fi
+      - name: Upload walk-forward reports and trained models
+        uses: actions/upload-artifact@v4
+        with:
+          name: walk-forward-graph-research-${{ github.run_number }}
+          path: |
+            reports/research/
+            artifacts/research/
+          if-no-files-found: error
+          retention-days: 90
