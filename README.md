@@ -663,6 +663,17 @@ flowchart TD
 
 ---
 
+## 🧪 Reproducible GitHub Actions Audit
+
+The audit branch includes a GitHub Actions workflow that runs unit tests and trains/evaluates the supervised MLP on GitHub-hosted runners. It reports two distinct protocols:
+
+- **Random stratified split:** an IID benchmark, useful for reproducible model comparison.
+- **Chronological split:** train on earlier transactions, validate on a later period, and test on the latest held-out period. This is the more relevant stress test for future deployment.
+
+The validation partition is used for model selection and threshold selection. The test partition is held out until these decisions are fixed. The workflow saves model artifacts, test predictions, split summaries, and software-version metadata as Actions artifacts and in `reports/audit/` on the audit branch.
+
+Run it from **Actions → Fraud model audit and retraining → Run workflow**. Select `both` for both protocols. No local training environment is needed.
+
 ## ⚠️ Limitations
 
 1. **Temporal drift** — performance on random splits may not represent future performance because fraud behavior changes over time.
