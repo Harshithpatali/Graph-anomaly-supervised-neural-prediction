@@ -12,7 +12,6 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from catboost import CatBoostClassifier
 from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
@@ -21,7 +20,6 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from causal_graph_features import build_causal_graph_features
 from graph_embedding import TransactionGraphSVD
-from supervised_fraud import train_mlp, predict_mlp
 
 warnings.filterwarnings("ignore")
 SEED = 42
@@ -119,6 +117,11 @@ def build_folds(n):
 
 
 def run():
+    # Heavy benchmark-only learners are imported lazily so downstream research
+    # utilities can reuse feature/split helpers without installing them.
+    from catboost import CatBoostClassifier
+    from supervised_fraud import train_mlp, predict_mlp
+
     started = time.time()
     df = pd.read_csv(DATA)
     df["purchase_time"] = pd.to_datetime(df["purchase_time"], errors="coerce", utc=True)
