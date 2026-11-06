@@ -11,7 +11,7 @@ def segment_customers(profiles: pd.DataFrame, feature_columns: list[str] | None 
                       cluster_range: range = range(2, 9), random_state: int = 42):
     if len(profiles) < 3:
         raise ValueError("At least three customer profiles are required.")
-    excluded = {"user_id", "first_purchase", "last_purchase", "as_of", "segment_id"}
+    excluded = {"user_id", "first_purchase", "last_purchase", "as_of", "segment_id", "behavioral_risk_index"}
     if feature_columns is None:
         feature_columns = [c for c in profiles.select_dtypes(include=[np.number]).columns if c not in excluded]
     if not feature_columns:
