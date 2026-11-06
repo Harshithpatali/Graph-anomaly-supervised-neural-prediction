@@ -79,10 +79,12 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "${GITHUB_REF_NAME}"
+          git rebase "origin/${GITHUB_REF_NAME}"
           git add reports/audit artifacts/audit
           if git diff --cached --quiet; then
             echo "No generated outputs changed."
           else
             git commit -m "Add reproducible fraud model audit results"
-            git push
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
