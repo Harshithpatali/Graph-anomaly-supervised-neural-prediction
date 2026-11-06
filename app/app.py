@@ -709,6 +709,39 @@ elif page == "🧪 Research Monitor":
                          points="all", title="Validation PR-AUC by configuration")
             st.plotly_chart(fig, use_container_width=True)
             st.dataframe(tuning, use_container_width=True)
+        expanded_path = ROOT / "reports" / "research" / "expanded_model_comparison.json"
+        if expanded_path.exists():
+            expanded = _json.loads(expanded_path.read_text())
+            final = expanded["final_fold"]
+            st.divider()
+            st.subheader("Expanded model comparison · CatBoost / LightGBM / XGBoost")
+            st.caption(expanded["protocol"])
+            ec1, ec2, ec3, ec4 = st.columns(4)
+            em = final["metrics"]
+            ec1.metric("Champion", final["selected_model"].upper())
+            ec2.metric("External test PR-AUC", f"{em['pr_auc']:.4f}")
+            ec3.metric("ROC-AUC", f"{em['roc_auc']:.4f}")
+            ec4.metric("PR-AUC / prevalence", f"{em['pr_auc_lift_over_prevalence']:.2f}×")
+            validation = pd.DataFrame(expanded["validation_rows"])
+            fig = px.box(validation, x="model", y="validation_pr_auc", color="model",
+                         points="all", title="Earlier-fold validation PR-AUC · model/configuration comparison")
+            fig.add_hline(y=expanded["final_test_prevalence"], line_dash="dash",
+                          line_color=_AMBER, annotation_text="Final test prevalence baseline")
+            fig.update_layout(height=360, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
+            cap_data = []
+            for cap, result in em["capacity"].items():
+                for metric in ("precision", "recall", "f1"):
+                    cap_data.append({"Capacity": f"{float(cap):.0%}", "Metric": metric.title(),
+                                     "Value": result["test_exact_capacity"][metric]})
+            fig = px.bar(pd.DataFrame(cap_data), x="Capacity", y="Value", color="Metric",
+                         barmode="group", title="Expanded champion · exact test investigation capacity")
+            fig.update_yaxes(tickformat=".0%")
+            fig.update_layout(height=360)
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(pd.DataFrame(cap_data), use_container_width=True)
+            st.info("Independent later-period validation: " + expanded["external_validation"]["status"] +
+                    ". " + expanded["external_validation"]["reason"])
         st.caption(report["interpretation"])
 
 elif page == "🧠 Neural Fraud Classifier":
