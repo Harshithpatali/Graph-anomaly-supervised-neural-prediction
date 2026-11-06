@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/run_calibrated_temporal_research.py"
       - "scripts/run_expanded_fraud_research.py"
+      - "scripts/run_rolling_robustness.py"
       - "scripts/run_walk_forward_benchmark.py"
       - "src/causal_graph_features.py"
       - "src/graph_embedding.py"
@@ -71,6 +72,14 @@ jobs:
           MKL_NUM_THREADS: "2"
           OPENBLAS_NUM_THREADS: "2"
         run: python scripts/run_expanded_fraud_research.py
+      - name: Run rolling temporal robustness and calibration experiment
+        env:
+          PYTHONPATH: src:scripts
+          ROBUSTNESS_BOOTSTRAPS: "1000"
+          OMP_NUM_THREADS: "2"
+          MKL_NUM_THREADS: "2"
+          OPENBLAS_NUM_THREADS: "2"
+        run: python scripts/run_rolling_robustness.py
       - name: Publish research summary
         run: |
           python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
@@ -123,7 +132,10 @@ jobs:
             reports/research/expanded_model_validation.csv
             reports/research/expanded_capacity_metrics.csv
             reports/research/expanded_final_predictions.csv
-            reports/research/expanded_final_model_comparison.csv
+            reports/research/expanded_final_model_comparison.csv reports/research/rolling_robustness_report.json reports/research/rolling_robustness_summary.csv reports/research/rolling_robustness_capacity.csv
+            reports/research/rolling_robustness_report.json
+            reports/research/rolling_robustness_summary.csv
+            reports/research/rolling_robustness_capacity.csv
             artifacts/research/expanded_temporal_champion.joblib
           if-no-files-found: error
           retention-days: 90
