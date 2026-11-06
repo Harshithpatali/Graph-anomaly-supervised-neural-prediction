@@ -205,6 +205,10 @@ def run():
         fold_result["feature_drift_psi"] = {
             col: psi(Xtr[col], Xt[col]) for col in drift_cols
         }
+        max_psi = max(fold_result["feature_drift_psi"].values(), default=0.0)
+        fold_result["drift_status"] = (
+            "high" if max_psi >= 0.30 else "moderate" if max_psi >= 0.20 else "low"
+        )
         results.append(fold_result)
         print(f"fold={fold} rows={len(train):,}/{len(valid):,}/{len(test):,} complete", flush=True)
 
