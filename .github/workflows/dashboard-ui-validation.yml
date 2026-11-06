@@ -40,5 +40,11 @@ jobs:
               assert selector in source, f"Missing dropdown contrast rule: {selector}"
           assert "background: #111e31 !important" in source, "Dropdown surface must have explicit dark background"
           assert "background: #24415d !important" in source, "Dropdown hover/selected state must be visible"
-          print("Dashboard typography, dropdown, and contrast checks passed.")
+          assert 'Inter, "Segoe UI"' not in source, "Use the deterministic local system font stack"
+          for selector in ('body > div [data-baseweb="popover"]', '[data-baseweb="popover"] [role="listbox"]', '[data-baseweb="popover"] [role="option"]', '[role="option"][data-highlighted="true"]'):
+              assert selector in source, f"Missing portal dropdown selector: {selector}"
+          assert "background: #101d30 !important" in source, "Dropdown surface must have dark background"
+          assert "background: #294967 !important" in source, "Dropdown hover state must be visible"
+          assert "z-index: 999999 !important" in source, "Dropdown portal must layer above dashboard content"
+          print("Dashboard typography, portal dropdown, and contrast checks passed.")
           PY
