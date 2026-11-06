@@ -88,6 +88,11 @@ jobs:
           for k, v in f["graph_embedding_diagnostics"].items():
               if isinstance(v, (int, float)):
                   print(f"- {k}: {v:.5f}")
+          print("\n## Largest graph embedding shifts")
+          print("| Component | Mean shift / train SD | Wasserstein / train SD | KS statistic |")
+          print("|---:|---:|---:|---:|")
+          for row in sorted(f["graph_embedding_diagnostics"]["component_distribution_drift"], key=lambda x: x["wasserstein_distance_in_train_std"], reverse=True)[:12]:
+              print(f"| {row['component']} | {row['mean_shift_in_train_std']:.4f} | {row['wasserstein_distance_in_train_std']:.4f} | {row['ks_statistic']:.4f} |")
           print("\n## PSI methodology")
           print("| Feature | Method | PSI |")
           print("|---|---|---:|")
