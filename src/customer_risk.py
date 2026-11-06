@@ -18,10 +18,16 @@ def build_behavioral_risk(profiles: pd.DataFrame) -> pd.DataFrame:
         values = pd.to_numeric(x[col], errors="coerce").replace([np.inf, -np.inf], np.nan)
         return values.rank(pct=True, method="average").fillna(0.0)
 
+    def pct_abs(col: str) -> pd.Series:
+        if col not in x:
+            return pd.Series(0.0, index=x.index)
+        values = pd.to_numeric(x[col], errors="coerce").abs().replace([np.inf, -np.inf], np.nan)
+        return values.rank(pct=True, method="average").fillna(0.0)
+
     components = {
         "activity_intensity": pct("transactions_per_active_day"),
         "spend_deviation": pct("transaction_value_cv"),
-        "spend_change": pct("spend_change_late_vs_early").abs(),
+        "spend_change": pct_abs("spend_change_late_vs_early"),
         "device_diversity": pct("distinct_device_id"),
         "ip_diversity": pct("distinct_ip_address"),
         "recent_activity": 1.0 - pct("days_since_last_purchase"),
