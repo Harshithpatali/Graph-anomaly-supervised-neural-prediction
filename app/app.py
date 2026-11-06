@@ -363,6 +363,32 @@ st.markdown(
         border: 1px solid #38516d !important;
     }}
 
+    /* Metric delta pills need dark text on their pale success backgrounds. */
+    [data-testid="stMetricDelta"],
+    [data-testid="stMetricDelta"] *,
+    [data-testid="stMetricDelta"] svg {{
+        color: #075b45 !important;
+        -webkit-text-fill-color: #075b45 !important;
+        opacity: 1 !important;
+        font-weight: 650 !important;
+    }}
+    /* Keep dataframe surface and grid controls consistent with the dark UI. */
+    [data-testid="stDataFrame"] {{
+        background: #101b2d !important;
+        border: 1px solid #2b405b !important;
+    }}
+    [data-testid="stDataFrame"] [role="grid"],
+    [data-testid="stDataFrame"] [role="row"],
+    [data-testid="stDataFrame"] [role="columnheader"],
+    [data-testid="stDataFrame"] [role="gridcell"] {{
+        background-color: #101b2d !important;
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: #eaf1fa !important;
+    }}
+    [data-testid="stDataFrame"] [role="columnheader"] {{
+        background-color: #1a2a40 !important;
+    }}
+
     /* Tables: readable header/body and clear row separation. */
     [data-testid="stDataFrame"] *,
     [data-testid="stTable"] * {{
@@ -763,16 +789,24 @@ elif page == "🔍 Investigation Workbench":
     }
     if "account_age_hours" in row:
         info["account_age_hours"] = float(row["account_age_hours"]) if pd.notna(row["account_age_hours"]) else None
-    import json as _json
     import html as _html
-    formatted_info = _html.escape(_json.dumps(info, indent=2, ensure_ascii=False))
+    # Render each field separately so the layout remains readable even if the
+    # browser/Streamlit markdown layer collapses whitespace inside <pre>.
+    detail_rows = []
+    for field, value in info.items():
+        safe_field = _html.escape(str(field))
+        safe_value = _html.escape(str(value))
+        detail_rows.append(
+            f'<div style="display:grid;grid-template-columns:minmax(180px, .32fr) 1fr;'
+            f'gap:14px;padding:9px 12px;border-bottom:1px solid #263750;">'
+            f'<span style="color:#9fb4cc;font-weight:600;">{safe_field}</span>'
+            f'<span style="color:#f1f6fc;font-family:Consolas,monospace;'
+            f'overflow-wrap:anywhere;">{safe_value}</span></div>'
+        )
     st.markdown(
-        f"""<div style="background:#0b1422 !important;color:#e8f0fa !important;
-        border:1px solid #38516d;border-radius:12px;padding:18px 20px;
-        overflow-x:auto;box-shadow:0 8px 24px rgba(0,0,0,.18);">
-        <pre style="margin:0;background:transparent !important;color:#e8f0fa !important;
-        font-family:Consolas,'SFMono-Regular',monospace;font-size:14px;
-        line-height:1.7;white-space:pre;tab-size:2;">{formatted_info}</pre></div>""",
+        '<div style="background:#0b1422;border:1px solid #38516d;'
+        'border-radius:12px;padding:8px 12px;margin-bottom:12px;">'
+        + ''.join(detail_rows) + '</div>',
         unsafe_allow_html=True,
     )
 
