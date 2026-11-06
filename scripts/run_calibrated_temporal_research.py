@@ -18,7 +18,7 @@ from xgboost import XGBClassifier
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from run_walk_forward_benchmark import DATA, OUT, ART, build_folds, make_features, metric_at_capacity
+from run_walk_forward_benchmark import DATA, OUT, ART, build_folds, make_features
 
 SEED = 42
 CAPACITIES = (0.01, 0.02, 0.05)
