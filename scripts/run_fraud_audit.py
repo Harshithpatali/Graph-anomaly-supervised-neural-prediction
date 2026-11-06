@@ -223,6 +223,22 @@ def main() -> None:
             flush=True,
         )
 
+    # Machine-readable CSV of model-selection results, useful for comparing
+    # the candidate architectures without opening raw workflow logs.
+    candidate_rows = []
+    for result in results:
+        for candidate in result["candidate_models"]:
+            candidate_rows.append({
+                "protocol": result["protocol"],
+                "model": candidate["model"],
+                "validation_pr_auc": candidate["validation_pr_auc"],
+                "validation_roc_auc": candidate["validation_roc_auc"],
+                "best_epoch": candidate["best_epoch"],
+            })
+    pd.DataFrame(candidate_rows).to_csv(
+        OUT_REPORT / "candidate_comparison.csv", index=False
+    )
+
     manifest = {
         "created_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         "git_sha": os.getenv("GITHUB_SHA", "local"),
