@@ -137,7 +137,7 @@ def main():
     # Only folds 1 and 2 validation partitions participate in model selection.
     for fold, train_end, val_end, _test_end in fold_bounds[:2]:
         train, valid = df.iloc[:train_end].copy(), df.iloc[train_end:val_end].copy()
-        Xtr, Xv, _unused, _graph, _medians = make_features(train, valid, df.iloc[val_end:val_end].copy())
+        Xtr, Xv, _future_only, _graph, _medians = make_features(train, valid, df.iloc[val_end:_test_end].copy())
         ytr, yv = train["class"].to_numpy(), valid["class"].to_numpy()
         for config_id, params in enumerate(TUNING_GRID, 1):
             model = build_model(params, SEED + fold * 100 + config_id)
