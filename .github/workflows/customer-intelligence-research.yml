@@ -12,7 +12,7 @@ on:
       - 'tests/test_customer_intelligence.py'
       - '.github/workflows/customer-intelligence-research.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,6 +35,29 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: python scripts/build_customer_intelligence.py
+      - name: Publish latest bundle to the public repository
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          source = Path("reports/customer_intelligence")
+          target = Path("public-data/customer-intelligence-research.zip")
+          target.parent.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+              for path in sorted(source.rglob("*")):
+                  if path.is_file():
+                      archive.write(path, path.relative_to(source))
+          print(f"Published bundle: {target} ({target.stat().st_size:,} bytes)")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public-data/customer-intelligence-research.zip
+          if git diff --cached --quiet; then
+            echo "Research bundle unchanged; no commit needed."
+          else
+            git commit -m "data: publish latest customer intelligence bundle"
+            git push
+          fi
       - name: Upload research reports
         uses: actions/upload-artifact@v4
         with:
