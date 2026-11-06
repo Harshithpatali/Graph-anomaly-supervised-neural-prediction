@@ -624,12 +624,14 @@ elif page == "🧪 Research Monitor":
         fold = report["final_fold"]
         metrics = fold["metrics"]
         raw, calibrated = metrics["raw"], metrics["isotonic_calibrated"]
-        k1, k2, k3, k4 = st.columns(4)
-        k1.metric("Final test PR-AUC", f"{calibrated['pr_auc']:.4f}")
-        k2.metric("Final test ROC-AUC", f"{calibrated['roc_auc']:.4f}")
-        k3.metric("Raw Brier", f"{raw['brier']:.4f}")
-        k4.metric("Calibrated Brier", f"{calibrated['brier']:.4f}", delta=f"{calibrated['brier']-raw['brier']:.4f}", delta_color="inverse")
-        st.caption(f"Final test window: {fold['test']['start']} → {fold['test']['end']} · {fold['test']['rows']:,} transactions · config {report['selected_config_id']}")
+        metric_cols = st.columns(6)
+        metric_cols[0].metric("Raw PR-AUC", f"{raw['pr_auc']:.4f}")
+        metric_cols[1].metric("Calibrated PR-AUC", f"{calibrated['pr_auc']:.4f}")
+        metric_cols[2].metric("Raw ROC-AUC", f"{raw['roc_auc']:.4f}")
+        metric_cols[3].metric("Calibrated ROC-AUC", f"{calibrated['roc_auc']:.4f}")
+        metric_cols[4].metric("Raw Brier", f"{raw['brier']:.4f}")
+        metric_cols[5].metric("Calibrated Brier", f"{calibrated['brier']:.4f}", delta=f"{calibrated['brier']-raw['brier']:.4f}", delta_color="inverse")
+        st.caption(f"Final test window: {fold['test']['start']} → {fold['test']['end']} · {fold['test']['rows']:,} transactions · config {report['selected_config_id']} · graph embeddings: {'included' if report['selected_include_graph_embeddings'] else 'excluded'}")
         st.warning("The final test window is a one-shot evaluation. Do not use these test charts to retune the model or thresholds.")
 
         cap_rows = []
