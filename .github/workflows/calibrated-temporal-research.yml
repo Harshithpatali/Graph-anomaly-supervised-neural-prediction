@@ -2,6 +2,16 @@ name: Calibrated temporal fraud research
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "scripts/run_calibrated_temporal_research.py"
+      - "scripts/run_walk_forward_benchmark.py"
+      - "src/causal_graph_features.py"
+      - "src/graph_embedding.py"
+      - "tests/test_calibrated_research.py"
+      - "requirements-research.txt"
+      - ".github/workflows/calibrated-temporal-research.yml"
   push:
     branches: ["main"]
     paths:
@@ -97,6 +107,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Publish dashboard research report to main
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
