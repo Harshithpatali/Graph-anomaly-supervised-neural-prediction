@@ -305,6 +305,7 @@ page = st.sidebar.radio(
         "🚨 Anomaly Ranking",
         "🔍 Investigation Workbench",
         "📈 Model Performance",
+        "🧪 Research Monitor",
         "🧠 Neural Fraud Classifier",
         "📋 Stakeholder Findings",
         "ℹ️ About",
@@ -331,6 +332,39 @@ if page == "🏠 Overview":
     c2.metric("Fraud rate (label)", f"{df['class'].mean()*100:.2f}%")
     c3.metric("Unique users", f"{df['user_id'].nunique():,}")
     c4.metric("Unique devices", f"{df['device_id'].nunique():,}")
+
+    pie_left, pie_right = st.columns(2)
+    with pie_left:
+        class_mix = df["class"].map({0: "Normal", 1: "Fraud label"}).value_counts().rename_axis("Class").reset_index(name="Transactions")
+        fig = px.pie(class_mix, names="Class", values="Transactions", hole=0.62,
+                     title="Label distribution", color="Class",
+                     color_discrete_map={"Normal": _CYAN, "Fraud label": _DANGER})
+        fig.update_traces(textposition="inside", textinfo="percent+label")
+        fig.update_layout(height=330)
+        st.plotly_chart(fig, use_container_width=True)
+    with pie_right:
+        if "source" in df.columns:
+            source_mix = df["source"].fillna("Unknown").value_counts().head(8).rename_axis("Source").reset_index(name="Transactions")
+            fig = px.pie(source_mix, names="Source", values="Transactions", hole=0.62,
+                         title="Transaction source mix")
+            fig.update_traces(textposition="inside", textinfo="percent+label")
+            fig.update_layout(height=330)
+            st.plotly_chart(fig, use_container_width=True)
+
+    if "purchase_time" in df.columns:
+        daily = (df.dropna(subset=["purchase_time"]).set_index("purchase_time")
+                 .resample("D").agg(transactions=("class", "size"), fraud_rate=("class", "mean"))
+                 .reset_index())
+        trend_left, trend_right = st.columns(2)
+        with trend_left:
+            fig = px.area(daily, x="purchase_time", y="transactions", title="Daily transaction volume")
+            fig.update_layout(height=300)
+            st.plotly_chart(fig, use_container_width=True)
+        with trend_right:
+            fig = px.line(daily, x="purchase_time", y="fraud_rate", title="Daily observed fraud-label rate")
+            fig.update_yaxes(tickformat=".1%")
+            fig.update_layout(height=300)
+            st.plotly_chart(fig, use_container_width=True)
 
     st.subheader("Anomaly Score Distribution")
     plot_df = df_sample.copy()
@@ -577,6 +611,95 @@ elif page == "📈 Model Performance":
 
 
 
+
+elif page == "🧪 Research Monitor":
+    st.title("Temporal Fraud Research Monitor")
+    st.caption("Walk-forward model selection, calibration, distribution drift and investigation-capacity diagnostics.")
+    import json as _json
+    research_path = ROOT / "reports" / "research" / "calibrated_temporal_report.json"
+    if not research_path.exists():
+        st.info("The calibrated temporal research workflow has not published a report yet. Run the Calibrated temporal fraud research workflow from GitHub Actions.")
+    else:
+        report = _json.loads(research_path.read_text())
+        fold = report["final_fold"]
+        metrics = fold["metrics"]
+        raw, calibrated = metrics["raw"], metrics["isotonic_calibrated"]
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Final test PR-AUC", f"{calibrated['pr_auc']:.4f}")
+        k2.metric("Final test ROC-AUC", f"{calibrated['roc_auc']:.4f}")
+        k3.metric("Raw Brier", f"{raw['brier']:.4f}")
+        k4.metric("Calibrated Brier", f"{calibrated['brier']:.4f}", delta=f"{calibrated['brier']-raw['brier']:.4f}", delta_color="inverse")
+        st.caption(f"Final test window: {fold['test']['start']} → {fold['test']['end']} · {fold['test']['rows']:,} transactions · config {report['selected_config_id']}")
+        st.warning("The final test window is a one-shot evaluation. Do not use these test charts to retune the model or thresholds.")
+
+        cap_rows = []
+        for capacity, result in metrics["capacity_thresholds"].items():
+            topk = result["test_top_k_metrics"]
+            cap_rows.extend([
+                {"Capacity": f"{float(capacity):.0%}", "Metric": "Precision", "Value": topk["precision"]},
+                {"Capacity": f"{float(capacity):.0%}", "Metric": "Recall", "Value": topk["recall"]},
+                {"Capacity": f"{float(capacity):.0%}", "Metric": "F1", "Value": topk["f1"]},
+            ])
+        left, right = st.columns(2)
+        with left:
+            fig = px.bar(pd.DataFrame(cap_rows), x="Capacity", y="Value", color="Metric",
+                         barmode="group", title="Final test: investigation capacity")
+            fig.update_yaxes(tickformat=".0%")
+            fig.update_layout(height=360)
+            st.plotly_chart(fig, use_container_width=True)
+        with right:
+            cal = metrics["validation_calibration"]
+            cal_rows = []
+            for label, key in [("Raw", "raw_bins"), ("Isotonic", "calibrated_bins")]:
+                for row in cal[key]:
+                    cal_rows.append({"Model": label, "Mean predicted": row["mean_probability"],
+                                     "Observed fraud rate": row["observed_rate"], "Count": row["count"]})
+            fig = px.scatter(pd.DataFrame(cal_rows), x="Mean predicted", y="Observed fraud rate",
+                             color="Model", size="Count", title="Validation reliability diagram")
+            fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode="lines", name="Perfect calibration",
+                                     line=dict(dash="dash", color=_MUTED)))
+            fig.update_layout(height=360)
+            st.plotly_chart(fig, use_container_width=True)
+
+        drift = pd.DataFrame([{"Feature": name, "PSI": item["psi"], "Method": item["method"]}
+                              for name, item in fold["feature_drift"].items() if item["psi"] is not None])
+        if not drift.empty:
+            drift = drift.sort_values("PSI", ascending=False).head(20)
+            fig = px.bar(drift, x="PSI", y="Feature", color="Method", orientation="h",
+                         title="Largest feature shifts (categorical-aware PSI)")
+            fig.add_vline(x=0.20, line_dash="dash", line_color=_AMBER, annotation_text="0.20 monitor")
+            fig.add_vline(x=0.30, line_dash="dot", line_color=_DANGER, annotation_text="0.30 high")
+            fig.update_layout(height=520, yaxis={"categoryorder": "total ascending"})
+            st.plotly_chart(fig, use_container_width=True)
+
+        emb = fold["graph_embedding_diagnostics"]
+        unseen = pd.DataFrame([
+            {"Entity": "User", "Unseen rate": emb["user_id_unseen_rate"]},
+            {"Entity": "Device", "Unseen rate": emb["device_id_unseen_rate"]},
+            {"Entity": "IP", "Unseen rate": emb["ip_address_unseen_rate"]},
+        ])
+        g1, g2 = st.columns(2)
+        with g1:
+            fig = px.bar(unseen, x="Entity", y="Unseen rate", title="Future entities absent from training vocabulary")
+            fig.update_yaxes(tickformat=".0%")
+            fig.update_layout(height=320)
+            st.plotly_chart(fig, use_container_width=True)
+        with g2:
+            fig = px.pie(pd.DataFrame({"Embedding coverage": ["Non-zero projection", "Zero projection"],
+                                       "Rows": [1 - emb["future_zero_embedding_rate"], emb["future_zero_embedding_rate"]]}),
+                         names="Embedding coverage", values="Rows", hole=0.62,
+                         title="Future graph embedding coverage")
+            fig.update_traces(textinfo="percent+label")
+            fig.update_layout(height=320)
+            st.plotly_chart(fig, use_container_width=True)
+        with st.expander("Model tuning results (earlier validation folds only)"):
+            tuning = pd.DataFrame(report["tuning"])
+            tuning["params"] = tuning["params"].astype(str)
+            fig = px.box(tuning, x="config_id", y="validation_pr_auc", color="fold",
+                         points="all", title="Validation PR-AUC by configuration")
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(tuning, use_container_width=True)
+        st.caption(report["interpretation"])
 
 elif page == "🧠 Neural Fraud Classifier":
     st.title("Neural Fraud Classifier (MLP)")
