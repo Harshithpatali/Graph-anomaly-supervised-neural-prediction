@@ -115,9 +115,9 @@ class FraudFeatureTransformer(BaseEstimator, TransformerMixin):
         out["purchase_value"] = value
         out["value_log1p"] = np.log1p(value.clip(lower=0))
         out["age"] = pd.to_numeric(X["age"], errors="coerce")
-        out["account_age_hours"] = (
-            purchase - signup
-        ).dt.total_seconds() / 3600
+        account_age = (purchase - signup).dt.total_seconds() / 3600
+        # Invalid negative account ages are treated as missing values.
+        out["account_age_hours"] = account_age.where(account_age >= 0)
 
         out["purchase_hour"] = purchase.dt.hour
         out["purchase_dow"] = purchase.dt.dayofweek
@@ -149,10 +149,10 @@ class FraudFeatureTransformer(BaseEstimator, TransformerMixin):
         out["ip_country"] = self._country(X["ip_address"])
 
         for col in ["source", "browser", "sex"]:
-            out[col] = X[col].astype(str)
+            out[col] = X[col].fillna("Unknown").astype(str)
 
         for col in HIGH_CARD:
-            out[col] = X[col].astype(str)
+            out[col] = X[col].fillna("Unknown").astype(str)
 
         return out
 
