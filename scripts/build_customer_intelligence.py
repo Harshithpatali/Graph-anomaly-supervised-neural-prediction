@@ -43,7 +43,10 @@ def main():
     cluster_metrics.to_csv(output / 'segmentation_metrics.csv', index=False)
     pd.DataFrame(segment_meta['segment_summary']).to_csv(output / 'segment_summary.csv', index=False)
     entities.to_csv(output / 'graph_entity_metrics.csv', index=False)
-    communities.to_csv(output / 'graph_communities.csv', index=False)
+    communities.to_csv(output / 'graph_communities.csv', index=False)    # Export a bounded edge sample for interactive network visualization.
+    pd.DataFrame(list(graph.edges())[:350], columns=['source', 'target']).to_csv(
+        output / 'graph_edges_sample.csv', index=False
+    )
     metadata = {'project': 'Graph-Based Customer Intelligence', 'label_used_for_features_or_training': False,
                 'transactions': len(tx), 'customers': len(profiles), 'graph_nodes': graph.number_of_nodes(),
                 'graph_edges': graph.number_of_edges(), 'segmentation': segment_meta['metadata'],
