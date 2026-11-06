@@ -76,7 +76,7 @@ st.markdown(
     }}
 
     html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {{
-        font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+        font-family: "Segoe UI", Arial, sans-serif !important;
         color: var(--text) !important;
     }}
 
@@ -98,7 +98,7 @@ st.markdown(
     }}
 
     h1, h2, h3, h4, p, li, label, small, span, div {{
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        font-family: "Segoe UI", Arial, sans-serif;
     }}
 
     h1, h2, h3, h4 {{
@@ -497,46 +497,74 @@ st.markdown(
        This fixes invisible selectbox, multiselect, radio and autocomplete
        options across every dashboard page.
     ------------------------------------------------------------------ */
+    /* Streamlit/BaseWeb portals are mounted under document.body, not inside
+       the widget wrapper. Target the portal, listbox, option and every nested
+       text node explicitly so theme defaults cannot restore white surfaces. */
+    body > div [data-baseweb="popover"],
+    body > div [data-baseweb="popover"] > div,
     [data-baseweb="popover"],
-    [data-baseweb="popover"] > div,
     [data-baseweb="menu"],
     [data-testid="stSelectboxVirtualDropdown"],
     [data-testid="stMultiSelectVirtualDropdown"],
-    ul[role="listbox"],
-    div[role="listbox"] {{
-        background: #111e31 !important;
-        background-color: #111e31 !important;
-        color: #f1f5fb !important;
-        border: 1px solid #405875 !important;
-        box-shadow: 0 14px 36px rgba(0,0,0,.42) !important;
+    [data-baseweb="popover"] [role="listbox"],
+    [data-baseweb="popover"] ul[role="listbox"],
+    [data-baseweb="popover"] div[role="listbox"] {{
+        background: #101d30 !important;
+        background-color: #101d30 !important;
+        color: #f4f7fc !important;
+        border: 1px solid #49627f !important;
+        box-shadow: 0 16px 40px rgba(0,0,0,.48) !important;
+        opacity: 1 !important;
+        z-index: 999999 !important;
+    }}
+    [data-baseweb="popover"] [role="option"],
+    [data-baseweb="popover"] li[role="option"],
+    [data-baseweb="menu"] li,
+    [data-testid="stSelectboxVirtualDropdown"] [role="option"],
+    [data-testid="stMultiSelectVirtualDropdown"] [role="option"],
+    ul[role="listbox"] > li,
+    div[role="listbox"] > div {{
+        background: #101d30 !important;
+        background-color: #101d30 !important;
+        color: #f4f7fc !important;
+        -webkit-text-fill-color: #f4f7fc !important;
+        min-height: 2.4rem !important;
         opacity: 1 !important;
     }}
-    [data-baseweb="popover"] *,
-    [data-baseweb="menu"] *,
+    [data-baseweb="popover"] [role="option"] *,
+    [data-baseweb="popover"] li[role="option"] *,
+    [data-baseweb="menu"] li *,
     [data-testid="stSelectboxVirtualDropdown"] *,
     [data-testid="stMultiSelectVirtualDropdown"] *,
     [role="listbox"] *,
-    [role="option"] {{
-        color: #f1f5fb !important;
-        -webkit-text-fill-color: #f1f5fb !important;
+    [role="option"] * {{
+        color: #f4f7fc !important;
+        -webkit-text-fill-color: #f4f7fc !important;
         opacity: 1 !important;
     }}
-    [role="option"],
-    [data-baseweb="menu"] li {{
-        background: #111e31 !important;
-        min-height: 2.35rem;
-    }}
+    [data-baseweb="popover"] [role="option"]:hover,
+    [data-baseweb="popover"] [role="option"][aria-selected="true"],
+    [data-baseweb="popover"] li[role="option"]:hover,
+    [data-baseweb="popover"] li[role="option"][aria-selected="true"],
+    [data-baseweb="menu"] li:hover,
+    [data-baseweb="menu"] li[aria-selected="true"],
     [role="option"]:hover,
     [role="option"][aria-selected="true"],
-    [data-baseweb="menu"] li:hover,
-    [data-baseweb="menu"] li[aria-selected="true"] {{
-        background: #24415d !important;
+    [role="option"][data-highlighted="true"] {{
+        background: #294967 !important;
+        background-color: #294967 !important;
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
     }}
     [role="option"][aria-disabled="true"] {{
-        color: #9aabc0 !important;
-        -webkit-text-fill-color: #9aabc0 !important;
+        color: #a8b8cc !important;
+        -webkit-text-fill-color: #a8b8cc !important;
+        opacity: 1 !important;
+    }}
+    [data-baseweb="popover"] svg,
+    [data-baseweb="popover"] [role="option"] svg {{
+        color: #dce8f5 !important;
+        fill: #dce8f5 !important;
     }}
 
     /* Selectbox and multiselect closed states, tokens, clear/dropdown icons. */
