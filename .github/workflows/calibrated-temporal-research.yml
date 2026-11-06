@@ -11,6 +11,7 @@ on:
       - "src/graph_embedding.py"
       - "tests/test_calibrated_research.py"
       - "requirements-research.txt"
+      - "requirements-calibrated-research.txt"
       - ".github/workflows/calibrated-temporal-research.yml"
   push:
     branches: ["main"]
@@ -47,13 +48,11 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: requirements-research.txt
+          cache-dependency-path: requirements-calibrated-research.txt
       - name: Install research dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-research.txt
-          pip uninstall -y torch
-          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install -r requirements-calibrated-research.txt
       - name: Run research regression tests
         env:
           PYTHONPATH: src:scripts
