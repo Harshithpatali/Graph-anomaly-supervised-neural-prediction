@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
+from scipy.stats import ks_2samp, wasserstein_distance
 from xgboost import XGBClassifier
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,16 +107,30 @@ def graph_embedding_diagnostics(train, future, graph):
         known = set(train[col].dropna().astype(str))
         values = future[col].dropna().astype(str)
         diagnostics[f"{col}_unseen_rate"] = float((~values.isin(known)).mean()) if len(values) else 0.0
-    z = graph.transform(future)
-    diagnostics["future_zero_embedding_rate"] = float(np.all(np.isclose(z, 0), axis=1).mean())
+    z_train = graph.transform(train)
+    z_future = graph.transform(future)
+    diagnostics["future_zero_embedding_rate"] = float(np.all(np.isclose(z_future, 0), axis=1).mean())
     diagnostics["train_svd_explained_variance_ratio"] = [
         float(v) for v in getattr(graph.svd_, "explained_variance_ratio_", [])
     ]
     diagnostics["train_svd_total_explained_variance_ratio"] = float(
         np.sum(getattr(graph.svd_, "explained_variance_ratio_", []))
     )
-    diagnostics["future_component_mean"] = [float(v) for v in z.mean(axis=0)]
-    diagnostics["future_component_std"] = [float(v) for v in z.std(axis=0)]
+    diagnostics["component_distribution_drift"] = []
+    for j in range(z_train.shape[1]):
+        train_component = z_train[:, j]
+        future_component = z_future[:, j]
+        train_std = max(float(train_component.std()), 1e-8)
+        diagnostics["component_distribution_drift"].append({
+            "component": int(j),
+            "train_mean": float(train_component.mean()),
+            "future_mean": float(future_component.mean()),
+            "train_std": float(train_std),
+            "future_std": float(future_component.std()),
+            "mean_shift_in_train_std": float((future_component.mean() - train_component.mean()) / train_std),
+            "wasserstein_distance_in_train_std": float(wasserstein_distance(train_component, future_component) / train_std),
+            "ks_statistic": float(ks_2samp(train_component, future_component).statistic),
+        })
     return diagnostics
 
 
