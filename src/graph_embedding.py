@@ -27,12 +27,13 @@ class TransactionGraphSVD:
     def _matrix(self, frame: pd.DataFrame):
         n = len(frame)
         rows, cols, values = [], [], []
-        for row_idx, token in enumerate(self._tokens(frame)):
-            col_idx = self.vocabulary_.get(token)
-            if col_idx is not None:
-                rows.append(row_idx // 3)
-                cols.append(col_idx)
-                values.append(1.0)
+        for column, prefix in [("user_id", "u"), ("device_id", "d"), ("ip_address", "i")]:
+            for row_idx, value in enumerate(frame[column].fillna("__MISSING__")):
+                col_idx = self.vocabulary_.get(prefix + "::" + str(value))
+                if col_idx is not None:
+                    rows.append(row_idx)
+                    cols.append(col_idx)
+                    values.append(1.0)
         return csr_matrix((values, (rows, cols)), shape=(n, len(self.vocabulary_)), dtype=np.float32)
 
     def fit_transform(self, frame: pd.DataFrame) -> np.ndarray:
