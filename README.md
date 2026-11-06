@@ -13,7 +13,7 @@ An unsupervised customer intelligence research platform built around customer be
 | **Overview** | Customer, transaction, graph and segment counts; cohort-level risk and anomaly distributions |
 | **Customer Explorer** | Individual purchase behavior and reasons a profile was surfaced |
 | **Customer Segments** | Behavioral groups discovered through unsupervised clustering |
-| **Graph Intelligence** | Structural importance of devices, IP addresses and connected components |
+| **Graph Intelligence** | Interactive sampled user-device-IP network, entity connectivity, component distributions and community structure |
 | **Anomaly Lab** | Customers and transactions that are unusual under unsupervised scoring |
 | **Methodology** | Data provenance, methods, interpretation and limitations |
 
@@ -56,9 +56,10 @@ The app reads precomputed files from `reports/customer_intelligence/`:
 - `segmentation_metrics.csv`
 - `graph_entity_metrics.csv`
 - `graph_communities.csv`
+- `graph_edges_sample.csv` (bounded interactive network sample)
 - `run_metadata.json`
 
-The GitHub Actions workflow uploads these as an artifact named **customer-intelligence-research**. If the reports are not bundled with the Streamlit deployment, download the ZIP artifact from a successful Actions run and upload it in the dashboard sidebar. The dashboard does not train models or rebuild the graph during startup.
+The GitHub Actions workflow builds and publishes the latest bundle to `public-data/customer-intelligence-research.zip` in this public repository. Streamlit downloads and caches it automatically; manual ZIP upload remains as a fallback. The dashboard does not train models or rebuild the full graph during startup.
 
 ## Run research on GitHub
 
