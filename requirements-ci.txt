@@ -7,3 +7,4 @@ pyarrow>=17,<24
 pytest>=8,<10
 torch>=2.4,<3
 networkx>=3.3,<4
+xgboost>=2.1,<4
