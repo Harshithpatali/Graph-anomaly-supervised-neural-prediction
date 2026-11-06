@@ -38,10 +38,12 @@ def score_distribution(p):
 
 def evaluate(y, p, threshold):
     y, p = np.asarray(y, dtype=int), np.asarray(p, dtype=float)
-    pred = (p >= threshold).astype(int)
+    # None explicitly represents the no-investigation policy. Keeping it as
+    # JSON null avoids non-standard Infinity values in the research report.
+    pred = np.zeros(len(p), dtype=int) if threshold is None else (p >= threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(y, pred, labels=[0, 1]).ravel()
     return {
-        "threshold": float(threshold),
+        "threshold": None if threshold is None else float(threshold),
         "precision": float(precision_score(y, pred, zero_division=0)),
         "recall": float(recall_score(y, pred, zero_division=0)),
         "f1": float(f1_score(y, pred, zero_division=0)),
@@ -118,8 +120,8 @@ def main():
             # scenarios are not forced to select a positive review capacity.
             no_review = {
                 "target_validation_capacity": 0.0,
-                "validation_selected_threshold": float("inf"),
-                "validation_metrics": evaluate(yv, pv, float("inf")),
+                "validation_selected_threshold": None,
+                "validation_metrics": evaluate(yv, pv, None),
             }
             for result in [no_review, *capacity_results]:
                 vm = result["validation_metrics"]
