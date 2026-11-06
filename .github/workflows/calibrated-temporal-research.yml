@@ -22,6 +22,7 @@ on:
       - "src/graph_embedding.py"
       - "tests/test_calibrated_research.py"
       - "requirements-research.txt"
+      - "requirements-calibrated-research.txt"
       - ".github/workflows/calibrated-temporal-research.yml"
 
 permissions:
