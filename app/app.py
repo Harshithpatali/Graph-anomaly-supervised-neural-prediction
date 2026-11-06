@@ -3,7 +3,9 @@ from __future__ import annotations
 import io, json, zipfile, urllib.request
 from pathlib import Path
 import pandas as pd
+import networkx as nx
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +35,11 @@ section[data-testid="stSidebar"] *{color:#e8f0fa!important}
 .stButton>button:hover,.stDownloadButton>button:hover{background:#205779!important;border-color:#78c8e9!important}
 [data-testid="stDataFrame"] *{color:#eaf2fb!important}
 hr{border-color:#30445e!important}
+.stApp [data-testid='stWidgetLabel'],.stApp [data-testid='stWidgetLabel'] *,.stApp [data-testid='stMarkdownContainer'] *,.stApp [data-testid='stAlert'] *,.stApp [data-testid='stExpander'] *{color:#edf4fc!important}
+.stApp input::placeholder,.stApp textarea::placeholder{color:#a9bbcf!important;opacity:1!important}
+.stApp [data-testid='stFileUploader'] section{background:#14243a!important;border:1px dashed #52708f!important}
+.stApp [data-testid='stFileUploader'] span,.stApp [data-testid='stFileUploader'] small{color:#dce8f5!important}
+.stApp button{color:#fff!important}
 .intel-kicker{color:#65d5f4!important;text-transform:uppercase;letter-spacing:.16em;font-size:.75rem;font-weight:800}
 .dashboard-note{background:#14243a;border:1px solid #304762;border-radius:12px;padding:12px 16px;color:#dce9f7!important}
 
@@ -65,7 +72,7 @@ def read_zip(upload):
             matches=[p for p in zf.namelist() if p.replace("\\","/").endswith(name)]
             if matches:
                 with zf.open(matches[0]) as f: out[name]=pd.read_parquet(io.BytesIO(f.read()))
-        for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv"):
+        for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv","graph_edges_sample.csv"):
             matches=[p for p in zf.namelist() if p.replace("\\","/").endswith(name)]
             if matches:
                 with zf.open(matches[0]) as f: out[name]=pd.read_csv(f)
@@ -89,7 +96,7 @@ def load_local():
     for name in ("customer_intelligence.parquet","customer_profiles.parquet","top_transaction_anomalies.parquet"):
         p=REPORT_DIR/name
         if p.exists(): out[name]=pd.read_parquet(p)
-    for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv"):
+    for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv","graph_edges_sample.csv"):
         p=REPORT_DIR/name
         if p.exists(): out[name]=pd.read_csv(p)
     p=REPORT_DIR/"run_metadata.json"
@@ -107,6 +114,28 @@ def plot(fig, height=350):
 
 def download(frame,name,label):
     st.download_button(label,frame.to_csv(index=False).encode(),name,"text/csv")
+
+def graph_network_figure(edge_frame: pd.DataFrame, entity_frame: pd.DataFrame):
+    """Render a small deterministic sample of the user-device-IP graph."""
+    if edge_frame.empty or not {'source', 'target'}.issubset(edge_frame.columns): return None
+    graph = nx.from_pandas_edgelist(edge_frame.head(350), source='source', target='target')
+    if graph.number_of_nodes() == 0: return None
+    positions = nx.spring_layout(graph, seed=42, iterations=35)
+    ex, ey = [], []
+    for u, v in graph.edges():
+        ex.extend([positions[u][0], positions[v][0], None]); ey.extend([positions[u][1], positions[v][1], None])
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=ex, y=ey, mode='lines', line=dict(width=.8,color='rgba(148,170,195,.4)'), hoverinfo='none'))
+    kinds = {}
+    if not entity_frame.empty and {'entity_id','node_type'}.issubset(entity_frame.columns): kinds = entity_frame.drop_duplicates('entity_id').set_index('entity_id').node_type.to_dict()
+    nodes = list(graph.nodes()); types = [kinds.get(n,str(n).split('::',1)[0]) for n in nodes]
+    palette = {'user':'#38bdf8','device':'#a78bfa','ip':'#34d399'}
+    fig.add_trace(go.Scatter(x=[positions[n][0] for n in nodes], y=[positions[n][1] for n in nodes], mode='markers',
+        text=[f'{types[i]} · {str(n)[:45]} · degree {graph.degree(n)}' for i,n in enumerate(nodes)], hoverinfo='text',
+        marker=dict(size=[9+min(graph.degree(n),7) for n in nodes], color=[palette.get(t,'#f59e0b') for t in types], line=dict(width=1,color='#e6f0fa'))))
+    fig.update_layout(title='Sampled user-device-IP relationship network',showlegend=False,height=600,
+        xaxis=dict(visible=False),yaxis=dict(visible=False),margin=dict(l=10,r=10,t=50,b=10),paper_bgcolor='#111c2e',plot_bgcolor='#111c2e')
+    return fig
 
 st.sidebar.markdown('<div class="intel-kicker">Customer intelligence platform</div>',unsafe_allow_html=True)
 st.sidebar.title("◈ Graph & Behavior")
@@ -244,7 +273,11 @@ elif page=="Customer Segments":
 
 elif page=="Graph Intelligence":
     st.subheader("Graph intelligence & network analytics")
-    st.caption("User-device-IP graph, built from at most the first 50,000 input transactions.")
+    st.caption("User-device-IP graph, built from at most the first 50,000 input transactions. Network view is a bounded sample for readability.")
+    edge_data=data.get("graph_edges_sample.csv",pd.DataFrame())
+    network_fig=graph_network_figure(edge_data,entities)
+    if network_fig is not None: st.plotly_chart(network_fig,use_container_width=True,config={"displaylogo":False})
+    else: st.info("Sampled graph edges are not in this bundle yet. Rerun the research workflow to generate the network view.")
     if entities.empty: st.warning("Graph metrics are not in this bundle."); st.stop()
     degree_col="degree" if "degree" in entities else None
     a,b,c,d=st.columns(4)
