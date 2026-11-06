@@ -29,26 +29,26 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# Colour system — WCAG-AA compliant on the dark canvas
+# Colour system - WCAG-AA compliant on the dark canvas
 # ---------------------------------------------------------------------------
-_INK        = "#05070F"                       # deepest
-_BG         = "#0A0F1E"                       # page background
-_PANEL      = "#111827"                       # cards / panels
-_PANEL_HI   = "#1A2332"                       # elevated inputs / hover
-_LINE       = "rgba(148, 163, 184, 0.14)"     # subtle borders
-_LINE_HI    = "rgba(148, 163, 184, 0.28)"     # stronger borders
-_TEXT       = "#F1F5F9"                       # primary text  (contrast 15.8:1)
-_TEXT_2     = "#CBD5E1"                       # secondary     (contrast 10.5:1)
-_MUTED      = "#94A3B8"                       # muted         (contrast 5.9:1)
-_ACCENT     = "#22D3EE"                       # cyan
-_ACCENT_2   = "#A78BFA"                       # violet
-_DANGER     = "#FB7185"                       # rose
-_GOOD       = "#34D399"                       # emerald
-_WARN       = "#FBBF24"                       # amber
+_INK        = "#05070F"
+_BG         = "#0A0F1E"
+_PANEL      = "#111827"
+_PANEL_HI   = "#1A2332"
+_LINE       = "rgba(148, 163, 184, 0.14)"
+_LINE_HI    = "rgba(148, 163, 184, 0.28)"
+_TEXT       = "#F1F5F9"
+_TEXT_2     = "#CBD5E1"
+_MUTED      = "#94A3B8"
+_ACCENT     = "#22D3EE"
+_ACCENT_2   = "#A78BFA"
+_DANGER     = "#FB7185"
+_GOOD       = "#34D399"
+_WARN       = "#FBBF24"
 _BLUE       = "#60A5FA"
 
 # ---------------------------------------------------------------------------
-# Plotly template — every font/tick explicitly coloured
+# Plotly template - every font/tick explicitly coloured
 # ---------------------------------------------------------------------------
 def _axis_style():
     return dict(
@@ -92,281 +92,259 @@ pio.templates["fraudintel"] = FRAUDINTEL_TEMPLATE
 pio.templates.default = "fraudintel"
 
 # ---------------------------------------------------------------------------
-# Global CSS — visibility fixes + modern “data-science dashboard” skin
+# Global CSS (only remaining f-string triple-quoted block - all braces escaped)
 # ---------------------------------------------------------------------------
-st.markdown(
-    f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+_CSS = f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-    /* ---------- base ---------- */
-    html, body, [class*="css"] {{
-        font-family: 'Inter', system-ui, sans-serif;
-        color: {_TEXT};
-    }}
-    .stApp {{
-        background:
-            radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.08), transparent 45%),
-            radial-gradient(circle at 88% 78%, rgba(167, 139, 250, 0.09), transparent 50%),
-            {_BG};
-        background-attachment: fixed;
-    }}
-    [data-testid="stHeader"] {{ background: transparent; }}
-    #MainMenu, footer {{ visibility: hidden; }}
+html, body, [class*="css"] {{
+    font-family: 'Inter', system-ui, sans-serif;
+    color: {_TEXT};
+}}
+.stApp {{
+    background:
+        radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.08), transparent 45%),
+        radial-gradient(circle at 88% 78%, rgba(167, 139, 250, 0.09), transparent 50%),
+        {_BG};
+    background-attachment: fixed;
+}}
+[data-testid="stHeader"] {{ background: transparent; }}
+#MainMenu, footer {{ visibility: hidden; }}
 
-    /* ---------- typography ---------- */
-    h1, h2, h3, h4, h5 {{
-        font-family: 'Space Grotesk', sans-serif !important;
-        color: {_TEXT} !important;
-        letter-spacing: -0.015em;
-    }}
-    h1 {{
-        background: linear-gradient(135deg, {_ACCENT} 0%, {_ACCENT_2} 60%, {_TEXT} 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: {_TEXT};                       /* fallback */
-        display: inline-block;
-        padding-bottom: 10px;
-        position: relative;
-    }}
-    h1::after {{
-        content: "";
-        position: absolute; left: 0; bottom: 0;
-        height: 2px; width: 100%;
-        background: linear-gradient(90deg, {_ACCENT}, transparent);
-        animation: scanline 3.2s ease-in-out infinite;
-    }}
-    @keyframes scanline {{
-        0%,100% {{ opacity:.35; transform:scaleX(.4); transform-origin:left; }}
-        50%      {{ opacity:1;   transform:scaleX(1);  transform-origin:left; }}
-    }}
-    p, span, div, li {{ color: {_TEXT}; }}
+h1, h2, h3, h4, h5 {{
+    font-family: 'Space Grotesk', sans-serif !important;
+    color: {_TEXT} !important;
+    letter-spacing: -0.015em;
+}}
+h1 {{
+    background: linear-gradient(135deg, {_ACCENT} 0%, {_ACCENT_2} 60%, {_TEXT} 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: {_TEXT};
+    display: inline-block;
+    padding-bottom: 10px;
+    position: relative;
+}}
+h1::after {{
+    content: "";
+    position: absolute; left: 0; bottom: 0;
+    height: 2px; width: 100%;
+    background: linear-gradient(90deg, {_ACCENT}, transparent);
+    animation: scanline 3.2s ease-in-out infinite;
+}}
+@keyframes scanline {{
+    0%,100% {{ opacity:.35; transform:scaleX(.4); transform-origin:left; }}
+    50%      {{ opacity:1;   transform:scaleX(1);  transform-origin:left; }}
+}}
+p, span, div, li {{ color: {_TEXT}; }}
 
-    /* caption / small text */
-    [data-testid="stCaptionContainer"] p,
-    .stCaption, small {{ color: {_MUTED} !important; }}
+[data-testid="stCaptionContainer"] p,
+.stCaption, small {{ color: {_MUTED} !important; }}
 
-    /* ---------- sidebar ---------- */
-    section[data-testid="stSidebar"] {{
-        background: {_PANEL};
-        border-right: 1px solid {_LINE_HI};
-    }}
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] label {{ color: {_TEXT_2} !important; }}
+section[data-testid="stSidebar"] {{
+    background: {_PANEL};
+    border-right: 1px solid {_LINE_HI};
+}}
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label {{ color: {_TEXT_2} !important; }}
 
-    /* radio */
-    .stRadio > div > label {{ color: {_TEXT_2} !important; }}
-    .stRadio > div > label:hover {{ color: {_TEXT} !important; }}
-    .stRadio [aria-checked="true"] ~ div {{ color: {_ACCENT} !important; font-weight: 600; }}
+.stRadio > div > label {{ color: {_TEXT_2} !important; }}
+.stRadio > div > label:hover {{ color: {_TEXT} !important; }}
+.stRadio [aria-checked="true"] ~ div {{ color: {_ACCENT} !important; font-weight: 600; }}
 
-    /* ---------- inputs ---------- */
-    .stTextInput input, .stNumberInput input, .stTextArea textarea,
-    .stDateInput input {{
-        background: {_PANEL_HI} !important;
-        color: {_TEXT} !important;
-        border: 1px solid {_LINE_HI} !important;
-        border-radius: 8px !important;
-    }}
-    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
-        color: {_MUTED} !important;
-    }}
-    label, [data-testid="stWidgetLabel"] p {{
-        color: {_TEXT_2} !important;
-        font-size: 0.85rem !important;
-        font-weight: 500;
-    }}
+.stTextInput input, .stNumberInput input, .stTextArea textarea,
+.stDateInput input {{
+    background: {_PANEL_HI} !important;
+    color: {_TEXT} !important;
+    border: 1px solid {_LINE_HI} !important;
+    border-radius: 8px !important;
+}}
+.stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+    color: {_MUTED} !important;
+}}
+label, [data-testid="stWidgetLabel"] p {{
+    color: {_TEXT_2} !important;
+    font-size: 0.85rem !important;
+    font-weight: 500;
+}}
 
-    /* select / multiselect */
-    .stSelectbox [data-baseweb="select"] > div,
-    .stMultiSelect [data-baseweb="select"] > div {{
-        background: {_PANEL_HI} !important;
-        border-color: {_LINE_HI} !important;
-        color: {_TEXT} !important;
-        border-radius: 8px !important;
-    }}
-    .stSelectbox [data-baseweb="select"] span,
-    .stMultiSelect [data-baseweb="select"] span,
-    .stMultiSelect [data-baseweb="tag"] {{
-        color: {_TEXT} !important;
-    }}
-    [data-baseweb="tag"] {{
-        background: rgba(34, 211, 238, 0.18) !important;
-        border: 1px solid {_ACCENT}55 !important;
-    }}
-    /* dropdown popover */
-    [data-baseweb="popover"] [data-baseweb="menu"],
-    [data-baseweb="popover"] ul {{
-        background: {_PANEL_HI} !important;
-        border: 1px solid {_LINE_HI} !important;
-        border-radius: 8px !important;
-    }}
-    [data-baseweb="popover"] li,
-    [data-baseweb="popover"] [role="option"] {{
-        color: {_TEXT} !important;
-        background: transparent !important;
-    }}
-    [data-baseweb="popover"] li:hover,
-    [data-baseweb="popover"] [role="option"]:hover {{
-        background: rgba(34, 211, 238, 0.14) !important;
-    }}
+.stSelectbox [data-baseweb="select"] > div,
+.stMultiSelect [data-baseweb="select"] > div {{
+    background: {_PANEL_HI} !important;
+    border-color: {_LINE_HI} !important;
+    color: {_TEXT} !important;
+    border-radius: 8px !important;
+}}
+.stSelectbox [data-baseweb="select"] span,
+.stMultiSelect [data-baseweb="select"] span,
+.stMultiSelect [data-baseweb="tag"] {{
+    color: {_TEXT} !important;
+}}
+[data-baseweb="tag"] {{
+    background: rgba(34, 211, 238, 0.18) !important;
+    border: 1px solid {_ACCENT}55 !important;
+}}
+[data-baseweb="popover"] [data-baseweb="menu"],
+[data-baseweb="popover"] ul {{
+    background: {_PANEL_HI} !important;
+    border: 1px solid {_LINE_HI} !important;
+    border-radius: 8px !important;
+}}
+[data-baseweb="popover"] li,
+[data-baseweb="popover"] [role="option"] {{
+    color: {_TEXT} !important;
+    background: transparent !important;
+}}
+[data-baseweb="popover"] li:hover,
+[data-baseweb="popover"] [role="option"]:hover {{
+    background: rgba(34, 211, 238, 0.14) !important;
+}}
 
-    /* slider */
-    .stSlider [data-baseweb="slider"] div[role="slider"] {{ background: {_ACCENT}; }}
-    .stSlider [data-testid="stTickBarMin"],
-    .stSlider [data-testid="stTickBarMax"] {{ color: {_MUTED} !important; }}
+.stSlider [data-baseweb="slider"] div[role="slider"] {{ background: {_ACCENT}; }}
+.stSlider [data-testid="stTickBarMin"],
+.stSlider [data-testid="stTickBarMax"] {{ color: {_MUTED} !important; }}
 
-    /* ---------- metric cards (glass) ---------- */
-    [data-testid="stMetric"] {{
-        background: linear-gradient(135deg, rgba(34,211,238,0.04), rgba(167,139,250,0.04));
-        border: 1px solid {_LINE_HI};
-        border-radius: 12px;
-        padding: 16px 20px;
-        position: relative;
-        overflow: hidden;
-        backdrop-filter: blur(6px);
-    }}
-    [data-testid="stMetric"]::before {{
-        content: "";
-        position: absolute; top: 0; left: 0; right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, {_ACCENT}, {_ACCENT_2});
-    }}
-    [data-testid="stMetricLabel"] p {{
-        color: {_MUTED} !important;
-        font-size: 0.72rem !important;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.07em;
-    }}
-    [data-testid="stMetricValue"] {{
-        color: {_TEXT} !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 1.7rem !important;
-        font-weight: 600;
-    }}
-    [data-testid="stMetricDelta"] {{ font-size: 0.8rem !important; }}
+[data-testid="stMetric"] {{
+    background: linear-gradient(135deg, rgba(34,211,238,0.04), rgba(167,139,250,0.04));
+    border: 1px solid {_LINE_HI};
+    border-radius: 12px;
+    padding: 16px 20px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(6px);
+}}
+[data-testid="stMetric"]::before {{
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, {_ACCENT}, {_ACCENT_2});
+}}
+[data-testid="stMetricLabel"] p {{
+    color: {_MUTED} !important;
+    font-size: 0.72rem !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}}
+[data-testid="stMetricValue"] {{
+    color: {_TEXT} !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 1.7rem !important;
+    font-weight: 600;
+}}
+[data-testid="stMetricDelta"] {{ font-size: 0.8rem !important; }}
 
-    /* ---------- buttons ---------- */
-    .stButton > button, .stDownloadButton > button {{
-        border-radius: 8px !important;
-        font-weight: 500;
-        transition: all 0.18s ease;
-    }}
-    .stButton > button[kind="secondary"],
-    .stDownloadButton > button[kind="secondary"] {{
-        background: {_PANEL_HI};
-        border: 1px solid {_LINE_HI};
-        color: {_TEXT};
-    }}
-    .stButton > button[kind="secondary"]:hover,
-    .stDownloadButton > button[kind="secondary"]:hover {{
-        background: rgba(34, 211, 238, 0.10);
-        border-color: {_ACCENT};
-        color: {_ACCENT};
-        box-shadow: 0 0 20px rgba(34, 211, 238, 0.18);
-    }}
-    .stButton > button[kind="primary"] {{
-        background: linear-gradient(135deg, {_ACCENT}, {_ACCENT_2});
-        color: {_INK};
-        border: none;
-    }}
-    .stButton > button[kind="primary"]:hover {{
-        box-shadow: 0 0 26px rgba(34, 211, 238, 0.45);
-        transform: translateY(-1px);
-    }}
+.stButton > button, .stDownloadButton > button {{
+    border-radius: 8px !important;
+    font-weight: 500;
+    transition: all 0.18s ease;
+}}
+.stButton > button[kind="secondary"],
+.stDownloadButton > button[kind="secondary"] {{
+    background: {_PANEL_HI};
+    border: 1px solid {_LINE_HI};
+    color: {_TEXT};
+}}
+.stButton > button[kind="secondary"]:hover,
+.stDownloadButton > button[kind="secondary"]:hover {{
+    background: rgba(34, 211, 238, 0.10);
+    border-color: {_ACCENT};
+    color: {_ACCENT};
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.18);
+}}
+.stButton > button[kind="primary"] {{
+    background: linear-gradient(135deg, {_ACCENT}, {_ACCENT_2});
+    color: {_INK};
+    border: none;
+}}
+.stButton > button[kind="primary"]:hover {{
+    box-shadow: 0 0 26px rgba(34, 211, 238, 0.45);
+    transform: translateY(-1px);
+}}
 
-    /* ---------- form ---------- */
-    [data-testid="stForm"] {{
-        border: 1px solid {_LINE_HI};
-        border-radius: 12px;
-        background: rgba(17, 24, 39, 0.55);
-        padding: 20px;
-        backdrop-filter: blur(8px);
-    }}
+[data-testid="stForm"] {{
+    border: 1px solid {_LINE_HI};
+    border-radius: 12px;
+    background: rgba(17, 24, 39, 0.55);
+    padding: 20px;
+    backdrop-filter: blur(8px);
+}}
 
-    /* ---------- tabs ---------- */
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 4px;
-        border-bottom: 1px solid {_LINE_HI};
-    }}
-    .stTabs [data-baseweb="tab"] {{
-        color: {_MUTED} !important;
-        font-weight: 500;
-        padding: 10px 18px;
-        border-radius: 8px 8px 0 0;
-        background: transparent;
-    }}
-    .stTabs [data-baseweb="tab"]:hover {{
-        color: {_TEXT} !important;
-        background: rgba(34, 211, 238, 0.05);
-    }}
-    .stTabs [aria-selected="true"] {{
-        color: {_ACCENT} !important;
-        border-bottom: 2px solid {_ACCENT} !important;
-    }}
+.stTabs [data-baseweb="tab-list"] {{
+    gap: 4px;
+    border-bottom: 1px solid {_LINE_HI};
+}}
+.stTabs [data-baseweb="tab"] {{
+    color: {_MUTED} !important;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+    background: transparent;
+}}
+.stTabs [data-baseweb="tab"]:hover {{
+    color: {_TEXT} !important;
+    background: rgba(34, 211, 238, 0.05);
+}}
+.stTabs [aria-selected="true"] {{
+    color: {_ACCENT} !important;
+    border-bottom: 2px solid {_ACCENT} !important;
+}}
 
-    /* ---------- dataframe ---------- */
-    [data-testid="stDataFrame"] {{
-        border: 1px solid {_LINE_HI};
-        border-radius: 10px;
-        overflow: hidden;
-    }}
+[data-testid="stDataFrame"] {{
+    border: 1px solid {_LINE_HI};
+    border-radius: 10px;
+    overflow: hidden;
+}}
 
-    /* ---------- alerts ---------- */
-    .stAlert {{
-        border-radius: 10px;
-        border-left-width: 3px;
-        background: rgba(17, 24, 39, 0.85) !important;
-    }}
-    .stAlert p {{ color: {_TEXT} !important; }}
+.stAlert {{
+    border-radius: 10px;
+    border-left-width: 3px;
+    background: rgba(17, 24, 39, 0.85) !important;
+}}
+.stAlert p {{ color: {_TEXT} !important; }}
 
-    /* ---------- json ---------- */
-    [data-testid="stJson"] {{
-        background: {_PANEL_HI} !important;
-        border: 1px solid {_LINE_HI};
-        border-radius: 10px;
-        padding: 8px;
-    }}
-    [data-testid="stJson"] * {{ color: {_TEXT} !important; }}
+[data-testid="stJson"] {{
+    background: {_PANEL_HI} !important;
+    border: 1px solid {_LINE_HI};
+    border-radius: 10px;
+    padding: 8px;
+}}
+[data-testid="stJson"] * {{ color: {_TEXT} !important; }}
 
-    /* ---------- bordered container (card) ---------- */
-    [data-testid="stVerticalBlockBorderWrapper"] {{
-        border-color: {_LINE_HI} !important;
-        border-radius: 14px !important;
-        background: rgba(17, 24, 39, 0.4);
-        padding: 6px;
-    }}
+[data-testid="stVerticalBlockBorderWrapper"] {{
+    border-color: {_LINE_HI} !important;
+    border-radius: 14px !important;
+    background: rgba(17, 24, 39, 0.4);
+    padding: 6px;
+}}
 
-    /* ---------- misc ---------- */
-    hr {{ border-color: {_LINE_HI}; margin: 1.4rem 0; }}
-    [data-testid="stTooltipIcon"] svg {{ color: {_MUTED} !important; }}
+hr {{ border-color: {_LINE_HI}; margin: 1.4rem 0; }}
+[data-testid="stTooltipIcon"] svg {{ color: {_MUTED} !important; }}
 
-    /* file uploader */
-    [data-testid="stFileUploader"] section {{
-        background: {_PANEL_HI};
-        border: 1px dashed {_LINE_HI};
-        border-radius: 10px;
-    }}
-    [data-testid="stFileUploader"] * {{ color: {_TEXT_2} !important; }}
+[data-testid="stFileUploader"] section {{
+    background: {_PANEL_HI};
+    border: 1px dashed {_LINE_HI};
+    border-radius: 10px;
+}}
+[data-testid="stFileUploader"] * {{ color: {_TEXT_2} !important; }}
 
-    /* scrollbars */
-    ::-webkit-scrollbar {{ width: 10px; height: 10px; }}
-    ::-webkit-scrollbar-track {{ background: {_PANEL}; }}
-    ::-webkit-scrollbar-thumb {{ background: {_LINE_HI}; border-radius: 4px; }}
-    ::-webkit-scrollbar-thumb:hover {{ background: {_ACCENT}88; }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+::-webkit-scrollbar {{ width: 10px; height: 10px; }}
+::-webkit-scrollbar-track {{ background: {_PANEL}; }}
+::-webkit-scrollbar-thumb {{ background: {_LINE_HI}; border-radius: 4px; }}
+::-webkit-scrollbar-thumb:hover {{ background: {_ACCENT}88; }}
+</style>
+"""
+st.markdown(_CSS, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# Fast data loader — only precomputed scored table
+# Fast data loader - only precomputed scored table
 # ---------------------------------------------------------------------------
-@st.cache_data(show_spinner="Loading scored data…")
+@st.cache_data(show_spinner="Loading scored data...")
 def load_dashboard() -> pd.DataFrame:
     pkl = ROOT / "data" / "processed" / "dashboard.pkl"
     pq  = ROOT / "data" / "processed" / "dashboard.parquet"
@@ -394,21 +372,21 @@ def sample_df(df: pd.DataFrame, n: int = 25_000, seed: int = 42) -> pd.DataFrame
 # ---------------------------------------------------------------------------
 # Sidebar
 # ---------------------------------------------------------------------------
-st.sidebar.title("🕵️ Fraud Graph")
-st.sidebar.caption("Pre‑scored · low‑latency intelligence")
+st.sidebar.title("Fraud Graph")
+st.sidebar.caption("Pre-scored / low-latency intelligence")
 
 page = st.sidebar.radio(
     "Navigate",
     [
-        "🏠 Overview",
-        "📊 Data Explorer",
-        "🕸️ Graph Insights",
-        "🚨 Anomaly Ranking",
-        "🔍 Investigation Workbench",
-        "📈 Model Performance",
-        "🧠 Neural Fraud Classifier",
-        "📋 Stakeholder Findings",
-        "ℹ️ About",
+        "Overview",
+        "Data Explorer",
+        "Graph Insights",
+        "Anomaly Ranking",
+        "Investigation Workbench",
+        "Model Performance",
+        "Neural Fraud Classifier",
+        "Stakeholder Findings",
+        "About",
     ],
     label_visibility="collapsed",
 )
@@ -419,7 +397,7 @@ df_sample = sample_df(df, 20_000)
 # ---------------------------------------------------------------------------
 # Pages
 # ---------------------------------------------------------------------------
-if page == "🏠 Overview":
+if page == "Overview":
     st.title("Dynamic E-Commerce Graph Anomaly Detection")
     st.markdown(
         "Unsupervised anomaly ranking on a multipartite transaction graph. "
@@ -441,13 +419,13 @@ if page == "🏠 Overview":
             plot_df, x="anomaly_score", color="label", nbins=60,
             barmode="overlay", opacity=0.7,
             color_discrete_map={"Normal": _ACCENT, "Fraud (label)": _DANGER},
-            title="Anomaly scores (higher = more anomalous) — sampled",
+            title="Anomaly scores (higher = more anomalous) - sampled",
         )
         fig.update_layout(height=360, margin=dict(t=50, b=20))
         st.plotly_chart(fig, use_container_width=True)
 
     with st.container(border=True):
-        st.subheader("Top‑20 Most Anomalous Transactions")
+        st.subheader("Top-20 Most Anomalous Transactions")
         top = df.nsmallest(20, "anomaly_rank")
         show_cols = [c for c in [
             "anomaly_rank", "anomaly_score", "user_id", "device_id",
@@ -455,7 +433,7 @@ if page == "🏠 Overview":
         ] if c in top.columns]
         st.dataframe(top[show_cols], use_container_width=True, height=420)
 
-elif page == "📊 Data Explorer":
+elif page == "Data Explorer":
     st.title("Data Explorer")
 
     with st.container(border=True):
@@ -506,7 +484,7 @@ elif page == "📊 Data Explorer":
             fig.update_layout(height=360)
             st.plotly_chart(fig, use_container_width=True)
 
-elif page == "🕸️ Graph Insights":
+elif page == "Graph Insights":
     st.title("Graph & Entity Insights")
     st.markdown(
         "Transactions link to **user / device / IP** nodes. "
@@ -549,14 +527,14 @@ elif page == "🕸️ Graph Insights":
         st.plotly_chart(fig, use_container_width=True)
 
     with st.container(border=True):
-        st.subheader("High‑risk shared devices")
+        st.subheader("High-risk shared devices")
         st.dataframe(high, use_container_width=True)
 
-elif page == "🚨 Anomaly Ranking":
+elif page == "Anomaly Ranking":
     st.title("Anomaly Ranking Workbench")
 
     with st.container(border=True):
-        top_n = st.slider("Show top‑N anomalies", 10, 300, 50, 10)
+        top_n = st.slider("Show top-N anomalies", 10, 300, 50, 10)
         q = st.slider(
             "Minimum score percentile", 50, 99, 90, 1,
             help="Only show transactions above this score percentile",
@@ -564,7 +542,7 @@ elif page == "🚨 Anomaly Ranking":
     min_score = float(np.percentile(df["anomaly_score"], q))
 
     ranked = df[df["anomaly_score"] >= min_score].nsmallest(top_n, "anomaly_rank")
-    st.caption(f"{len(ranked)} transactions · min score {min_score:.4f}")
+    st.caption(f"{len(ranked)} transactions / min score {min_score:.4f}")
 
     display_cols = [c for c in [
         "anomaly_rank", "anomaly_score", "user_id", "device_id", "ip_address",
@@ -573,11 +551,11 @@ elif page == "🚨 Anomaly Ranking":
     st.dataframe(ranked[display_cols], use_container_width=True, height=480)
 
     csv = ranked.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇ Download ranked CSV", csv, "anomaly_ranking.csv", "text/csv")
+    st.download_button("Download ranked CSV", csv, "anomaly_ranking.csv", "text/csv")
 
-elif page == "🔍 Investigation Workbench":
+elif page == "Investigation Workbench":
     st.title("Investigation Workbench")
-    st.markdown("Drill into a high‑ranking transaction or entity.")
+    st.markdown("Drill into a high-ranking transaction or entity.")
 
     with st.container(border=True):
         mode = st.radio(
@@ -592,7 +570,8 @@ elif page == "🔍 Investigation Workbench":
         )
         rows = df[df["anomaly_rank"] == rank]
         if rows.empty:
-            st.warning("Rank not found"); st.stop()
+            st.warning("Rank not found")
+            st.stop()
         row = rows.iloc[0]
     elif mode == "User ID":
         top_users = df.nsmallest(3000, "anomaly_rank")["user_id"].unique().tolist()
@@ -639,10 +618,10 @@ elif page == "🔍 Investigation Workbench":
             use_container_width=True, height=320,
         )
 
-elif page == "📈 Model Performance":
+elif page == "Model Performance":
     st.title("Validation Against Fraud Labels")
     st.warning(
-        "Post‑hoc validation only — the model never trained on the `class` label."
+        "Post-hoc validation only - the model never trained on the `class` label."
     )
 
     from evaluation import evaluate_anomaly_scores, enrichment_factor
@@ -655,10 +634,10 @@ elif page == "📈 Model Performance":
 
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("ROC‑AUC",        f"{metrics['roc_auc']:.4f}")
-        c2.metric("PR‑AUC",         f"{metrics['pr_auc']:.4f}")
+        c1.metric("ROC-AUC",        f"{metrics['roc_auc']:.4f}")
+        c2.metric("PR-AUC",         f"{metrics['pr_auc']:.4f}")
         c3.metric(f"Precision@{k}", f"{metrics['precision_at_k']:.4f}")
-        c4.metric("Enrichment@k",   f"{enrichment_factor(y, s, k):.2f}×")
+        c4.metric("Enrichment@k",   f"{enrichment_factor(y, s, k):.2f}x")
 
     prec, rec, _ = precision_recall_curve(y, s)
     fpr,  tpr, _ = roc_curve(y, s)
@@ -669,7 +648,7 @@ elif page == "📈 Model Performance":
         fig1.add_trace(go.Scatter(x=rec, y=prec, mode="lines", name="PR",
                                   line=dict(color=_ACCENT, width=2),
                                   fill="tozeroy", fillcolor="rgba(34,211,238,0.08)"))
-        fig1.update_layout(title="Precision‑Recall", xaxis_title="Recall",
+        fig1.update_layout(title="Precision-Recall", xaxis_title="Recall",
                            yaxis_title="Precision", height=360)
         st.plotly_chart(fig1, use_container_width=True)
     with col_b, st.container(border=True):
@@ -692,17 +671,15 @@ elif page == "📈 Model Performance":
         fig.update_layout(height=340)
         st.plotly_chart(fig, use_container_width=True)
 
-elif page == "🧠 Neural Fraud Classifier":
+elif page == "Neural Fraud Classifier":
     st.title("Neural Fraud Classifier (MLP)")
     st.markdown(
-        """
-        PyTorch **MLP** with leakage‑safe features.  
-        Split: stratified 70/15/15 · Primary metric: **PR‑AUC**  
-        Artifact scores **raw CSV columns** (same as `Fraud_Data.csv` without `class`).
-        """
+        "PyTorch **MLP** with leakage-safe features.  \n"
+        "Split: stratified 70/15/15 / Primary metric: **PR-AUC**  \n"
+        "Artifact scores **raw CSV columns** (same as `Fraud_Data.csv` without `class`)."
     )
 
-    @st.cache_resource(show_spinner="Loading neural model…")
+    @st.cache_resource(show_spinner="Loading neural model...")
     def load_neural():
         path         = ROOT / "artifacts" / "final_supervised_neural_model.joblib"
         summary_path = ROOT / "artifacts" / "neural_fraud_summary.json"
@@ -714,7 +691,7 @@ elif page == "🧠 Neural Fraud Classifier":
         summary = _json.loads(summary_path.read_text()) if summary_path.exists() else {}
         return art, summary
 
-    @st.cache_data(show_spinner="Loading test predictions…")
+    @st.cache_data(show_spinner="Loading test predictions...")
     def load_test_predictions():
         path = ROOT / "artifacts" / "final_test_predictions.csv"
         if not path.exists():
@@ -732,8 +709,8 @@ elif page == "🧠 Neural Fraud Classifier":
     with st.container(border=True):
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Champion",     str(summary.get("champion_type", art.model_type)).upper())
-        c2.metric("Test PR‑AUC",  f"{tm.get('pr_auc',  float('nan')):.4f}")
-        c3.metric("Test ROC‑AUC", f"{tm.get('roc_auc', float('nan')):.4f}")
+        c2.metric("Test PR-AUC",  f"{tm.get('pr_auc',  float('nan')):.4f}")
+        c3.metric("Test ROC-AUC", f"{tm.get('roc_auc', float('nan')):.4f}")
         c4.metric("Threshold",    f"{thr:.3f}")
 
         c5, c6, c7, c8 = st.columns(4)
@@ -743,7 +720,7 @@ elif page == "🧠 Neural Fraud Classifier":
         c8.metric("Accuracy",  f"{tm.get('accuracy',  float('nan')):.3f}")
 
     tab_pred, tab_csv, tab_batch = st.tabs([
-        "🆕 New prediction", "📄 Locked test CSV", "📥 Batch upload",
+        "New prediction", "Locked test CSV", "Batch upload",
     ])
 
     with tab_pred:
@@ -776,21 +753,21 @@ elif page == "🧠 Neural Fraud Classifier":
                 proba = float(art.predict_proba(row)[0, 1])
                 pred  = int(proba >= thr)
                 if pred:
-                    st.error(f"**FRAUD**  ·  probability = **{proba:.4f}**  (threshold {thr:.3f})")
+                    st.error(f"**FRAUD**  /  probability = **{proba:.4f}**  (threshold {thr:.3f})")
                 else:
-                    st.success(f"**Normal**  ·  probability = **{proba:.4f}**  (threshold {thr:.3f})")
+                    st.success(f"**Normal**  /  probability = **{proba:.4f}**  (threshold {thr:.3f})")
                 st.json({"fraud_probability": proba, "predicted_class": pred, "threshold": thr})
             except Exception as e:
                 st.error(f"Prediction failed: {e}")
 
     with tab_csv:
-        st.subheader("Locked test set — scored predictions")
+        st.subheader("Locked test set - scored predictions")
         pred_df = load_test_predictions()
         if pred_df is None:
             st.warning("`artifacts/final_test_predictions.csv` not found.")
         else:
             st.caption(
-                f"{len(pred_df):,} rows · columns include raw fields + "
+                f"{len(pred_df):,} rows / columns include raw fields + "
                 "fraud_probability + predicted_class + actual_class"
             )
             filt = st.selectbox(
@@ -817,7 +794,7 @@ elif page == "🧠 Neural Fraud Classifier":
             )
             csv_bytes = pred_df.to_csv(index=False).encode("utf-8")
             st.download_button(
-                "⬇ Download full final_test_predictions.csv",
+                "Download full final_test_predictions.csv",
                 csv_bytes, file_name="final_test_predictions.csv", mime="text/csv",
             )
 
@@ -838,7 +815,7 @@ elif page == "🧠 Neural Fraud Classifier":
                 if missing:
                     st.error(f"Missing columns: {missing}")
                 else:
-                    with st.spinner("Scoring…"):
+                    with st.spinner("Scoring..."):
                         proba = art.predict_proba(batch)[:, 1]
                     scored = batch.copy()
                     scored["fraud_probability"] = proba
@@ -848,15 +825,15 @@ elif page == "🧠 Neural Fraud Classifier":
                         use_container_width=True,
                     )
                     st.download_button(
-                        "⬇ Download scored CSV",
+                        "Download scored CSV",
                         scored.to_csv(index=False).encode("utf-8"),
                         file_name="scored_transactions.csv", mime="text/csv",
                     )
             except Exception as e:
                 st.error(f"Batch scoring failed: {e}")
 
-elif page == "📋 Stakeholder Findings":
-    st.title("Stakeholder Findings — What We Learned")
+elif page == "Stakeholder Findings":
+    st.title("Stakeholder Findings - What We Learned")
     import json as _json
     findings_path = ROOT / "artifacts" / "stakeholder_findings.json"
     findings = _json.loads(findings_path.read_text()) if findings_path.exists() else {}
@@ -864,29 +841,29 @@ elif page == "📋 Stakeholder Findings":
     st.header("1. Executive summary")
     st.markdown(f"**{findings.get('headline', '')}**")
 
+    model_block = findings.get("model_on_locked_test", {})
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
         c1.metric("Majority baseline accuracy",
                   f"{findings.get('majority_baseline_accuracy', 0.95):.1%}")
         c2.metric("Fraud rate in locked test",
                   f"{findings.get('fraud_base_rate_test', 0.046):.1%}")
-        model_block = findings.get("model_on_locked_test", {})
-        c3.metric("Model enrichment @ top‑k",
-                  f"{model_block.get('enrichment_at_k', 0):.1f}×")
+        c3.metric("Model enrichment @ top-k",
+                  f"{model_block.get('enrichment_at_k', 0):.1f}x")
 
-    st.header("2. Why accuracy looks “worse than random”")
+    st.header("2. Why accuracy looks 'worse than random'")
     st.warning(findings.get("why_accuracy_misleads", ""))
     st.markdown(
-        """
-        | Approach | Approx. accuracy on test | Catches fraud? |
-        |----------|--------------------------|----------------|
-        | Always predict normal | **~95%** | No |
-        | Supervised model (F1 threshold) | ~92% | Partially — ranks risk |
-        | Random guessing of fraud labels | ~50% balanced | No |
-        """
+        "| Approach | Approx. accuracy on test | Catches fraud? |\n"
+        "|----------|--------------------------|----------------|\n"
+        "| Always predict normal | **~95%** | No |\n"
+        "| Supervised model (F1 threshold) | ~92% | Partially - ranks risk |\n"
+        "| Random guessing of fraud labels | ~50% balanced | No |"
     )
-    st.caption("“Worse than majority accuracy” ≠ “worse than random ranking”. "
-               "Ranking metrics are the right lens.")
+    st.caption(
+        "'Worse than majority accuracy' is not the same as 'worse than random ranking'. "
+        "Ranking metrics are the right lens."
+    )
 
     st.header("3. Critical data insight (concept drift)")
     for bullet in findings.get("key_data_insights", []):
@@ -895,28 +872,24 @@ elif page == "📋 Stakeholder Findings":
     st.header("4. Simple rule vs model")
     rule = findings.get("simple_rule_train", {})
     st.markdown(
-        f"""
-        **Rule:** `{rule.get('rule', '')}`
-
-        - Train precision: **{rule.get('train_precision', '—')}**
-        - Train recall of fraud: **{rule.get('train_recall_of_fraud', '—')}**
-        - Val/Test recall: **{rule.get('val_test_recall', '—')}**
-        - Note: {rule.get('note', '')}
-        """
+        "**Rule:** `" + str(rule.get("rule", "")) + "`\n\n"
+        "- Train precision: **" + str(rule.get("train_precision", "N/A")) + "**\n"
+        "- Train recall of fraud: **" + str(rule.get("train_recall_of_fraud", "N/A")) + "**\n"
+        "- Val/Test recall: **" + str(rule.get("val_test_recall", "N/A")) + "**\n"
+        "- Note: " + str(rule.get("note", ""))
     )
 
     st.header("5. Model quality on locked future test")
     st.markdown(
-        f"""
-        - **Model:** {model_block.get('selected_model', '—')}
-        - **PR‑AUC:** {model_block.get('pr_auc', '—')} (higher than base rate ≈ 0.046)
-        - **ROC‑AUC:** {model_block.get('roc_auc', '—')}
-        - **Precision@k:** {model_block.get('precision_at_k', '—')} with
-          **{model_block.get('enrichment_at_k', '—')}×** enrichment
-        - **Accuracy:** {model_block.get('accuracy', '—')} (below majority baseline — expected)
-
-        {model_block.get('interpretation', '')}
-        """
+        "- **Model:** " + str(model_block.get("selected_model", "N/A")) + "\n"
+        "- **PR-AUC:** " + str(model_block.get("pr_auc", "N/A")) +
+        " (higher than base rate ~0.046)\n"
+        "- **ROC-AUC:** " + str(model_block.get("roc_auc", "N/A")) + "\n"
+        "- **Precision@k:** " + str(model_block.get("precision_at_k", "N/A")) +
+        " with **" + str(model_block.get("enrichment_at_k", "N/A")) + "x** enrichment\n"
+        "- **Accuracy:** " + str(model_block.get("accuracy", "N/A")) +
+        " (below majority baseline - expected)\n\n" +
+        str(model_block.get("interpretation", ""))
     )
 
     st.header("6. Recommended use for the business")
@@ -931,24 +904,22 @@ elif page == "📋 Stakeholder Findings":
         "This project is honest about limits: chronological evaluation, label used only "
         "for validation in the unsupervised track, explicit imbalance handling, and clear "
         "separation between ranking quality and accuracy. The main scientific finding is "
-        "severe **temporal drift** in attack patterns — instant signup fraud dominates early "
+        "severe **temporal drift** in attack patterns - instant signup fraud dominates early "
         "data and vanishes later."
     )
 
-elif page == "ℹ️ About":
+elif page == "About":
     st.title("About this project")
     st.markdown(
-        """
-        ### Scientific stance
-        - Fraud label is **validation ground truth only**
-        - Chronological train / val / test split
-        - Graph features (degree, shared device/IP) + temporal + behavioural
-        - This UI loads **pre‑scored** data for low latency
-
-        ### Pipeline
-        Dataset → Audit → Graph → Features → IsolationForest → Ranking → Validation → Dashboard
-
-        ### Run
-        ```bash
-        pip install -r requirements.txt
-        streamlit run app/app.py
+        "### Scientific stance\n"
+        "- Fraud label is **validation ground truth only**\n"
+        "- Chronological train / val / test split\n"
+        "- Graph features (degree, shared device/IP) + temporal + behavioural\n"
+        "- This UI loads **pre-scored** data for low latency\n"
+        "\n"
+        "### Pipeline\n"
+        "Dataset -> Audit -> Graph -> Features -> IsolationForest -> Ranking -> Validation -> Dashboard\n"
+        "\n"
+        "### Run"
+    )
+    st.code("pip install -r requirements.txt\nstreamlit run app/app.py", language="bash")
