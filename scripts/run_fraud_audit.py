@@ -200,6 +200,7 @@ def main() -> None:
     print("Loading dataset...")
     df = pd.read_csv(data_path)
     ip_map = pd.read_csv(ip_path)
+    print(f"Loaded fraud rows={len(df):,}, map rows={len(ip_map):,}", flush=True)
     df["purchase_time"] = pd.to_datetime(df["purchase_time"], errors="coerce", utc=True)
     df["signup_time"] = pd.to_datetime(df["signup_time"], errors="coerce", utc=True)
     df = df.dropna(subset=["purchase_time", "class"]).copy()
@@ -213,7 +214,14 @@ def main() -> None:
     results = []
     for protocol in protocols:
         print(f"Running {protocol} benchmark ...")
-        results.append(run_protocol(df, ip_map, protocol))
+        result = run_protocol(df, ip_map, protocol)
+        results.append(result)
+        print(
+            f"{protocol}: test PR-AUC={result['test_metrics']['pr_auc']:.6f}, "
+            f"ROC-AUC={result['test_metrics']['roc_auc']:.6f}, "
+            f"Precision@k={result['test_metrics']['precision_at_k']:.6f}",
+            flush=True,
+        )
 
     manifest = {
         "created_utc": pd.Timestamp.now(tz="UTC").isoformat(),
