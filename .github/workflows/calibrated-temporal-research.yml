@@ -72,6 +72,7 @@ jobs:
           m = f["metrics"]
           print("# Calibrated temporal fraud research")
           print(f"- Selected configuration: **{r['selected_config_id']}**")
+          print(f"- Graph embeddings included: **{r['selected_include_graph_embeddings']}**")
           print(f"- Final test period: {f['test']['start']} to {f['test']['end']}")
           print("| Metric | Raw | Isotonic calibrated |")
           print("|---|---:|---:|")
