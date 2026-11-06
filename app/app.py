@@ -1,6 +1,6 @@
 """Graph-Based Customer Intelligence dashboard; reads precomputed label-free reports."""
 from __future__ import annotations
-import io, json, zipfile
+import io, json, zipfile, urllib.request
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
@@ -63,6 +63,15 @@ def read_zip(upload):
             with zf.open(matches[0]) as f: out["run_metadata.json"]=json.loads(f.read().decode())
     return out
 
+@st.cache_data(show_spinner="Fetching the latest public research bundle…", ttl=3600)
+def load_github_bundle():
+    """Download the portfolio research bundle from this public GitHub repository."""
+    url = "https://raw.githubusercontent.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction/main/public-data/customer-intelligence-research.zip"
+    request = urllib.request.Request(url, headers={"User-Agent": "customer-intelligence-streamlit"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        payload = response.read()
+    return read_zip(io.BytesIO(payload))
+
 @st.cache_data(show_spinner=False)
 def load_local():
     out={}
@@ -89,8 +98,14 @@ st.sidebar.title("◈ Graph & Behavior")
 st.sidebar.caption("Discover customers · Understand behavior · Surface anomalies")
 data=load_local()
 if "customer_intelligence.parquet" not in data:
-    up=st.sidebar.file_uploader("Upload GitHub Actions research ZIP",type=["zip"],
-       help="Download the customer-intelligence-research artifact from the GitHub Actions run.")
+    try:
+        data=load_github_bundle()
+        st.sidebar.success("Latest public GitHub research bundle loaded.")
+    except Exception as exc:
+        st.sidebar.warning(f"Automatic GitHub data load unavailable: {exc}")
+if "customer_intelligence.parquet" not in data:
+    up=st.sidebar.file_uploader("Upload research ZIP (fallback)",type=["zip"],
+       help="Use this only if the public GitHub bundle is unavailable.")
     if up is not None:
         try: data=read_zip(up); st.sidebar.success("Research bundle loaded for this session.")
         except Exception as exc: st.sidebar.error(f"Unable to read ZIP: {exc}")
@@ -104,7 +119,7 @@ st.caption("A label-free research workspace for customer behavior, segmentation,
 
 customers=data.get("customer_intelligence.parquet")
 if customers is None or customers.empty:
-    st.info("The dashboard is ready, but the precomputed research bundle is not included in this deployment. Run the Customer Intelligence Research workflow, download its customer-intelligence-research ZIP artifact, then upload it in the sidebar.")
+    st.info("The dashboard could not find its precomputed research bundle. Check that the Customer Intelligence Research workflow completed successfully and published public-data/customer-intelligence-research.zip. You can also upload a research ZIP using the sidebar fallback.")
     st.markdown("Expected files: customer_intelligence.parquet, customer_profiles.parquet, top_transaction_anomalies.parquet, segment_summary.csv, segmentation_metrics.csv, graph_entity_metrics.csv, graph_communities.csv and run_metadata.json.")
     st.stop()
 customers=customers.copy()
