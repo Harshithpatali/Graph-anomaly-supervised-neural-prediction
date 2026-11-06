@@ -663,16 +663,25 @@ flowchart TD
 
 ---
 
-## 🧪 Reproducible GitHub Actions Audit
+## 🧪 Reproducible GitHub Actions Audit — Results (6 November 2026)
 
-The audit branch includes a GitHub Actions workflow that runs unit tests and trains/evaluates the supervised MLP on GitHub-hosted runners. It reports two distinct protocols:
+The audit workflow trained two MLP configurations on GitHub-hosted CPU runners using the committed 151,112-row Fraud_Data dataset. Metrics below are from run 7; exact split information, configurations, confusion matrices, and full reports are in `reports/audit/`.
 
-- **Random stratified split:** an IID benchmark, useful for reproducible model comparison.
-- **Chronological split:** train on earlier transactions, validate on a later period, and test on the latest held-out period. This is the more relevant stress test for future deployment.
+| Test protocol | Fraud base rate | PR-AUC | ROC-AUC | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Stratified random 70/15/15 | 9.36% | **0.6899** | **0.8215** | 97.12% | 54.05% | 0.6945 |
+| Chronological 60/20/20 | 4.60% | **0.0982** | **0.5880** | 21.43% | 18.50% | 0.1986 |
 
-The validation partition is used for model selection and threshold selection. The test partition is held out until these decisions are fixed. The workflow saves model artifacts, test predictions, split summaries, and software-version metadata as Actions artifacts and in `reports/audit/` on the audit branch.
+**Interpretation:** the random split is an IID benchmark, not a future-period deployment estimate. Chronological evaluation is the more relevant future-period stress test and shows weak generalization under temporal drift. Its PR-AUC is only about 2.14× the 4.60% test fraud base rate. The model currently misses 1,132 of 1,389 fraud cases at the validation-selected threshold.
 
-Run it from **Actions → Fraud model audit and retraining → Run workflow**. Select `both` for both protocols. No local training environment is needed.
+The audit does not justify claiming production-ready future-period fraud detection. Treat the model as a historical-pattern ranking aid that needs temporal feature redesign, drift monitoring, and retraining strategy before real deployment.
+
+The workflow also saves:
+- `artifacts/audit/random_neural_model.joblib` and `artifacts/audit/chronological_neural_model.joblib`
+- The matching held-out test predictions CSVs
+- `reports/audit/random_metrics.json`, `chronological_metrics.json`, and `audit_manifest.json`
+
+To rerun from GitHub, open **Actions → Fraud model audit and retraining → Run workflow** and select `both`, `random`, or `chronological`. Validation is used for model selection and threshold selection; the corresponding test partition is held out.
 
 ## ⚠️ Limitations
 
