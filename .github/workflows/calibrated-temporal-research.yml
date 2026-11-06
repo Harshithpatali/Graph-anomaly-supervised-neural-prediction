@@ -20,6 +20,7 @@ on:
   push:
     branches: ["main"]
     paths:
+      - "scripts/run_rolling_robustness.py"
       - "scripts/run_calibrated_temporal_research.py"
       - "scripts/run_walk_forward_benchmark.py"
       - "src/causal_graph_features.py"
@@ -58,6 +59,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-calibrated-research.txt
+      - name: Install CPU PyTorch for MLP evaluation
+        run: |
+          python -m pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu "torch>=2.0"
+          python -c "import torch; print('PyTorch:', torch.__version__)"
       - name: Run research regression tests
         env:
           PYTHONPATH: src:scripts
