@@ -74,6 +74,51 @@ def main():
         drop = [c for c in Xtr.columns if c.startswith("graph_svd_")]
         Xtr, Xv, Xt = (x.drop(columns=drop) for x in (Xtr, Xv, Xt))
         ytr, yv, yt = (x["class"].to_numpy() for x in (train, valid, test))
+        # MLP baseline on the identical causal feature matrix. Scaling is fit on
+        # the training partition only; early stopping monitors validation PR-AUC.
+        scaler = StandardScaler()
+        Xtr_scaled = scaler.fit_transform(Xtr).astype(np.float32)
+        Xv_scaled = scaler.transform(Xv).astype(np.float32)
+        Xt_scaled = scaler.transform(Xt).astype(np.float32)
+        mlp_cfg = {"hidden": (128, 64), "dropout": 0.25, "lr": 5e-4,
+                   "weight_decay": 1e-4, "batch_size": 2048, "epochs": 20, "patience": 5}
+        mlp, mlp_val_ap, mlp_epoch, mlp_device = train_mlp(
+            Xtr_scaled, ytr, Xv_scaled, yv, config=mlp_cfg,
+            seed=SEED + fold, device="cpu")
+        mlp_pv = predict_mlp(mlp, Xv_scaled, mlp_device)
+        mlp_pt = predict_mlp(mlp, Xt_scaled, mlp_device)
+        mlp_threshold = float(np.sort(mlp_pv)[-max(1, int(np.ceil(len(mlp_pv)*.02)))])
+        mlp_selected = mlp_pt >= mlp_threshold
+        mlp_top = np.argsort(-mlp_pt, kind="mergesort")[:max(1, int(np.ceil(len(yt)*.02)))]
+        mlp_result = {
+            "fold": fold, "model": "mlp", "selected_config": "mlp_128_64",
+            "selected_epoch": int(mlp_epoch), "validation_pr_auc": float(mlp_val_ap),
+            "test_pr_auc": float(average_precision_score(yt, mlp_pt)),
+            "test_roc_auc": float(roc_auc_score(yt, mlp_pt)),
+            "test_prevalence": float(yt.mean()),
+            "test_pr_auc_lift": float(average_precision_score(yt, mlp_pt)/max(float(yt.mean()),1e-12)),
+            "test_brier": float(brier_score_loss(yt, mlp_pt)),
+            "test_log_loss": float(log_loss(yt, np.clip(mlp_pt,1e-7,1-1e-7))),
+            "test_ece_10bin": ece(yt, mlp_pt),
+            "test_calibration": calibration_slope_intercept(yt, mlp_pt),
+            "threshold_at_validation_2pct_capacity": mlp_threshold,
+            "test_precision_at_validation_threshold": float(yt[mlp_selected].mean()) if mlp_selected.any() else 0.0,
+            "test_recall_at_validation_threshold": float(yt[mlp_selected].sum()/max(int(yt.sum()),1)),
+            "test_review_rate_at_validation_threshold": float(mlp_selected.mean()),
+            "test_precision_exact_2pct": float(yt[mlp_top].mean()),
+            "test_recall_exact_2pct": float(yt[mlp_top].sum()/max(int(yt.sum()),1)),
+            "pr_auc_bootstrap_95ci": bootstrap_ci(yt, mlp_pt, "pr_auc"),
+            "precision_exact_2pct_bootstrap_95ci": bootstrap_ci(yt, mlp_pt, "precision_at_2pct"),
+            "capacity": {str(cap): topk(yt, mlp_pt, cap) for cap in CAPACITIES},
+            "train_start": str(train.purchase_time.min()), "train_end": str(train.purchase_time.max()),
+            "validation_start": str(valid.purchase_time.min()), "validation_end": str(valid.purchase_time.max()),
+            "test_start": str(test.purchase_time.min()), "test_end": str(test.purchase_time.max()),
+            "train_rows": len(train), "validation_rows": len(valid), "test_rows": len(test),
+        }
+        details.append(mlp_result)
+        rows.append({k:v for k,v in mlp_result.items() if k not in ("capacity","test_calibration","pr_auc_bootstrap_95ci","precision_exact_2pct_bootstrap_95ci")})
+        print(f"fold={fold} mlp PR-AUC={mlp_result['test_pr_auc']:.5f}", flush=True)
+
         for family in ("xgboost", "lightgbm"):
             options = [c for c in CANDIDATES if c["name"] == family]
             scored = []
@@ -120,7 +165,7 @@ def main():
             rows.append({k:v for k,v in result.items() if k not in ("capacity","test_calibration","pr_auc_bootstrap_95ci","precision_exact_2pct_bootstrap_95ci")})
             print(f"fold={fold} {family} PR-AUC={result['test_pr_auc']:.5f} Brier={result['test_brier']:.5f}", flush=True)
     summary = {}
-    for family in ("xgboost","lightgbm"):
+    for family in ("xgboost","lightgbm","mlp"):
         rr = [r for r in details if r["model"] == family]
         summary[family] = {
             "mean_test_pr_auc": float(np.mean([r["test_pr_auc"] for r in rr])),
@@ -136,7 +181,7 @@ def main():
     report = {
         "created_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         "git_sha": os.getenv("GITHUB_SHA","local"),
-        "protocol": "Three expanding-window chronological test windows. Each fold selects one of two predeclared configurations on its validation partition, then evaluates once on the subsequent test partition. Graph SVD excluded. Bootstrap intervals are stratified within each test window.",
+        "protocol": "MLP is evaluated on the same causal feature matrix with train-only scaling and validation early stopping. Three expanding-window chronological test windows. Each fold selects one of two predeclared configurations on its validation partition, then evaluates once on the subsequent test partition. Graph SVD excluded. Bootstrap intervals are stratified within each test window.",
         "bootstrap_replicates": BOOTSTRAPS, "fold_results": details, "summary": summary,
         "external_validation": "Not performed; requires independent later-period labeled data.",
         "runtime_seconds": round(time.time()-started,2)
