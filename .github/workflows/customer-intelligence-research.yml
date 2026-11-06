@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'app/app.py'
       - 'src/customer_*.py'
       - 'src/unsupervised_anomalies.py'
       - 'src/graph_intelligence.py'
@@ -23,7 +24,9 @@ jobs:
           python-version: '3.11'
           cache: pip
       - name: Install dependencies
-        run: pip install 'pandas>=2.2,<3' 'numpy>=1.26,<3' 'scikit-learn>=1.5,<2' 'networkx>=3.3,<4' 'pyarrow>=17,<24' 'pytest>=8,<10'
+        run: pip install 'pandas>=2.2,<3' 'numpy>=1.26,<3' 'scikit-learn>=1.5,<2' 'networkx>=3.3,<4' 'pyarrow>=17,<24' 'pytest>=8,<10' 'streamlit>=1.35' 'plotly>=5.18'
+      - name: Compile dashboard and research modules
+        run: python -m compileall -q app src scripts
       - name: Run customer intelligence tests
         env:
           PYTHONPATH: ${{ github.workspace }}
