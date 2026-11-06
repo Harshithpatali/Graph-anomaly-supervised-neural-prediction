@@ -59,6 +59,9 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
         timeline[f"{prefix}_seconds_since_prior"] = (
             by_entity["purchase_time"].diff().dt.total_seconds().fillna(1e7)
         ).astype("float32")
+        timeline[f"{prefix}_seconds_since_first"] = (
+            timeline["purchase_time"] - by_entity["purchase_time"].transform("min")
+        ).dt.total_seconds().astype("float32")
 
         # Vectorized grouped time rolling; the left-closed boundary excludes
         # all transactions sharing the current timestamp.
@@ -75,7 +78,7 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
 
         lookup_cols = [
             entity, "purchase_time", f"{prefix}_events_prior",
-            f"{prefix}_seconds_since_prior", f"{prefix}_events_prior_7d",
+            f"{prefix}_seconds_since_prior", f"{prefix}_seconds_since_first", f"{prefix}_events_prior_7d",
             f"{prefix}_events_prior_30d",
         ]
         keys = x[[entity, "purchase_time"]].copy()
@@ -150,8 +153,8 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
         prior = pd.to_numeric(x[f"{prefix}_events_prior"], errors="coerce").fillna(0)
         recent7 = pd.to_numeric(x[f"{prefix}_events_prior_7d"], errors="coerce").fillna(0)
         recent30 = pd.to_numeric(x[f"{prefix}_events_prior_30d"], errors="coerce").fillna(0)
-        elapsed_days = (pd.to_numeric(x[f"{prefix}_seconds_since_prior"], errors="coerce")
-                        .replace(1e7, np.nan).fillna(30 * 24 * 3600) / 86400).clip(lower=1 / 86400)
+        elapsed_days = (pd.to_numeric(x[f"{prefix}_seconds_since_first"], errors="coerce")
+                        .fillna(0).clip(lower=86400) / 86400)
         x[f"{prefix}_events_per_day_since_prior"] = (prior / elapsed_days).astype("float32")
         x[f"{prefix}_recent_activity_ratio_7d_30d"] = ((recent7 + 1) / (recent30 + 1)).astype("float32")
         x[f"{prefix}_burst_7d_vs_history"] = (recent7 / (recent30 / 30 + 1)).astype("float32")
