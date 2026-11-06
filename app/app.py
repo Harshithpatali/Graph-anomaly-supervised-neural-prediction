@@ -46,14 +46,14 @@ FRAUDINTEL_TEMPLATE = go.layout.Template(
     layout=go.Layout(
         paper_bgcolor=_PANEL,
         plot_bgcolor=_PANEL,
-        font=dict(family="JetBrains Mono, monospace", color=_TEXT, size=12),
-        title=dict(font=dict(family="Space Grotesk, sans-serif", size=16, color=_TEXT)),
+        font=dict(family="Inter, Segoe UI, Arial, sans-serif", color=_TEXT, size=13),
+        title=dict(font=dict(family="Inter, Segoe UI, Arial, sans-serif", size=17, color=_TEXT)),
         colorway=[_CYAN, _VIOLET, _DANGER, _GOOD, _AMBER],
         xaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
         yaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color=_MUTED)),
         margin=dict(t=48, b=32, l=48, r=24),
-        hoverlabel=dict(bgcolor=_INK, font=dict(family="JetBrains Mono, monospace")),
+        hoverlabel=dict(bgcolor=_INK, font=dict(family="Inter, Segoe UI, Arial, sans-serif", color=_TEXT)),
     )
 )
 pio.templates["fraudintel"] = FRAUDINTEL_TEMPLATE
@@ -62,132 +62,198 @@ pio.templates.default = "fraudintel"
 st.markdown(
     f"""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    /* Self-contained typography: no external font download required. */
+    :root {{
+        color-scheme: dark;
+        --app-bg: #0b1220;
+        --surface: #111c2e;
+        --surface-raised: #16243a;
+        --border: #263750;
+        --text: #edf3fb;
+        --muted: #a8b7ca;
+        --accent: #54c7ec;
+        --accent-strong: #2aa8d5;
+    }}
 
-    html, body, [class*="css"] {{
-        font-family: 'JetBrains Mono', monospace;
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {{
+        font-family: Inter, "Segoe UI", Arial, sans-serif !important;
+        color: var(--text) !important;
     }}
 
     .stApp {{
-        background:
-            radial-gradient(circle at 12% 18%, rgba(0, 217, 255, 0.07), transparent 42%),
-            radial-gradient(circle at 88% 78%, rgba(124, 92, 255, 0.08), transparent 46%),
-            {_INK};
-        background-attachment: fixed;
+        background: var(--app-bg);
+        background-image:
+            radial-gradient(ellipse at 8% 0%, rgba(42, 168, 213, .10), transparent 34%),
+            radial-gradient(ellipse at 95% 10%, rgba(104, 95, 220, .08), transparent 30%);
     }}
 
-    h1, h2, h3 {{
-        font-family: 'Space Grotesk', sans-serif !important;
-        color: {_TEXT} !important;
-        letter-spacing: -0.01em;
+    [data-testid="stHeader"] {{
+        background: rgba(11, 18, 32, .92);
+    }}
+
+    [data-testid="stMain"] .block-container {{
+        max-width: 1480px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }}
+
+    h1, h2, h3, h4, p, li, label, small, span, div {{
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }}
+
+    h1, h2, h3, h4 {{
+        color: var(--text) !important;
+        letter-spacing: -0.025em;
+        font-weight: 650 !important;
     }}
 
     h1 {{
-        background: linear-gradient(90deg, {_CYAN} 0%, {_VIOLET} 55%, {_TEXT} 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        display: inline-block;
-        position: relative;
-        padding-bottom: 10px;
+        font-size: clamp(1.8rem, 3vw, 2.45rem) !important;
+        line-height: 1.18;
+        padding-bottom: .35rem;
+        background: none !important;
+        -webkit-text-fill-color: var(--text) !important;
     }}
 
-    h1::after {{
-        content: "";
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        height: 2px;
-        width: 100%;
-        background: linear-gradient(90deg, {_CYAN}, transparent);
-        animation: scanline 3.2s ease-in-out infinite;
+    h1::after {{ display: none !important; }}
+
+    p, li, [data-testid="stMarkdownContainer"] {{
+        color: #d4deeb;
+        line-height: 1.6;
     }}
 
-    @keyframes scanline {{
-        0%, 100% {{ opacity: .35; transform: scaleX(0.4); transform-origin: left; }}
-        50% {{ opacity: 1; transform: scaleX(1); transform-origin: left; }}
+    [data-testid="stCaptionContainer"], .stCaption, small {{
+        color: var(--muted) !important;
     }}
 
     section[data-testid="stSidebar"] {{
-        background: {_PANEL};
-        border-right: 1px solid {_LINE};
+        background: #0e192a;
+        border-right: 1px solid var(--border);
     }}
 
-    section[data-testid="stSidebar"] .stRadio label {{
-        font-family: 'JetBrains Mono', monospace;
-        color: {_MUTED};
+    section[data-testid="stSidebar"] * {{
+        color: #dce7f4;
     }}
 
-    section[data-testid="stSidebar"] .stRadio [data-testid="stMarkdownContainer"] p {{
-        font-size: 0.92rem;
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {{
+        color: var(--muted) !important;
+    }}
+
+    section[data-testid="stSidebar"] [role="radiogroup"] {{
+        gap: .3rem;
+    }}
+
+    section[data-testid="stSidebar"] [role="radiogroup"] label {{
+        border-radius: 9px;
+        padding: .45rem .55rem;
+    }}
+
+    section[data-testid="stSidebar"] [role="radiogroup"] label:hover {{
+        background: rgba(84, 199, 236, .10);
     }}
 
     [data-testid="stMetric"] {{
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid {_LINE};
-        border-radius: 6px;
-        padding: 14px 16px;
+        background: linear-gradient(145deg, #142238, #101b2d);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
     }}
 
-    [data-testid="stMetricValue"] {{
-        font-family: 'JetBrains Mono', monospace;
-        color: {_CYAN};
+    [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] p {{
+        color: #b5c4d7 !important;
+        font-size: .88rem !important;
+        font-weight: 550 !important;
     }}
 
-    [data-testid="stMetricLabel"] {{
-        color: {_MUTED};
+    [data-testid="stMetricValue"], [data-testid="stMetricValue"] div {{
+        color: #f4f8fd !important;
+        font-weight: 700 !important;
+        letter-spacing: -.03em;
     }}
 
-    .stButton>button, .stDownloadButton>button {{
-        background: transparent;
-        border: 1px solid {_CYAN};
-        color: {_CYAN};
-        border-radius: 4px;
-        font-family: 'JetBrains Mono', monospace;
-        transition: all .15s ease;
+    [data-testid="stMetricDelta"] {{
+        font-size: .82rem;
     }}
 
-    .stButton>button:hover, .stDownloadButton>button:hover {{
-        background: rgba(0, 217, 255, 0.12);
-        box-shadow: 0 0 12px rgba(0, 217, 255, 0.35);
-        color: {_TEXT};
-        border-color: {_CYAN};
+    [data-testid="stPlotlyChart"], [data-testid="stDataFrame"],
+    [data-testid="stTable"], [data-testid="stForm"] {{
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(17, 28, 46, .72);
     }}
 
     [data-testid="stDataFrame"] {{
-        border: 1px solid {_LINE};
-        border-radius: 6px;
-        overflow: hidden;
+        padding: .2rem;
+    }}
+
+    [data-baseweb="input"], [data-baseweb="select"], [data-baseweb="textarea"],
+    [data-testid="stNumberInput"] input, [data-testid="stTextInput"] input {{
+        background: #111e31 !important;
+        color: var(--text) !important;
+        border-color: #354a66 !important;
+        border-radius: 9px !important;
+    }}
+
+    [data-testid="stWidgetLabel"] p, [data-testid="stWidgetLabel"] label {{
+        color: #dce7f4 !important;
+        font-weight: 550 !important;
+    }}
+
+    .stButton > button, .stDownloadButton > button,
+    [data-testid="stFormSubmitButton"] > button {{
+        border-radius: 9px;
+        border: 1px solid #398eae;
+        background: #17354b;
+        color: #f3f8fc !important;
+        font-weight: 600;
+        min-height: 2.55rem;
+        transition: background .15s ease, border-color .15s ease;
+    }}
+
+    .stButton > button:hover, .stDownloadButton > button:hover,
+    [data-testid="stFormSubmitButton"] > button:hover {{
+        background: #20516a;
+        border-color: var(--accent);
+        color: #fff !important;
     }}
 
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 4px;
-        border-bottom: 1px solid {_LINE};
+        gap: .35rem;
+        border-bottom: 1px solid var(--border);
     }}
 
     .stTabs [data-baseweb="tab"] {{
-        color: {_MUTED};
-        font-family: 'JetBrains Mono', monospace;
+        color: #b7c5d7;
+        font-weight: 550;
+        padding: .65rem .9rem;
     }}
 
     .stTabs [aria-selected="true"] {{
-        color: {_CYAN} !important;
-        border-bottom: 2px solid {_CYAN} !important;
+        color: #8cdef5 !important;
+        border-bottom: 2px solid var(--accent) !important;
     }}
 
-    .stAlert {{
-        border-radius: 6px;
-        border-left-width: 3px;
-    }}
-
-    [data-testid="stForm"] {{
-        border: 1px solid {_LINE};
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.015);
+    [data-testid="stAlert"] {{
+        border-radius: 11px;
     }}
 
     hr {{
-        border-color: {_LINE};
+        border-color: var(--border);
+    }}
+
+    code, pre {{
+        font-family: Consolas, "SFMono-Regular", monospace !important;
+    }}
+
+    @media (max-width: 768px) {{
+        [data-testid="stMain"] .block-container {{
+            padding: 1.2rem .9rem 2rem;
+        }}
+        [data-testid="stMetric"] {{
+            padding: .8rem;
+        }}
     }}
     </style>
     """,

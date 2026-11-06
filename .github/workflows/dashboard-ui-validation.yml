@@ -1,0 +1,39 @@
+name: Dashboard UI validation
+
+on:
+  pull_request:
+    paths:
+      - "app/app.py"
+      - ".github/workflows/dashboard-ui-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/app.py"
+      - ".github/workflows/dashboard-ui-validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate dashboard Python syntax
+        run: python -m py_compile app/app.py
+      - name: Check bundled typography fallback
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("app/app.py").read_text(encoding="utf-8")
+          assert "fonts.googleapis.com" not in source, "Dashboard still depends on a remote Google Font"
+          assert "Inter, \"Segoe UI\", Arial, sans-serif" in source
+          assert "background-clip: text" not in source, "Gradient text can become invisible in unsupported browsers"
+          print("Dashboard typography checks passed.")
+          PY
