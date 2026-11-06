@@ -23,6 +23,9 @@ from run_expanded_fraud_research import DATA, OUT, CANDIDATES, SEED, make_model,
 from run_walk_forward_benchmark import build_folds, make_features
 
 CAPACITIES = (0.01, 0.02, 0.05, 0.10)
+# Sensitivity scenarios: one missed fraud is assigned 2x, 5x, 10x, 20x,
+# or 50x the cost of investigating one alert. These are assumptions, not facts.
+MISSED_FRAUD_COST_MULTIPLIERS = (2, 5, 10, 20, 50)
 
 def score_distribution(p):
     p = np.asarray(p, dtype=float)
@@ -106,6 +109,49 @@ def main():
                 **{f"test_{k}": v for k, v in test_metrics.items() if k != "threshold"},
             })
 
+        # Cost-sensitive operating-point selection. Select only on validation labels,
+        # then transfer the chosen validation threshold unchanged to the test window.
+        cost_scenarios = []
+        for missed_cost_multiplier in MISSED_FRAUD_COST_MULTIPLIERS:
+            candidates_for_cost = []
+            for result in capacity_results:
+                vm = result["validation_metrics"]
+                validation_cost = (
+                    vm["predicted_positive"]
+                    + missed_cost_multiplier * vm["false_negative"]
+                )
+                candidates_for_cost.append((validation_cost, result))
+            selected_validation_cost, selected_result = min(
+                candidates_for_cost, key=lambda item: item[0]
+            )
+            selected_threshold = selected_result["validation_selected_threshold"]
+            validation_metrics = selected_result["validation_metrics"]
+            test_metrics = evaluate(yt, pt, selected_threshold)
+            validation_cost_per_1000 = (
+                1000.0 * selected_validation_cost / max(len(yv), 1)
+            )
+            test_cost = (
+                test_metrics["predicted_positive"]
+                + missed_cost_multiplier * test_metrics["false_negative"]
+            )
+            test_cost_per_1000 = 1000.0 * test_cost / max(len(yt), 1)
+            cost_scenarios.append({
+                "missed_fraud_cost_in_review_costs": missed_cost_multiplier,
+                "selected_validation_capacity": selected_result["target_validation_capacity"],
+                "validation_selected_threshold": selected_threshold,
+                "validation_estimated_cost_per_1000": validation_cost_per_1000,
+                "validation_review_rate": validation_metrics["review_rate"],
+                "validation_precision": validation_metrics["precision"],
+                "validation_recall": validation_metrics["recall"],
+                "test_estimated_cost_per_1000": test_cost_per_1000,
+                "test_review_rate": test_metrics["review_rate"],
+                "test_precision": test_metrics["precision"],
+                "test_recall": test_metrics["recall"],
+                "test_false_positives": test_metrics["false_positive"],
+                "test_false_negatives": test_metrics["false_negative"],
+                "test_cases_investigated": test_metrics["predicted_positive"],
+            })
+
         fold_report = {
             "fold": fold, "selected_config": chosen["config"],
             "validation_pr_auc": float(validation_ap),
@@ -115,6 +161,7 @@ def main():
             "validation_score_distribution": score_distribution(pv),
             "test_score_distribution": score_distribution(pt),
             "capacity_cutoffs": capacity_results,
+            "cost_sensitive_scenarios": cost_scenarios,
             "train_rows": len(train), "validation_rows": len(valid), "test_rows": len(test),
             "validation_start": str(valid.purchase_time.min()),
             "validation_end": str(valid.purchase_time.max()),
@@ -147,6 +194,29 @@ def main():
             "never used to select cutoffs. Test review rates may differ from targets."
         ),
         "fold_results": fold_reports,
+        "cost_model": {
+            "formula": "investigated_cases * review_cost + missed_frauds * missed_fraud_cost",
+            "normalization": "review_cost = 1; missed_fraud_cost is varied by scenario",
+            "scenarios": list(MISSED_FRAUD_COST_MULTIPLIERS),
+            "selection": "minimum validation estimated cost among the 1%, 2%, 5%, and 10% capacity-derived thresholds; test labels are not used for selection",
+            "caveat": "Illustrative sensitivity analysis only. Real investigation cost, fraud loss, recovery, prevention effectiveness, and review capacity must be supplied by the business before operational use.",
+        },
+        "mean_test_estimated_cost_per_1000_by_missed_fraud_cost_ratio": {
+            str(multiplier): float(np.mean([
+                next(x for x in fold["cost_sensitive_scenarios"]
+                     if x["missed_fraud_cost_in_review_costs"] == multiplier)["test_estimated_cost_per_1000"]
+                for fold in fold_reports
+            ]))
+            for multiplier in MISSED_FRAUD_COST_MULTIPLIERS
+        },
+        "validation_selected_capacity_by_cost_scenario": {
+            str(multiplier): [
+                next(x for x in fold["cost_sensitive_scenarios"]
+                     if x["missed_fraud_cost_in_review_costs"] == multiplier)["selected_validation_capacity"]
+                for fold in fold_reports
+            ]
+            for multiplier in MISSED_FRAUD_COST_MULTIPLIERS
+        },
         "mean_test_pr_auc": float(np.mean([r["test_pr_auc"] for r in fold_reports])),
         "mean_test_roc_auc": float(np.mean([r["test_roc_auc"] for r in fold_reports])),
         "mean_test_metrics_by_validation_capacity": {
