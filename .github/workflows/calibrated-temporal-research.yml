@@ -122,5 +122,18 @@ jobs:
             echo "Research report unchanged"
           else
             git commit -m "Publish calibrated temporal research report [skip ci]"
-            git push origin HEAD:main
+            # Another workflow may publish to main at the same time. Rebase
+            # generated report commit onto the latest main and retry safely.
+            for attempt in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                echo "Research report published successfully."
+                exit 0
+              fi
+              echo "Push attempt $attempt raced with another main update; retrying."
+              sleep $((attempt * 3))
+            done
+            echo "Could not publish report after three retries."
+            exit 1
           fi
