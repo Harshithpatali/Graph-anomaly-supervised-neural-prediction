@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 """Rolling temporal robustness, uncertainty, calibration and queue evaluation."""
 from __future__ import annotations
-import json, os, time
+import json, os, time, sys
 from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'scripts'))
+sys.path.insert(0, str(ROOT / 'src'))
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, roc_auc_score, brier_score_loss, log_loss
-from scripts.run_expanded_fraud_research import (
+from run_expanded_fraud_research import (
     DATA, OUT, CANDIDATES, SEED, make_model, fit_candidate, topk, CAPACITIES
 )
-from scripts.run_walk_forward_benchmark import build_folds, make_features
+from run_walk_forward_benchmark import build_folds, make_features
+from supervised_fraud import train_mlp, predict_mlp
+from sklearn.preprocessing import StandardScaler
 
 BOOTSTRAPS = int(os.getenv("ROBUSTNESS_BOOTSTRAPS", "1000"))
 RNG = np.random.default_rng(20261106)
