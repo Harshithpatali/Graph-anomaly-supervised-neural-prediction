@@ -491,6 +491,130 @@ st.markdown(
         -webkit-text-fill-color: currentColor !important;
     }}
 
+    /* ------------------------------------------------------------------
+       Global widget/menu audit: Streamlit/BaseWeb menus render in a portal
+       outside the widget container. Style the portal itself, not only inputs.
+       This fixes invisible selectbox, multiselect, radio and autocomplete
+       options across every dashboard page.
+    ------------------------------------------------------------------ */
+    [data-baseweb="popover"],
+    [data-baseweb="popover"] > div,
+    [data-baseweb="menu"],
+    [data-testid="stSelectboxVirtualDropdown"],
+    [data-testid="stMultiSelectVirtualDropdown"],
+    ul[role="listbox"],
+    div[role="listbox"] {{
+        background: #111e31 !important;
+        background-color: #111e31 !important;
+        color: #f1f5fb !important;
+        border: 1px solid #405875 !important;
+        box-shadow: 0 14px 36px rgba(0,0,0,.42) !important;
+        opacity: 1 !important;
+    }}
+    [data-baseweb="popover"] *,
+    [data-baseweb="menu"] *,
+    [data-testid="stSelectboxVirtualDropdown"] *,
+    [data-testid="stMultiSelectVirtualDropdown"] *,
+    [role="listbox"] *,
+    [role="option"] {{
+        color: #f1f5fb !important;
+        -webkit-text-fill-color: #f1f5fb !important;
+        opacity: 1 !important;
+    }}
+    [role="option"],
+    [data-baseweb="menu"] li {{
+        background: #111e31 !important;
+        min-height: 2.35rem;
+    }}
+    [role="option"]:hover,
+    [role="option"][aria-selected="true"],
+    [data-baseweb="menu"] li:hover,
+    [data-baseweb="menu"] li[aria-selected="true"] {{
+        background: #24415d !important;
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
+    }}
+    [role="option"][aria-disabled="true"] {{
+        color: #9aabc0 !important;
+        -webkit-text-fill-color: #9aabc0 !important;
+    }}
+
+    /* Selectbox and multiselect closed states, tokens, clear/dropdown icons. */
+    [data-baseweb="select"] > div,
+    [data-baseweb="select"] [role="combobox"] {{
+        background: #111e31 !important;
+        color: #f1f5fb !important;
+        border-color: #405875 !important;
+    }}
+    [data-baseweb="select"] input,
+    [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+    [data-baseweb="select"] span {{
+        color: #f1f5fb !important;
+        -webkit-text-fill-color: #f1f5fb !important;
+    }}
+    [data-baseweb="tag"] {{
+        background: #24415d !important;
+        border: 1px solid #4b6b8c !important;
+    }}
+    [data-baseweb="tag"] *,
+    [data-baseweb="select"] svg {{
+        color: #f1f5fb !important;
+        fill: #f1f5fb !important;
+    }}
+
+    /* Number-input steppers and all form controls: visible at rest and hover. */
+    [data-testid="stNumberInput"] button,
+    [data-testid="stNumberInput"] button *,
+    [data-testid="stDateInput"] button,
+    [data-testid="stTimeInput"] button {{
+        background: #1b3048 !important;
+        color: #f1f5fb !important;
+        -webkit-text-fill-color: #f1f5fb !important;
+        border-color: #405875 !important;
+        opacity: 1 !important;
+    }}
+    [data-testid="stNumberInput"] button:hover,
+    [data-testid="stDateInput"] button:hover,
+    [data-testid="stTimeInput"] button:hover {{
+        background: #2a4b6a !important;
+    }}
+    [data-testid="stCheckbox"] label *,
+    [data-testid="stRadio"] label *,
+    [data-testid="stToggle"] label * {{
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: #eaf1fa !important;
+    }}
+
+    /* Tables: style both Streamlit's canvas grid and ordinary HTML tables. */
+    [data-testid="stTable"] table,
+    [data-testid="stTable"] thead,
+    [data-testid="stTable"] tbody,
+    [data-testid="stTable"] tr,
+    [data-testid="stTable"] th,
+    [data-testid="stTable"] td {{
+        background: #101b2d !important;
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: #eaf1fa !important;
+        border-color: #304762 !important;
+    }}
+    [data-testid="stTable"] th {{
+        background: #1a2a40 !important;
+        color: #ffffff !important;
+        font-weight: 650 !important;
+    }}
+    [data-testid="stDataFrame"] [role="gridcell"] *,
+    [data-testid="stDataFrame"] [role="columnheader"] * {{
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: #eaf1fa !important;
+    }}
+
+    /* Plotly tooltips and controls use the same readable palette. */
+    .js-plotly-plot .plotly .modebar,
+    .js-plotly-plot .plotly .modebar * {{
+        color: #eaf1fa !important;
+        fill: #eaf1fa !important;
+    }}
+
     /* Keep layout clean and usable on narrow screens. */
     @media (max-width: 768px) {{
         [data-testid="stMain"] .block-container {{
