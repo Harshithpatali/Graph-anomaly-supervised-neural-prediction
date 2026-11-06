@@ -22,6 +22,7 @@ def test_numeric_psi_detects_shift_and_handles_constant_feature():
     shifted = np.arange(100, dtype=float) + 1000
     assert psi_numeric(reference, shifted) > 0.1
     assert psi_numeric(np.ones(20), np.ones(10)) == 0.0
+    assert psi_numeric(np.ones(20), np.ones(10) * 5) > 0.1
 
 
 def test_calendar_fields_use_categorical_psi():
