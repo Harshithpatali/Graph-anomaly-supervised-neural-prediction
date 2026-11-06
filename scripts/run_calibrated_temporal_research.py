@@ -62,7 +62,9 @@ def psi_numeric(reference, current, bins=10, epsilon=1e-6):
         return None
     quantiles = np.unique(np.quantile(a, np.linspace(0, 1, bins + 1)))
     if len(quantiles) <= 1:
-        edges = np.array([-np.inf, quantiles[0], np.inf])
+        center = float(quantiles[0])
+        delta = max(abs(center) * 1e-6, 1e-6)
+        edges = np.array([-np.inf, center - delta, center + delta, np.inf])
     else:
         inner = quantiles[1:-1]
         edges = np.concatenate(([-np.inf], inner, [np.inf]))
