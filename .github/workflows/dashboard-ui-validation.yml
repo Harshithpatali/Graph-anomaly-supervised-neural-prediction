@@ -33,7 +33,7 @@ jobs:
           from pathlib import Path
           source = Path("app/app.py").read_text(encoding="utf-8")
           assert "fonts.googleapis.com" not in source, "Dashboard still depends on a remote Google Font"
-          assert "Inter, \"Segoe UI\", Arial, sans-serif" in source
+          assert 'family="Segoe UI, Arial, sans-serif"' in source, "Dashboard must use a locally available system font stack"
           assert "background-clip: text" not in source, "Gradient text can become invisible in unsupported browsers"
           print("Dashboard typography checks passed.")
           PY
