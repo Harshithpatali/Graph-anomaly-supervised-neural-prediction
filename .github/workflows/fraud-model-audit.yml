@@ -72,7 +72,7 @@ jobs:
           retention-days: 90
 
       - name: Commit reproducible audit outputs
-        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/audit/temporal-leakage-and-ci'
+        if: startsWith(github.ref, 'refs/heads/audit/')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
