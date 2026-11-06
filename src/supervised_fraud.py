@@ -57,6 +57,9 @@ class FraudFeatureTransformer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         X = pd.DataFrame(X).copy()
 
+        # Frequency statistics are learned from the training partition only.
+        # They are historical reference counts, not counts computed over the
+        # validation/test/inference batch. This keeps serving batch-invariant.
         self.user_freq_ = X["user_id"].value_counts(dropna=False).to_dict()
         self.device_freq_ = X["device_id"].value_counts(dropna=False).to_dict()
         self.ip_freq_ = X["ip_address"].value_counts(dropna=False).to_dict()
@@ -70,6 +73,7 @@ class FraudFeatureTransformer(BaseEstimator, TransformerMixin):
         self.device_ip_freq_ = (
             X.groupby(["device_id", "ip_address"], dropna=False).size().to_dict()
         )
+        self.feature_names_in_ = np.asarray(X.columns, dtype=object)
 
         values = pd.to_numeric(X["purchase_value"], errors="coerce")
         self.median_value_ = float(values.median())
