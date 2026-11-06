@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-11-06T13:36:00.632767+00:00",
-  "git_sha": "5f40577a15b573ad39c61eea95a067f9df46f176",
+  "created_utc": "2026-11-06T14:43:01.335346+00:00",
+  "git_sha": "82958d383cdd6ea11647309e5076a867ae46b6e9",
   "dataset_rows": 151112,
   "fraud_rate": 0.09364577267192546,
   "protocol": "config selection on folds 1-2 validation only; fold 3 untouched until one final evaluation; isotonic calibration fitted on fold 3 validation",
@@ -778,6 +778,6 @@
       ]
     }
   },
-  "runtime_seconds": 111.48,
+  "runtime_seconds": 106.66,
   "interpretation": "The final test is reported once after all model and calibration choices are frozen. Calibration quality is assessed on validation; future test metrics are a one-shot generalization estimate."
 }
