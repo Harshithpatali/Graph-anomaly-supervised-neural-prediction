@@ -64,30 +64,19 @@ A portfolio-grade e-commerce fraud intelligence system combining **unsupervised 
 
 ---
 
-## 📊 Key Metrics at a Glance
+## 📊 Reported Metrics — Existing Random-Split Run (Historical)
 
-Final locked-test performance of the supervised neural champion (PyTorch MLP):
+The previously saved neural-classifier figures below belong to a **stratified random 70/15/15 split**. They are a controlled IID benchmark, not evidence of future-period performance. The saved README badge figures and `artifacts/neural_fraud_summary.json` are from different experiment outputs and are **not consistent**; do not quote either as the current verified result until the GitHub Actions audit regenerates the metrics.
 
-![PR-AUC](https://img.shields.io/badge/PR--AUC-0.6956-2563EB)
-![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.8294-2563EB)
-![Accuracy](https://img.shields.io/badge/Accuracy-95.59%25-64748B)
-![Precision](https://img.shields.io/badge/Precision-97.95%25-16A34A)
-![Recall](https://img.shields.io/badge/Recall-54.05%25-F59E0B)
-![F1](https://img.shields.io/badge/F1-0.6966-16A34A)
-![Threshold](https://img.shields.io/badge/Decision%20Threshold-0.9374-6D28D9)
+| Existing report | PR-AUC | ROC-AUC | Split |
+|---|---:|---:|---|
+| README / Notebook 13 snapshot | 0.6956 | 0.8294 | Stratified random |
+| `artifacts/neural_fraud_summary.json` | 0.6896 | 0.8212 | Stratified random |
+| `reports/final_metrics.json` (graph anomaly track) | 0.0707 | 0.5394 | Chronological |
 
-| Metric | Result |
-|---|---:|
-| Threshold | **0.937358** |
-| PR-AUC | **0.695629** |
-| ROC-AUC | **0.829392** |
-| Accuracy | **0.955927** |
-| Precision | **0.979505** |
-| Recall | **0.540528** |
-| F1 | **0.696629** |
-| Balanced Accuracy | **0.769680** |
+These values refer to different models and evaluation protocols. In particular, the anomaly-track PR-AUC must not be compared directly with the supervised neural benchmark as if they were the same model.
 
-The model is deliberately **high-precision / conservative-recall**: it rarely flags a legitimate transaction as fraud, but knowingly misses some fraud in exchange for that reliability — full reasoning in [Precision vs Recall](#-precision-vs-recall).
+**Fresh reproducible metrics:** GitHub Actions creates `reports/audit/random_metrics.json`, `reports/audit/chronological_metrics.json`, and `reports/audit/audit_manifest.json`. Those generated reports, rather than the historical numbers above, are the source of truth for the audit branch.
 
 ---
 
