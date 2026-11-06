@@ -46,14 +46,14 @@ FRAUDINTEL_TEMPLATE = go.layout.Template(
     layout=go.Layout(
         paper_bgcolor=_PANEL,
         plot_bgcolor=_PANEL,
-        font=dict(family="Inter, Segoe UI, Arial, sans-serif", color=_TEXT, size=13),
-        title=dict(font=dict(family="Inter, Segoe UI, Arial, sans-serif", size=17, color=_TEXT)),
+        font=dict(family=""Segoe UI", Arial, sans-serif", color=_TEXT, size=13),
+        title=dict(font=dict(family=""Segoe UI", Arial, sans-serif", size=17, color=_TEXT)),
         colorway=[_CYAN, _VIOLET, _DANGER, _GOOD, _AMBER],
         xaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
         yaxis=dict(gridcolor=_LINE, zerolinecolor=_LINE, linecolor=_LINE),
         legend=dict(bgcolor="rgba(0,0,0,0)", font=dict(color=_MUTED)),
         margin=dict(t=48, b=32, l=48, r=24),
-        hoverlabel=dict(bgcolor=_INK, font=dict(family="Inter, Segoe UI, Arial, sans-serif", color=_TEXT)),
+        hoverlabel=dict(bgcolor=_INK, font=dict(family=""Segoe UI", Arial, sans-serif", color=_TEXT)),
     )
 )
 pio.templates["fraudintel"] = FRAUDINTEL_TEMPLATE
@@ -255,6 +255,174 @@ st.markdown(
             padding: .8rem;
         }}
     }}
+    /* Contrast and typography hardening: use installed system fonts only.
+       Avoid broad text-fill/transparent effects that can make labels disappear. */
+    :root {
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    html, body, .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stMarkdownContainer"] *,
+    [data-testid="stWidgetLabel"],
+    [data-testid="stWidgetLabel"] *,
+    [data-testid="stCaptionContainer"],
+    [data-testid="stCaptionContainer"] *,
+    [data-testid="stMetric"],
+    [data-testid="stMetric"] *,
+    [data-testid="stAlert"],
+    [data-testid="stAlert"] *,
+    [data-testid="stExpander"],
+    [data-testid="stExpander"] * {
+        font-family: "Segoe UI", Arial, sans-serif !important;
+    }
+
+    /* Explicit readable defaults across Streamlit's rendered text. */
+    [data-testid="stMain"] p,
+    [data-testid="stMain"] li,
+    [data-testid="stMain"] label,
+    [data-testid="stMain"] summary,
+    [data-testid="stMain"] [data-testid="stMarkdownContainer"] {
+        color: #e2eaf5 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    [data-testid="stMain"] h1,
+    [data-testid="stMain"] h2,
+    [data-testid="stMain"] h3,
+    [data-testid="stMain"] h4 {
+        color: #f4f7fc !important;
+        -webkit-text-fill-color: #f4f7fc !important;
+        font-weight: 650 !important;
+        letter-spacing: -0.02em;
+    }
+
+    [data-testid="stMain"] h2 { margin-top: 1.35rem; }
+    [data-testid="stMain"] h3 { margin-top: 1.05rem; }
+
+    /* Sidebar navigation and labels remain legible in selected/hover states. */
+    section[data-testid="stSidebar"] [role="radiogroup"] label,
+    section[data-testid="stSidebar"] [role="radiogroup"] label *,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] * {
+        color: #dce7f4 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+    section[data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] {
+        background: rgba(84, 199, 236, .14);
+        border: 1px solid rgba(84, 199, 236, .38);
+    }
+
+    /* Inputs, dropdown menus, date controls, and placeholders. */
+    [data-baseweb="input"] *,
+    [data-baseweb="select"] *,
+    [data-baseweb="textarea"] *,
+    [data-testid="stNumberInput"] *,
+    [data-testid="stTextInput"] *,
+    [data-testid="stDateInput"] *,
+    [data-testid="stTimeInput"] {
+        color: #f1f5fb !important;
+        -webkit-text-fill-color: currentColor !important;
+        caret-color: #70d7f4;
+    }
+    input::placeholder, textarea::placeholder {
+        color: #a9b8cb !important;
+        opacity: 1 !important;
+        -webkit-text-fill-color: #a9b8cb !important;
+    }
+    [data-baseweb="popover"] *,
+    [role="listbox"] *,
+    [role="option"] {
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    /* Tables: readable header/body and clear row separation. */
+    [data-testid="stDataFrame"] *,
+    [data-testid="stTable"] * {
+        font-family: "Segoe UI", Arial, sans-serif !important;
+    }
+    [data-testid="stDataFrame"] [role="columnheader"],
+    [data-testid="stDataFrame"] [role="columnheader"] *,
+    [data-testid="stTable"] thead th {
+        color: #f4f7fc !important;
+        -webkit-text-fill-color: currentColor !important;
+        font-weight: 650 !important;
+    }
+
+    /* Buttons have consistent contrast, focus, and hover feedback. */
+    .stButton > button, .stDownloadButton > button,
+    [data-testid="stFormSubmitButton"] > button,
+    [data-testid="stPopover"] > button {
+        color: #f7fbff !important;
+        -webkit-text-fill-color: #f7fbff !important;
+        background: linear-gradient(135deg, #17415a, #18334d);
+        border: 1px solid #438eaf;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+    }
+    .stButton > button:focus-visible,
+    .stDownloadButton > button:focus-visible,
+    [data-testid="stFormSubmitButton"] > button:focus-visible,
+    input:focus-visible, textarea:focus-visible {
+        outline: 2px solid #79ddf8 !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Tabs and expanders: distinct inactive/active states. */
+    .stTabs [data-baseweb="tab"] {
+        color: #c4d1e1 !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        color: #8cdef5 !important;
+        -webkit-text-fill-color: #8cdef5 !important;
+        background: rgba(84, 199, 236, .08);
+    }
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary * {
+        color: #eaf1fa !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    /* Links and inline code are visible without relying on browser defaults. */
+    [data-testid="stMarkdownContainer"] a {
+        color: #83dff8 !important;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    [data-testid="stMarkdownContainer"] code {
+        color: #d8f3ff !important;
+        background: #1a2a40 !important;
+        border: 1px solid #304762;
+        border-radius: 5px;
+        padding: .1rem .3rem;
+    }
+    [data-testid="stMarkdownContainer"] pre {
+        background: #0b1422 !important;
+        border: 1px solid #2b405b;
+        border-radius: 10px;
+    }
+
+    /* Status messages retain accessible text contrast. */
+    [data-testid="stAlert"] p,
+    [data-testid="stAlert"] span,
+    [data-testid="stAlert"] div {
+        color: #edf4fc !important;
+        -webkit-text-fill-color: currentColor !important;
+    }
+
+    /* Keep layout clean and usable on narrow screens. */
+    @media (max-width: 768px) {
+        [data-testid="stMain"] .block-container {
+            padding: 1.1rem .85rem 2rem;
+        }
+        [data-testid="stMetric"] { padding: .8rem; }
+        .stTabs [data-baseweb="tab"] { padding: .55rem .65rem; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
