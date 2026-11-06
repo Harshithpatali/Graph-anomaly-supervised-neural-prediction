@@ -1,0 +1,20 @@
+{
+  "protocol": "random",
+  "seed": 42,
+  "split": [
+    {"name":"train","rows":105778,"fraud":9906,"fraud_rate":0.0936489629223468,"start_time":"2015-01-01 00:00:44+00:00","end_time":"2015-12-16 02:56:05+00:00"},
+    {"name":"validation","rows":22667,"fraud":2123,"fraud_rate":0.0936603873472449,"start_time":"2015-01-01 00:00:45+00:00","end_time":"2015-12-14 02:23:29+00:00"},
+    {"name":"test","rows":22667,"fraud":2122,"fraud_rate":0.09361627034896546,"start_time":"2015-01-01 00:44:16+00:00","end_time":"2015-12-14 20:15:23+00:00"}
+  ],
+  "candidate_models": [
+    {"model":"mlp_64_32","validation_pr_auc":0.6859096701016646,"validation_roc_auc":0.8260431202979385,"best_epoch":13,"config":{"hidden":[64,32],"dropout":0.2,"lr":0.001,"weight_decay":0.0001,"batch_size":2048,"epochs":18,"patience":4}},
+    {"model":"mlp_128_64","validation_pr_auc":0.6868934716055631,"validation_roc_auc":0.8241231576943227,"best_epoch":10,"config":{"hidden":[128,64],"dropout":0.25,"lr":0.0005,"weight_decay":0.0001,"batch_size":2048,"epochs":22,"patience":5}}
+  ],
+  "selected_model":"mlp_128_64",
+  "threshold_selected_on_validation":0.9363325238227844,
+  "validation_metrics":{"threshold":0.9363325238227844,"pr_auc":0.6868934716055631,"roc_auc":0.8241231576943227,"accuracy":0.9537212688048705,"precision":0.9685863874345549,"recall":0.5228450306170513,"f1":0.6791067604772102,"balanced_accuracy":0.7605463470842266,"tn":20508,"fp":36,"fn":1013,"tp":1110},
+  "test_metrics":{"threshold":0.9363325238227844,"pr_auc":0.6898593433823331,"roc_auc":0.8214951134827598,"accuracy":0.955485948736048,"precision":0.9712108382726503,"recall":0.5405278039585297,"f1":0.6945201332122314,"balanced_accuracy":0.7694364500444875,"tn":20511,"fp":34,"fn":975,"tp":1147,"precision_at_k":0.6343072573044298,"recall_at_k":0.6343072573044298,"enrichment_at_k":6.775609142940391,"k":2122,"majority_baseline_accuracy":0.9063837296510345},
+  "artifacts":{"model":"artifacts/audit/random_neural_model.joblib","test_predictions":"artifacts/audit/random_test_predictions.csv"},
+  "runtime_seconds":33.69,
+  "warning":"Random split is an IID benchmark only; it must not be interpreted as future-period generalization."
+}
