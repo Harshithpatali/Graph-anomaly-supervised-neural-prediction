@@ -1,5 +1,14 @@
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
+
+# Keep this test importable from the repository root in every CI workflow,
+# including workflows that only add src/ to PYTHONPATH.
+SCRIPTS_DIR = str(Path(__file__).resolve().parents[1] / "scripts")
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
 
 from run_calibrated_temporal_research import (
     calculate_psi, expected_calibration_error, metric_at_capacity_tiebreak, psi_categorical, psi_numeric
