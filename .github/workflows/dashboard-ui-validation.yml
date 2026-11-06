@@ -5,6 +5,11 @@ on:
     paths:
       - "app/app.py"
       - ".github/workflows/dashboard-ui-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/app.py"
+      - ".github/workflows/dashboard-ui-validation.yml"
   workflow_dispatch:
 
 permissions:
