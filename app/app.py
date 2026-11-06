@@ -692,6 +692,14 @@ elif page == "🧪 Research Monitor":
             fig.update_traces(textinfo="percent+label")
             fig.update_layout(height=320)
             st.plotly_chart(fig, use_container_width=True)
+        component_drift = pd.DataFrame(emb.get("component_distribution_drift", []))
+        if not component_drift.empty:
+            fig = px.bar(component_drift, x="component", y="mean_shift_in_train_std",
+                         title="Graph embedding component mean shift (training standard deviations)")
+            fig.add_hline(y=0, line_dash="dash", line_color=_MUTED)
+            fig.update_layout(height=320, xaxis_title="Frozen SVD component", yaxis_title="Mean shift / train SD")
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(component_drift, use_container_width=True)
         with st.expander("Model tuning results (earlier validation folds only)"):
             tuning = pd.DataFrame(report["tuning"])
             tuning["params"] = tuning["params"].astype(str)
