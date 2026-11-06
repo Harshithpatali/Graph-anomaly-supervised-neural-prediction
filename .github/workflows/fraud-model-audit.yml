@@ -85,6 +85,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin "$BRANCH_NAME"
           git reset --hard "origin/$BRANCH_NAME"
+          mkdir -p reports/audit artifacts/audit
           git add reports/audit artifacts/audit
           if git diff --cached --quiet; then
             echo "No generated outputs changed."
