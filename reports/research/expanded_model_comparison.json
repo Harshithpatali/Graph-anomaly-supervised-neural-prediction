@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-11-06T15:04:34.630846+00:00",
-  "git_sha": "7723c80a3ee2ab4264a987b6dd2ad640e43e42f0",
+  "created_utc": "2026-11-06T16:14:31.097473+00:00",
+  "git_sha": "370c8367dcdb9345b892a35fc9c9d6c41046b598",
   "dataset": "data/raw/Fraud_Data.csv",
   "dataset_rows": 151112,
   "overall_fraud_prevalence": 0.09364577267192546,
@@ -942,5 +942,5 @@
     ],
     "expected_schema": "Same e-commerce schema and independently adjudicated class labels, with purchase_time strictly later than the existing dataset."
   },
-  "runtime_seconds": 79.74
+  "runtime_seconds": 102.32
 }
