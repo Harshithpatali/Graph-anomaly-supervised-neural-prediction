@@ -2,6 +2,8 @@ name: Walk-forward graph fraud research
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 1"
   push:
     branches: ["research/**"]
     paths:
@@ -52,6 +54,24 @@ jobs:
           MKL_NUM_THREADS: "2"
           OPENBLAS_NUM_THREADS: "2"
         run: python scripts/run_walk_forward_benchmark.py
+      - name: Publish drift and model summary
+        if: always()
+        run: |
+          if [ -f reports/research/walk_forward_report.json ]; then
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          report = json.loads(Path("reports/research/walk_forward_report.json").read_text())
+          print("# Walk-forward fraud benchmark")
+          print("| Model | Mean PR-AUC | Mean ROC-AUC | Recall at validation 2% queue threshold |")
+          print("|---|---:|---:|---:|")
+          for name, metrics in report["models"].items():
+              print(f"| {name} | {metrics['pr_auc']:.4f} | {metrics['roc_auc']:.4f} | {metrics['recall_at_validation_threshold']:.2%} |")
+          print("\\n## Feature drift")
+          for fold in report["folds"]:
+              print(f"- Fold {fold['fold']}: **{fold['drift_status']}** (max PSI {max(fold['feature_drift_psi'].values(), default=0):.3f})")
+          PY
+          fi
       - name: Upload walk-forward reports and trained models
         uses: actions/upload-artifact@v4
         with:
