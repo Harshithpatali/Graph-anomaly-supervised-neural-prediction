@@ -114,7 +114,14 @@ def main():
         cost_scenarios = []
         for missed_cost_multiplier in MISSED_FRAUD_COST_MULTIPLIERS:
             candidates_for_cost = []
-            for result in capacity_results:
+            # Include a no-investigation baseline so low missed-fraud cost
+            # scenarios are not forced to select a positive review capacity.
+            no_review = {
+                "target_validation_capacity": 0.0,
+                "validation_selected_threshold": float("inf"),
+                "validation_metrics": evaluate(yv, pv, float("inf")),
+            }
+            for result in [no_review, *capacity_results]:
                 vm = result["validation_metrics"]
                 validation_cost = (
                     vm["predicted_positive"]
@@ -198,7 +205,7 @@ def main():
             "formula": "investigated_cases * review_cost + missed_frauds * missed_fraud_cost",
             "normalization": "review_cost = 1; missed_fraud_cost is varied by scenario",
             "scenarios": list(MISSED_FRAUD_COST_MULTIPLIERS),
-            "selection": "minimum validation estimated cost among the 1%, 2%, 5%, and 10% capacity-derived thresholds; test labels are not used for selection",
+            "selection": "minimum validation estimated cost among no-investigation and the 1%, 2%, 5%, and 10% capacity-derived thresholds; test labels are not used for selection",
             "caveat": "Illustrative sensitivity analysis only. Real investigation cost, fraud loss, recovery, prevention effectiveness, and review capacity must be supplied by the business before operational use.",
         },
         "mean_test_estimated_cost_per_1000_by_missed_fraud_cost_ratio": {
