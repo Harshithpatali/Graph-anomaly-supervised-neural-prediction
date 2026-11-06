@@ -119,4 +119,58 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
         ).sort_values("_row")
         x[name] = aligned["prior_links"].fillna(0).to_numpy(dtype=np.float32)
 
+    # Temporal edge histories: transaction counts and recency for the
+    # user-device, user-IP and device-IP edges. All same-timestamp events are
+    # grouped before shifting, so simultaneous transactions cannot leak.
+    for left, right, prefix in [
+        ("user_id", "device_id", "user_device"),
+        ("user_id", "ip_address", "user_ip"),
+        ("device_id", "ip_address", "device_ip"),
+    ]:
+        valid = x.loc[x[left].notna() & x[right].notna(), [left, right, "purchase_time"]]
+        edge = (valid.groupby([left, right, "purchase_time"], sort=False)
+                     .size().rename("edge_events").reset_index()
+                     .sort_values([left, right, "purchase_time"], kind="mergesort"))
+        edge_group = edge.groupby([left, right], sort=False)
+        edge[f"{prefix}_events_prior"] = (edge_group["edge_events"].cumsum() - edge["edge_events"]).astype("float32")
+        edge[f"{prefix}_seconds_since_prior"] = (
+            edge_group["purchase_time"].diff().dt.total_seconds().fillna(1e7)
+        ).astype("float32")
+        keys = x[[left, right, "purchase_time"]].copy()
+        aligned = keys.merge(edge[[left, right, "purchase_time",
+                                   f"{prefix}_events_prior", f"{prefix}_seconds_since_prior"]],
+                             on=[left, right, "purchase_time"], how="left",
+                             sort=False, validate="many_to_one")
+        x[f"{prefix}_events_prior"] = aligned[f"{prefix}_events_prior"].fillna(0).to_numpy()
+        x[f"{prefix}_seconds_since_prior"] = aligned[f"{prefix}_seconds_since_prior"].fillna(1e7).to_numpy()
+
+    # Behavior-rate and neighborhood features. These summarize the local
+    # temporal graph without using labels or future edges.
+    for prefix in ("user", "device", "ip"):
+        prior = pd.to_numeric(x[f"{prefix}_events_prior"], errors="coerce").fillna(0)
+        recent7 = pd.to_numeric(x[f"{prefix}_events_prior_7d"], errors="coerce").fillna(0)
+        recent30 = pd.to_numeric(x[f"{prefix}_events_prior_30d"], errors="coerce").fillna(0)
+        elapsed_days = (pd.to_numeric(x[f"{prefix}_seconds_since_prior"], errors="coerce")
+                        .replace(1e7, np.nan).fillna(30 * 24 * 3600) / 86400).clip(lower=1 / 86400)
+        x[f"{prefix}_events_per_day_since_prior"] = (prior / elapsed_days).astype("float32")
+        x[f"{prefix}_recent_activity_ratio_7d_30d"] = ((recent7 + 1) / (recent30 + 1)).astype("float32")
+        x[f"{prefix}_burst_7d_vs_history"] = (recent7 / (recent30 / 30 + 1)).astype("float32")
+    x["device_ip_neighborhood_degree"] = (
+        pd.to_numeric(x["device_prior_distinct_users"], errors="coerce").fillna(0)
+        + pd.to_numeric(x["ip_prior_distinct_users"], errors="coerce").fillna(0)
+    ).astype("float32")
+    x["device_ip_neighborhood_product"] = (
+        (pd.to_numeric(x["device_prior_distinct_users"], errors="coerce").fillna(0) + 1)
+        * (pd.to_numeric(x["ip_prior_distinct_users"], errors="coerce").fillna(0) + 1)
+    ).astype("float32")
+    x["user_device_novelty"] = (
+        pd.to_numeric(x["user_device_events_prior"], errors="coerce").fillna(0) == 0
+    ).astype("int8")
+    x["user_ip_novelty"] = (
+        pd.to_numeric(x["user_ip_events_prior"], errors="coerce").fillna(0) == 0
+    ).astype("int8")
+    x["device_ip_novelty"] = (
+        pd.to_numeric(x["device_ip_events_prior"], errors="coerce").fillna(0) == 0
+    ).astype("int8")
+
     return x.sort_values("_row_order").drop(columns="_row_order").reset_index(drop=True)
