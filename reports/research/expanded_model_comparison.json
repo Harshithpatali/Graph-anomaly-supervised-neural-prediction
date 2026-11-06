@@ -1,6 +1,6 @@
 {
-  "created_utc": "2026-11-06T14:58:42.203664+00:00",
-  "git_sha": "1ed59b840cfec279b90e2ad1e249911efd9d6495",
+  "created_utc": "2026-11-06T15:04:34.630846+00:00",
+  "git_sha": "7723c80a3ee2ab4264a987b6dd2ad640e43e42f0",
   "dataset": "data/raw/Fraud_Data.csv",
   "dataset_rows": 151112,
   "overall_fraud_prevalence": 0.09364577267192546,
@@ -34,6 +34,331 @@
         "learning_rate": 0.025,
         "min_child_samples": 80,
         "reg_lambda": 8
+      }
+    },
+    "model_comparison": {
+      "catboost": {
+        "selected_config": {
+          "name": "catboost",
+          "config": 1,
+          "params": {
+            "iterations": 600,
+            "depth": 6,
+            "learning_rate": 0.035,
+            "l2_leaf_reg": 8
+          }
+        },
+        "validation_pr_auc": 0.11044689393120005,
+        "test_pr_auc": 0.12019270181370656,
+        "test_roc_auc": 0.6416554493095338,
+        "pr_auc_lift_over_prevalence": 2.624145303994609,
+        "capacity": {
+          "0.01": {
+            "validation_threshold": 0.5063870231986666,
+            "validation_topk": {
+              "capacity": 0.01,
+              "queue_size": 197,
+              "precision": 0.2131979695431472,
+              "recall": 0.04640883977900553,
+              "f1": 0.07622504537205081
+            },
+            "test_transferred_threshold": {
+              "precision": 0.23809523809523808,
+              "recall": 0.2579979360165119,
+              "review_rate": 0.04963131026659104
+            },
+            "test_exact_capacity": {
+              "capacity": 0.01,
+              "queue_size": 212,
+              "precision": 0.23113207547169812,
+              "recall": 0.05056759545923633,
+              "f1": 0.0829805249788315
+            }
+          },
+          "0.02": {
+            "validation_threshold": 0.5063870231986666,
+            "validation_topk": {
+              "capacity": 0.02,
+              "queue_size": 393,
+              "precision": 0.20865139949109415,
+              "recall": 0.09060773480662983,
+              "f1": 0.1263482280431433
+            },
+            "test_transferred_threshold": {
+              "precision": 0.23809523809523808,
+              "recall": 0.2579979360165119,
+              "review_rate": 0.04963131026659104
+            },
+            "test_exact_capacity": {
+              "capacity": 0.02,
+              "queue_size": 424,
+              "precision": 0.25235849056603776,
+              "recall": 0.11042311661506708,
+              "f1": 0.15362526920315867
+            }
+          },
+          "0.05": {
+            "validation_threshold": 0.5050782529169215,
+            "validation_topk": {
+              "capacity": 0.05,
+              "queue_size": 983,
+              "precision": 0.2268565615462869,
+              "recall": 0.24640883977900552,
+              "f1": 0.23622881355932207
+            },
+            "test_transferred_threshold": {
+              "precision": 0.229012760241773,
+              "recall": 0.35190918472652216,
+              "review_rate": 0.07038192474948006
+            },
+            "test_exact_capacity": {
+              "capacity": 0.05,
+              "queue_size": 1058,
+              "precision": 0.2381852551984877,
+              "recall": 0.26006191950464397,
+              "f1": 0.24864331524420324
+            }
+          },
+          "0.1": {
+            "validation_threshold": 0.49056295561660945,
+            "validation_topk": {
+              "capacity": 0.1,
+              "queue_size": 1965,
+              "precision": 0.15318066157760815,
+              "recall": 0.33259668508287293,
+              "f1": 0.2097560975609756
+            },
+            "test_transferred_threshold": {
+              "precision": 0.14948453608247422,
+              "recall": 0.3890608875128999,
+              "review_rate": 0.11920968046889771
+            },
+            "test_exact_capacity": {
+              "capacity": 0.1,
+              "queue_size": 2116,
+              "precision": 0.1715500945179584,
+              "recall": 0.3746130030959752,
+              "f1": 0.23533225283630468
+            }
+          }
+        }
+      },
+      "lightgbm": {
+        "selected_config": {
+          "name": "lightgbm",
+          "config": 1,
+          "params": {
+            "n_estimators": 600,
+            "num_leaves": 15,
+            "max_depth": 5,
+            "learning_rate": 0.025,
+            "min_child_samples": 80,
+            "reg_lambda": 8
+          }
+        },
+        "validation_pr_auc": 0.12035610473896496,
+        "test_pr_auc": 0.1400411297312002,
+        "test_roc_auc": 0.6545143721477662,
+        "pr_auc_lift_over_prevalence": 3.057492405153015,
+        "capacity": {
+          "0.01": {
+            "validation_threshold": 0.7641672299204765,
+            "validation_topk": {
+              "capacity": 0.01,
+              "queue_size": 197,
+              "precision": 0.350253807106599,
+              "recall": 0.07624309392265194,
+              "f1": 0.1252268602540835
+            },
+            "test_transferred_threshold": {
+              "precision": 0.3384615384615385,
+              "recall": 0.06811145510835913,
+              "review_rate": 0.00921724333522405
+            },
+            "test_exact_capacity": {
+              "capacity": 0.01,
+              "queue_size": 212,
+              "precision": 0.33490566037735847,
+              "recall": 0.07327141382868937,
+              "f1": 0.12023708721422523
+            }
+          },
+          "0.02": {
+            "validation_threshold": 0.6843121900876022,
+            "validation_topk": {
+              "capacity": 0.02,
+              "queue_size": 393,
+              "precision": 0.30279898218829515,
+              "recall": 0.13149171270718232,
+              "f1": 0.18335901386748846
+            },
+            "test_transferred_threshold": {
+              "precision": 0.25684210526315787,
+              "recall": 0.1259029927760578,
+              "review_rate": 0.022452259406314994
+            },
+            "test_exact_capacity": {
+              "capacity": 0.02,
+              "queue_size": 424,
+              "precision": 0.25943396226415094,
+              "recall": 0.11351909184726522,
+              "f1": 0.15793251974156497
+            }
+          },
+          "0.05": {
+            "validation_threshold": 0.6117838933995912,
+            "validation_topk": {
+              "capacity": 0.05,
+              "queue_size": 983,
+              "precision": 0.2278738555442523,
+              "recall": 0.24751381215469614,
+              "f1": 0.23728813559322035
+            },
+            "test_transferred_threshold": {
+              "precision": 0.23091603053435114,
+              "recall": 0.24974200206398348,
+              "review_rate": 0.04953677443751182
+            },
+            "test_exact_capacity": {
+              "capacity": 0.05,
+              "queue_size": 1058,
+              "precision": 0.23062381852551986,
+              "recall": 0.2518059855521156,
+              "f1": 0.2407498766650222
+            }
+          },
+          "0.1": {
+            "validation_threshold": 0.27014801372233466,
+            "validation_topk": {
+              "capacity": 0.1,
+              "queue_size": 1965,
+              "precision": 0.1460559796437659,
+              "recall": 0.31712707182320443,
+              "f1": 0.19999999999999998
+            },
+            "test_transferred_threshold": {
+              "precision": 0.1327713382507903,
+              "recall": 0.39009287925696595,
+              "review_rate": 0.13457175269427113
+            },
+            "test_exact_capacity": {
+              "capacity": 0.1,
+              "queue_size": 2116,
+              "precision": 0.16871455576559546,
+              "recall": 0.3684210526315789,
+              "f1": 0.2314424635332253
+            }
+          }
+        }
+      },
+      "xgboost": {
+        "selected_config": {
+          "name": "xgboost",
+          "config": 1,
+          "params": {
+            "n_estimators": 350,
+            "max_depth": 4,
+            "learning_rate": 0.035,
+            "min_child_weight": 8,
+            "subsample": 0.85,
+            "colsample_bytree": 0.85,
+            "reg_lambda": 8
+          }
+        },
+        "validation_pr_auc": 0.11767611792164698,
+        "test_pr_auc": 0.14360671394452995,
+        "test_roc_auc": 0.6558665384741419,
+        "pr_auc_lift_over_prevalence": 3.135339153983979,
+        "capacity": {
+          "0.01": {
+            "validation_threshold": 0.2999802529811859,
+            "validation_topk": {
+              "capacity": 0.01,
+              "queue_size": 197,
+              "precision": 0.3604060913705584,
+              "recall": 0.07845303867403315,
+              "f1": 0.12885662431941924
+            },
+            "test_transferred_threshold": {
+              "precision": 0.33175355450236965,
+              "recall": 0.07223942208462332,
+              "review_rate": 0.009973529967857818
+            },
+            "test_exact_capacity": {
+              "capacity": 0.01,
+              "queue_size": 212,
+              "precision": 0.330188679245283,
+              "recall": 0.07223942208462332,
+              "f1": 0.11854360711261643
+            }
+          },
+          "0.02": {
+            "validation_threshold": 0.22455400228500366,
+            "validation_topk": {
+              "capacity": 0.02,
+              "queue_size": 393,
+              "precision": 0.29770992366412213,
+              "recall": 0.1292817679558011,
+              "f1": 0.1802773497688752
+            },
+            "test_transferred_threshold": {
+              "precision": 0.25614754098360654,
+              "recall": 0.12899896800825594,
+              "review_rate": 0.02306674229532993
+            },
+            "test_exact_capacity": {
+              "capacity": 0.02,
+              "queue_size": 424,
+              "precision": 0.27358490566037735,
+              "recall": 0.1197110423116615,
+              "f1": 0.1665470208183776
+            }
+          },
+          "0.05": {
+            "validation_threshold": 0.16024868190288544,
+            "validation_topk": {
+              "capacity": 0.05,
+              "queue_size": 983,
+              "precision": 0.23296032553407936,
+              "recall": 0.25303867403314917,
+              "f1": 0.24258474576271186
+            },
+            "test_transferred_threshold": {
+              "precision": 0.22849213691026826,
+              "recall": 0.2549019607843137,
+              "review_rate": 0.051096615617318965
+            },
+            "test_exact_capacity": {
+              "capacity": 0.05,
+              "queue_size": 1058,
+              "precision": 0.23156899810964082,
+              "recall": 0.2528379772961816,
+              "f1": 0.24173655648741982
+            }
+          },
+          "0.1": {
+            "validation_threshold": 0.0433783195912838,
+            "validation_topk": {
+              "capacity": 0.1,
+              "queue_size": 1965,
+              "precision": 0.1465648854961832,
+              "recall": 0.318232044198895,
+              "f1": 0.20069686411149826
+            },
+            "test_transferred_threshold": {
+              "precision": 0.1473768522226672,
+              "recall": 0.3797729618163055,
+              "review_rate": 0.11802798260540745
+            },
+            "test_exact_capacity": {
+              "capacity": 0.1,
+              "queue_size": 2116,
+              "precision": 0.16729678638941398,
+              "recall": 0.3653250773993808,
+              "f1": 0.2294975688816856
+            }
+          }
+        }
       }
     },
     "metrics": {
@@ -139,6 +464,331 @@
     "lightgbm:2": 0.11887265988705012,
     "xgboost:1": 0.11767611792164698,
     "xgboost:2": 0.11668709193227864
+  },
+  "final_test_model_comparison": {
+    "catboost": {
+      "selected_config": {
+        "name": "catboost",
+        "config": 1,
+        "params": {
+          "iterations": 600,
+          "depth": 6,
+          "learning_rate": 0.035,
+          "l2_leaf_reg": 8
+        }
+      },
+      "validation_pr_auc": 0.11044689393120005,
+      "test_pr_auc": 0.12019270181370656,
+      "test_roc_auc": 0.6416554493095338,
+      "pr_auc_lift_over_prevalence": 2.624145303994609,
+      "capacity": {
+        "0.01": {
+          "validation_threshold": 0.5063870231986666,
+          "validation_topk": {
+            "capacity": 0.01,
+            "queue_size": 197,
+            "precision": 0.2131979695431472,
+            "recall": 0.04640883977900553,
+            "f1": 0.07622504537205081
+          },
+          "test_transferred_threshold": {
+            "precision": 0.23809523809523808,
+            "recall": 0.2579979360165119,
+            "review_rate": 0.04963131026659104
+          },
+          "test_exact_capacity": {
+            "capacity": 0.01,
+            "queue_size": 212,
+            "precision": 0.23113207547169812,
+            "recall": 0.05056759545923633,
+            "f1": 0.0829805249788315
+          }
+        },
+        "0.02": {
+          "validation_threshold": 0.5063870231986666,
+          "validation_topk": {
+            "capacity": 0.02,
+            "queue_size": 393,
+            "precision": 0.20865139949109415,
+            "recall": 0.09060773480662983,
+            "f1": 0.1263482280431433
+          },
+          "test_transferred_threshold": {
+            "precision": 0.23809523809523808,
+            "recall": 0.2579979360165119,
+            "review_rate": 0.04963131026659104
+          },
+          "test_exact_capacity": {
+            "capacity": 0.02,
+            "queue_size": 424,
+            "precision": 0.25235849056603776,
+            "recall": 0.11042311661506708,
+            "f1": 0.15362526920315867
+          }
+        },
+        "0.05": {
+          "validation_threshold": 0.5050782529169215,
+          "validation_topk": {
+            "capacity": 0.05,
+            "queue_size": 983,
+            "precision": 0.2268565615462869,
+            "recall": 0.24640883977900552,
+            "f1": 0.23622881355932207
+          },
+          "test_transferred_threshold": {
+            "precision": 0.229012760241773,
+            "recall": 0.35190918472652216,
+            "review_rate": 0.07038192474948006
+          },
+          "test_exact_capacity": {
+            "capacity": 0.05,
+            "queue_size": 1058,
+            "precision": 0.2381852551984877,
+            "recall": 0.26006191950464397,
+            "f1": 0.24864331524420324
+          }
+        },
+        "0.1": {
+          "validation_threshold": 0.49056295561660945,
+          "validation_topk": {
+            "capacity": 0.1,
+            "queue_size": 1965,
+            "precision": 0.15318066157760815,
+            "recall": 0.33259668508287293,
+            "f1": 0.2097560975609756
+          },
+          "test_transferred_threshold": {
+            "precision": 0.14948453608247422,
+            "recall": 0.3890608875128999,
+            "review_rate": 0.11920968046889771
+          },
+          "test_exact_capacity": {
+            "capacity": 0.1,
+            "queue_size": 2116,
+            "precision": 0.1715500945179584,
+            "recall": 0.3746130030959752,
+            "f1": 0.23533225283630468
+          }
+        }
+      }
+    },
+    "lightgbm": {
+      "selected_config": {
+        "name": "lightgbm",
+        "config": 1,
+        "params": {
+          "n_estimators": 600,
+          "num_leaves": 15,
+          "max_depth": 5,
+          "learning_rate": 0.025,
+          "min_child_samples": 80,
+          "reg_lambda": 8
+        }
+      },
+      "validation_pr_auc": 0.12035610473896496,
+      "test_pr_auc": 0.1400411297312002,
+      "test_roc_auc": 0.6545143721477662,
+      "pr_auc_lift_over_prevalence": 3.057492405153015,
+      "capacity": {
+        "0.01": {
+          "validation_threshold": 0.7641672299204765,
+          "validation_topk": {
+            "capacity": 0.01,
+            "queue_size": 197,
+            "precision": 0.350253807106599,
+            "recall": 0.07624309392265194,
+            "f1": 0.1252268602540835
+          },
+          "test_transferred_threshold": {
+            "precision": 0.3384615384615385,
+            "recall": 0.06811145510835913,
+            "review_rate": 0.00921724333522405
+          },
+          "test_exact_capacity": {
+            "capacity": 0.01,
+            "queue_size": 212,
+            "precision": 0.33490566037735847,
+            "recall": 0.07327141382868937,
+            "f1": 0.12023708721422523
+          }
+        },
+        "0.02": {
+          "validation_threshold": 0.6843121900876022,
+          "validation_topk": {
+            "capacity": 0.02,
+            "queue_size": 393,
+            "precision": 0.30279898218829515,
+            "recall": 0.13149171270718232,
+            "f1": 0.18335901386748846
+          },
+          "test_transferred_threshold": {
+            "precision": 0.25684210526315787,
+            "recall": 0.1259029927760578,
+            "review_rate": 0.022452259406314994
+          },
+          "test_exact_capacity": {
+            "capacity": 0.02,
+            "queue_size": 424,
+            "precision": 0.25943396226415094,
+            "recall": 0.11351909184726522,
+            "f1": 0.15793251974156497
+          }
+        },
+        "0.05": {
+          "validation_threshold": 0.6117838933995912,
+          "validation_topk": {
+            "capacity": 0.05,
+            "queue_size": 983,
+            "precision": 0.2278738555442523,
+            "recall": 0.24751381215469614,
+            "f1": 0.23728813559322035
+          },
+          "test_transferred_threshold": {
+            "precision": 0.23091603053435114,
+            "recall": 0.24974200206398348,
+            "review_rate": 0.04953677443751182
+          },
+          "test_exact_capacity": {
+            "capacity": 0.05,
+            "queue_size": 1058,
+            "precision": 0.23062381852551986,
+            "recall": 0.2518059855521156,
+            "f1": 0.2407498766650222
+          }
+        },
+        "0.1": {
+          "validation_threshold": 0.27014801372233466,
+          "validation_topk": {
+            "capacity": 0.1,
+            "queue_size": 1965,
+            "precision": 0.1460559796437659,
+            "recall": 0.31712707182320443,
+            "f1": 0.19999999999999998
+          },
+          "test_transferred_threshold": {
+            "precision": 0.1327713382507903,
+            "recall": 0.39009287925696595,
+            "review_rate": 0.13457175269427113
+          },
+          "test_exact_capacity": {
+            "capacity": 0.1,
+            "queue_size": 2116,
+            "precision": 0.16871455576559546,
+            "recall": 0.3684210526315789,
+            "f1": 0.2314424635332253
+          }
+        }
+      }
+    },
+    "xgboost": {
+      "selected_config": {
+        "name": "xgboost",
+        "config": 1,
+        "params": {
+          "n_estimators": 350,
+          "max_depth": 4,
+          "learning_rate": 0.035,
+          "min_child_weight": 8,
+          "subsample": 0.85,
+          "colsample_bytree": 0.85,
+          "reg_lambda": 8
+        }
+      },
+      "validation_pr_auc": 0.11767611792164698,
+      "test_pr_auc": 0.14360671394452995,
+      "test_roc_auc": 0.6558665384741419,
+      "pr_auc_lift_over_prevalence": 3.135339153983979,
+      "capacity": {
+        "0.01": {
+          "validation_threshold": 0.2999802529811859,
+          "validation_topk": {
+            "capacity": 0.01,
+            "queue_size": 197,
+            "precision": 0.3604060913705584,
+            "recall": 0.07845303867403315,
+            "f1": 0.12885662431941924
+          },
+          "test_transferred_threshold": {
+            "precision": 0.33175355450236965,
+            "recall": 0.07223942208462332,
+            "review_rate": 0.009973529967857818
+          },
+          "test_exact_capacity": {
+            "capacity": 0.01,
+            "queue_size": 212,
+            "precision": 0.330188679245283,
+            "recall": 0.07223942208462332,
+            "f1": 0.11854360711261643
+          }
+        },
+        "0.02": {
+          "validation_threshold": 0.22455400228500366,
+          "validation_topk": {
+            "capacity": 0.02,
+            "queue_size": 393,
+            "precision": 0.29770992366412213,
+            "recall": 0.1292817679558011,
+            "f1": 0.1802773497688752
+          },
+          "test_transferred_threshold": {
+            "precision": 0.25614754098360654,
+            "recall": 0.12899896800825594,
+            "review_rate": 0.02306674229532993
+          },
+          "test_exact_capacity": {
+            "capacity": 0.02,
+            "queue_size": 424,
+            "precision": 0.27358490566037735,
+            "recall": 0.1197110423116615,
+            "f1": 0.1665470208183776
+          }
+        },
+        "0.05": {
+          "validation_threshold": 0.16024868190288544,
+          "validation_topk": {
+            "capacity": 0.05,
+            "queue_size": 983,
+            "precision": 0.23296032553407936,
+            "recall": 0.25303867403314917,
+            "f1": 0.24258474576271186
+          },
+          "test_transferred_threshold": {
+            "precision": 0.22849213691026826,
+            "recall": 0.2549019607843137,
+            "review_rate": 0.051096615617318965
+          },
+          "test_exact_capacity": {
+            "capacity": 0.05,
+            "queue_size": 1058,
+            "precision": 0.23156899810964082,
+            "recall": 0.2528379772961816,
+            "f1": 0.24173655648741982
+          }
+        },
+        "0.1": {
+          "validation_threshold": 0.0433783195912838,
+          "validation_topk": {
+            "capacity": 0.1,
+            "queue_size": 1965,
+            "precision": 0.1465648854961832,
+            "recall": 0.318232044198895,
+            "f1": 0.20069686411149826
+          },
+          "test_transferred_threshold": {
+            "precision": 0.1473768522226672,
+            "recall": 0.3797729618163055,
+            "review_rate": 0.11802798260540745
+          },
+          "test_exact_capacity": {
+            "capacity": 0.1,
+            "queue_size": 2116,
+            "precision": 0.16729678638941398,
+            "recall": 0.3653250773993808,
+            "f1": 0.2294975688816856
+          }
+        }
+      }
+    }
   },
   "validation_rows": [
     {
@@ -292,5 +942,5 @@
     ],
     "expected_schema": "Same e-commerce schema and independently adjudicated class labels, with purchase_time strictly later than the existing dataset."
   },
-  "runtime_seconds": 104.25
+  "runtime_seconds": 79.74
 }
