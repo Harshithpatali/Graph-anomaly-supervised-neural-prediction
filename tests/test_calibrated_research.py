@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from run_calibrated_temporal_research import (
-    calculate_psi, expected_calibration_error, psi_categorical, psi_numeric
+    calculate_psi, expected_calibration_error, metric_at_capacity_tiebreak, psi_categorical, psi_numeric
 )
 
 
@@ -36,3 +36,13 @@ def test_ece_is_finite_and_reports_bins():
     assert np.isfinite(ece)
     assert ece < 0.2
     assert sum(row["count"] for row in bins) == 4
+
+
+def test_capacity_metrics_use_raw_score_as_tie_breaker():
+    result = metric_at_capacity_tiebreak(
+        y=[1, 0, 1, 0], p=[0.5, 0.5, 0.5, 0.5],
+        secondary=[0.9, 0.8, 0.7, 0.6], fraction=0.5
+    )
+    assert result["queue_size"] == 2
+    assert result["precision"] == 0.5
+    assert result["recall"] == 0.5
