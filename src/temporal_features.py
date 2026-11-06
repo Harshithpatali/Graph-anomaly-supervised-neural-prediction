@@ -41,59 +41,59 @@ def add_historical_velocity_features(
     time_col: str = "purchase_time",
 ) -> pd.DataFrame:
     """
-    Calculate entity counts and time-since-previous using only prior rows.
+    Calculate entity counts and time-since-previous using strictly prior events.
 
-    A stable chronological sort is used. Ties at the same timestamp are treated
-    as simultaneous: all rows at that timestamp see events strictly earlier
-    than the timestamp. The counts therefore do not depend on row ordering
-    among simultaneous transactions.
+    Rows sharing an entity and timestamp are treated as simultaneous. They
+    receive the same prior count and the same time gap from the previous
+    distinct timestamp; events at the current timestamp are not counted yet.
     """
     x = df.copy()
     if time_col not in x.columns:
         return x
 
     x[time_col] = pd.to_datetime(x[time_col], errors="coerce", utc=True)
-    x["_original_order"] = np.arange(len(x))
-    x = x.sort_values([time_col, "_original_order"], kind="mergesort")
+    original_order = np.arange(len(x))
+    x["_original_order"] = original_order
 
-    for entity, prefix in [
+    entities = [
         ("user_id", "user"),
         ("device_id", "device"),
         ("ip_address", "ip"),
-    ]:
+    ]
+    for entity, prefix in entities:
         if entity not in x.columns:
             continue
 
-        # Count strictly earlier timestamps, not the current batch's future rows.
-        x[f"{prefix}_tx_count_prior"] = (
-            x.groupby(entity, dropna=False)[time_col]
-             .transform(lambda s: s.groupby(s).transform("size").cumsum() - s.groupby(s).transform("size"))
-        ).astype(float)
-
-        previous_time = x.groupby(entity, dropna=False)[time_col].transform(
-            lambda s: s.groupby(s).transform("first").shift()
-        )
-        # The groupby-on-time formulation above can be ambiguous for duplicated
-        # timestamps. Recompute exact prior timestamp via per-entity unique times.
-        unique_times = (
-            x.loc[x[entity].notna(), [entity, time_col]]
-             .drop_duplicates()
+        # Unique entity/timestamp rows ensure simultaneous transactions share
+        # identical history. The shift excludes the current timestamp group.
+        timeline = (
+            x.loc[x[entity].notna() & x[time_col].notna(), [entity, time_col]]
+             .groupby([entity, time_col], dropna=False)
+             .size()
+             .rename("events_at_time")
+             .reset_index()
              .sort_values([entity, time_col], kind="mergesort")
         )
-        unique_times[f"{prefix}_previous_time"] = unique_times.groupby(entity, dropna=False)[time_col].shift()
-        previous_lookup = unique_times.set_index([entity, time_col])[f"{prefix}_previous_time"]
+        grouped = timeline.groupby(entity, sort=False, dropna=False)
+        timeline[f"{prefix}_prior_count"] = (
+            grouped["events_at_time"].cumsum() - timeline["events_at_time"]
+        ).astype(float)
+        timeline[f"{prefix}_previous_time"] = grouped[time_col].shift()
+        timeline[f"{prefix}_time_since_prev_seconds"] = (
+            timeline[time_col] - timeline[f"{prefix}_previous_time"]
+        ).dt.total_seconds().fillna(1e7)
+
+        lookup = timeline.set_index([entity, time_col])
         keys = pd.MultiIndex.from_arrays([x[entity], x[time_col]])
-        previous = previous_lookup.reindex(keys).to_numpy()
-        x[f"{prefix}_time_since_prev_seconds"] = (
-            (x[time_col].to_numpy() - previous) / np.timedelta64(1, "s")
+        aligned = lookup.reindex(keys)
+        x[f"{prefix}_tx_count_prior"] = (
+            aligned[f"{prefix}_prior_count"].fillna(0).to_numpy(dtype=float)
         )
         x[f"{prefix}_time_since_prev_seconds"] = (
-            pd.to_numeric(x[f"{prefix}_time_since_prev_seconds"], errors="coerce")
-              .fillna(1e7)
+            aligned[f"{prefix}_time_since_prev_seconds"].fillna(1e7).to_numpy(dtype=float)
         )
 
-    x = x.sort_values("_original_order", kind="mergesort").drop(columns="_original_order")
-    return x
+    return x.sort_values("_original_order", kind="mergesort").drop(columns="_original_order")
 
 
 def add_velocity_features(
