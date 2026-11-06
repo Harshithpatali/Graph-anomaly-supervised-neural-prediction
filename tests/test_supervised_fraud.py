@@ -9,9 +9,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from supervised_fraud import (
-    BASE_REQUIRED, FraudFeatureTransformer, evaluate_model, select_threshold
-)
+from supervised_fraud import FraudFeatureTransformer, evaluate_model, select_threshold
 
 
 @pytest.fixture
@@ -43,7 +41,7 @@ def test_transformer_frequencies_are_fit_only_and_batch_invariant(sample_transac
     first = transformer.transform(row)
     augmented = pd.concat([row, row.assign(user_id=999, device_id="new", ip_address=9999)], ignore_index=True)
     second = transformer.transform(augmented).iloc[[0]]
-    pd.testing.assert_frame_equal(first, second)
+    pd.testing.assert_frame_equal(first.reset_index(drop=True), second.reset_index(drop=True))
     assert first.iloc[0]["device_frequency"] == 0
 
 
