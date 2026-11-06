@@ -1,0 +1,20 @@
+{
+  "protocol": "chronological",
+  "seed": 42,
+  "split": [
+    {"name":"train","rows":90667,"fraud":11366,"fraud_rate":0.12535983323590721,"start_time":"2015-01-01 00:00:44+00:00","end_time":"2015-07-12 14:22:05+00:00"},
+    {"name":"validation","rows":30222,"fraud":1396,"fraud_rate":0.04619151611408907,"start_time":"2015-07-12 14:22:21+00:00","end_time":"2015-08-30 15:18:18+00:00"},
+    {"name":"test","rows":30223,"fraud":1389,"fraud_rate":0.04595837607120405,"start_time":"2015-08-30 15:18:56+00:00","end_time":"2015-12-16 02:56:05+00:00"}
+  ],
+  "candidate_models": [
+    {"model":"mlp_64_32","validation_pr_auc":0.09375613431848424,"validation_roc_auc":0.5864695882040588,"best_epoch":7,"config":{"hidden":[64,32],"dropout":0.2,"lr":0.001,"weight_decay":0.0001,"batch_size":2048,"epochs":18,"patience":4}},
+    {"model":"mlp_128_64","validation_pr_auc":0.0951551603124607,"validation_roc_auc":0.5903511300984446,"best_epoch":11,"config":{"hidden":[128,64],"dropout":0.25,"lr":0.0005,"weight_decay":0.0001,"batch_size":2048,"epochs":22,"patience":5}}
+  ],
+  "selected_model":"mlp_128_64",
+  "threshold_selected_on_validation":0.18504157662391663,
+  "validation_metrics":{"threshold":0.18504157662391663,"pr_auc":0.0951551603124607,"roc_auc":0.5903511300984446,"accuracy":0.929686982992522,"precision":0.21321793863099922,"recall":0.19412607449856734,"f1":0.2032245969253843,"balanced_accuracy":0.5797175852268039,"tn":27826,"fp":1000,"fn":1125,"tp":271},
+  "test_metrics":{"threshold":0.18504157662391663,"pr_auc":0.09821168109728579,"roc_auc":0.5880031338493129,"accuracy":0.9313767660391092,"precision":0.21434528773978315,"recall":0.18502519798416125,"f1":0.19860896445131376,"balanced_accuracy":0.5761777165616165,"tn":27892,"fp":942,"fn":1132,"tp":257,"precision_at_k":0.2044636429085673,"recall_at_k":0.2044636429085673,"enrichment_at_k":4.448887458333786,"k":1389,"majority_baseline_accuracy":0.954041623928796},
+  "artifacts":{"model":"artifacts/audit/chronological_neural_model.joblib","test_predictions":"artifacts/audit/chronological_test_predictions.csv"},
+  "runtime_seconds":24.4,
+  "warning":"Chronological holdout tests future-period generalization; score may be lower because the dataset exhibits severe time drift."
+}
