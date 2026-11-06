@@ -729,6 +729,18 @@ elif page == "🧪 Research Monitor":
                           line_color=_AMBER, annotation_text="Final test prevalence baseline")
             fig.update_layout(height=360, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
+            final_compare = pd.DataFrame([
+                {"Model": name.upper(), "PR-AUC": result["test_pr_auc"],
+                 "ROC-AUC": result["test_roc_auc"]}
+                for name, result in expanded["final_test_model_comparison"].items()
+            ])
+            fig = px.bar(final_compare, x="Model", y="PR-AUC", color="Model",
+                         title="Same final chronological holdout · PR-AUC")
+            fig.add_hline(y=expanded["final_test_prevalence"], line_dash="dash",
+                          line_color=_AMBER, annotation_text="Random-ranking baseline")
+            fig.update_layout(height=340, showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
+            st.dataframe(final_compare, use_container_width=True)
             cap_data = []
             for cap, result in em["capacity"].items():
                 for metric in ("precision", "recall", "f1"):
