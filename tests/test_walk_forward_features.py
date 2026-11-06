@@ -69,3 +69,24 @@ def test_graph_svd_is_inductive_for_unseen_entities():
     assert train_embedding.shape == (3, 4)
     assert future_embedding.shape == (1, 4)
     assert np.isfinite(future_embedding).all()
+
+def test_temporal_edge_and_neighborhood_features_are_causal():
+    from causal_graph_features import build_causal_graph_features
+
+    base = _events().iloc[:3].copy()
+    extended = pd.concat([
+        base,
+        pd.DataFrame({
+            "user_id": [1], "device_id": ["d1"], "ip_address": [10],
+            "signup_time": ["2024-01-01T00:00:00Z"],
+            "purchase_time": ["2024-01-04T00:00:00Z"],
+            "purchase_value": [55],
+        })
+    ], ignore_index=True)
+    a = build_causal_graph_features(base)
+    b = build_causal_graph_features(extended)
+    assert a.loc[2, "device_ip_events_prior"] == 2.0
+    assert b.loc[:2, "device_ip_events_prior"].tolist() == a["device_ip_events_prior"].tolist()
+    assert b.loc[2, "device_ip_novelty"] == 0
+    assert b.loc[2, "device_ip_neighborhood_degree"] >= 0
+    assert np.isfinite(b.select_dtypes(include=[np.number]).to_numpy()).all()
