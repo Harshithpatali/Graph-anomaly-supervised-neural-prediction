@@ -68,9 +68,9 @@ def build_causal_graph_features(frame: pd.DataFrame) -> pd.DataFrame:
                         .rolling(window, on="purchase_time", closed="left")["events"]
                         .sum()
             )
+            keys = pd.MultiIndex.from_frame(timeline[[entity, "purchase_time"]])
             timeline[f"{prefix}_events_prior_{window.lower()}"] = (
-                rolled.reset_index(level=0, drop=True)
-                      .reindex(timeline.index).fillna(0).to_numpy(dtype=np.float32)
+                rolled.reindex(keys).fillna(0).to_numpy(dtype=np.float32)
             )
 
         lookup_cols = [
