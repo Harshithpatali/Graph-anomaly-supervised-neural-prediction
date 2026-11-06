@@ -407,6 +407,34 @@ st.markdown(
         border-radius: 10px;
     }}
 
+    /* Alert / callout panels: Streamlit's default light alert surfaces conflicted
+       with the global white alert text, making Stakeholder Findings and Model
+       Performance messages appear blank. Keep every callout on a dark surface. */
+    [data-testid="stAlert"],
+    [data-testid="stAlert"] > div,
+    [data-testid="stAlert"] [data-baseweb="notification"] {{
+        background: #17263a !important;
+        border: 1px solid #38516d !important;
+        border-radius: 12px !important;
+        color: #f2f6fc !important;
+    }}
+    [data-testid="stAlert"] *,
+    [data-testid="stAlert"] p,
+    [data-testid="stAlert"] span,
+    [data-testid="stAlert"] div,
+    [data-testid="stAlert"] li {{
+        color: #f2f6fc !important;
+        -webkit-text-fill-color: #f2f6fc !important;
+        opacity: 1 !important;
+    }}
+    [data-testid="stAlert"] a {{
+        color: #8be2fb !important;
+        -webkit-text-fill-color: #8be2fb !important;
+    }}
+    [data-testid="stAlert"] svg {{
+        fill: currentColor !important;
+    }}
+
     /* Status messages retain accessible text contrast. */
     [data-testid="stAlert"] p,
     [data-testid="stAlert"] span,
