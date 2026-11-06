@@ -1,0 +1,37 @@
+name: Customer intelligence research
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/customer_*.py'
+      - 'src/unsupervised_anomalies.py'
+      - 'src/graph_intelligence.py'
+      - 'scripts/build_customer_intelligence.py'
+      - 'tests/test_customer_intelligence.py'
+      - '.github/workflows/customer-intelligence-research.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+      - name: Run customer intelligence tests
+        run: pytest -q tests/test_customer_intelligence.py
+      - name: Build unsupervised customer intelligence reports
+        run: python scripts/build_customer_intelligence.py
+      - name: Upload research reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-intelligence-research
+          path: reports/customer_intelligence/
+          if-no-files-found: error
+          retention-days: 30
