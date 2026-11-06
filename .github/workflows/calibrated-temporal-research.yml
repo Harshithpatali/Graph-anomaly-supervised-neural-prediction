@@ -29,7 +29,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: calibrated-temporal-research-main
+  group: calibrated-temporal-research-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
