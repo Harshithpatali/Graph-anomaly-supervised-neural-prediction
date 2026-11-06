@@ -1269,7 +1269,24 @@ elif page == "🧠 Neural Fraud Classifier":
                     st.error(f"**FRAUD**  ·  probability = **{proba:.4f}**  (threshold {thr:.3f})")
                 else:
                     st.success(f"**Normal**  ·  probability = **{proba:.4f}**  (threshold {thr:.3f})")
-                st.json({"fraud_probability": proba, "predicted_class": pred, "threshold": thr})
+                import json as _json
+                import html as _html
+                prediction_payload = {
+                    "fraud_probability": proba,
+                    "predicted_class": pred,
+                    "threshold": thr,
+                }
+                prediction_json = _html.escape(
+                    _json.dumps(prediction_payload, indent=2, ensure_ascii=False)
+                )
+                st.markdown(
+                    '<div style="background:#0b1422;border:1px solid #38516d;'
+                    'border-radius:12px;padding:14px 18px;overflow-x:auto;">'
+                    f'<pre style="margin:0;background:transparent;color:#f1f6fc;'
+                    f'font-family:Consolas,monospace;font-size:14px;line-height:1.7;">'
+                    f'{prediction_json}</pre></div>',
+                    unsafe_allow_html=True,
+                )
             except Exception as e:
                 st.error(f"Prediction failed: {e}")
 
