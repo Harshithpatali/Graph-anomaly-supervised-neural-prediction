@@ -1,0 +1,296 @@
+{
+  "created_utc": "2026-11-06T14:58:42.203664+00:00",
+  "git_sha": "1ed59b840cfec279b90e2ad1e249911efd9d6495",
+  "dataset": "data/raw/Fraud_Data.csv",
+  "dataset_rows": 151112,
+  "overall_fraud_prevalence": 0.09364577267192546,
+  "final_test_prevalence": 0.045802609188882584,
+  "random_pr_auc_baseline": 0.045802609188882584,
+  "final_fold": {
+    "fold": 3,
+    "train": {
+      "rows": 110311,
+      "start": "2015-01-01 00:00:44+00:00",
+      "end": "2015-08-12 19:38:53+00:00"
+    },
+    "validation": {
+      "rows": 19645,
+      "start": "2015-08-12 19:42:32+00:00",
+      "end": "2015-09-17 05:38:39+00:00"
+    },
+    "test": {
+      "rows": 21156,
+      "start": "2015-09-17 05:39:48+00:00",
+      "end": "2015-12-16 02:56:05+00:00"
+    },
+    "selected_model": "lightgbm",
+    "selected_config": {
+      "name": "lightgbm",
+      "config": 1,
+      "params": {
+        "n_estimators": 600,
+        "num_leaves": 15,
+        "max_depth": 5,
+        "learning_rate": 0.025,
+        "min_child_samples": 80,
+        "reg_lambda": 8
+      }
+    },
+    "metrics": {
+      "pr_auc": 0.1400411297312002,
+      "roc_auc": 0.6545143721477662,
+      "pr_auc_lift_over_prevalence": 3.057492405153015,
+      "capacity": {
+        "0.01": {
+          "validation_threshold": 0.7641672299204765,
+          "validation_topk": {
+            "capacity": 0.01,
+            "queue_size": 197,
+            "precision": 0.350253807106599,
+            "recall": 0.07624309392265194,
+            "f1": 0.1252268602540835
+          },
+          "test_transferred_threshold": {
+            "precision": 0.3384615384615385,
+            "recall": 0.06811145510835913,
+            "review_rate": 0.00921724333522405
+          },
+          "test_exact_capacity": {
+            "capacity": 0.01,
+            "queue_size": 212,
+            "precision": 0.33490566037735847,
+            "recall": 0.07327141382868937,
+            "f1": 0.12023708721422523
+          }
+        },
+        "0.02": {
+          "validation_threshold": 0.6843121900876022,
+          "validation_topk": {
+            "capacity": 0.02,
+            "queue_size": 393,
+            "precision": 0.30279898218829515,
+            "recall": 0.13149171270718232,
+            "f1": 0.18335901386748846
+          },
+          "test_transferred_threshold": {
+            "precision": 0.25684210526315787,
+            "recall": 0.1259029927760578,
+            "review_rate": 0.022452259406314994
+          },
+          "test_exact_capacity": {
+            "capacity": 0.02,
+            "queue_size": 424,
+            "precision": 0.25943396226415094,
+            "recall": 0.11351909184726522,
+            "f1": 0.15793251974156497
+          }
+        },
+        "0.05": {
+          "validation_threshold": 0.6117838933995912,
+          "validation_topk": {
+            "capacity": 0.05,
+            "queue_size": 983,
+            "precision": 0.2278738555442523,
+            "recall": 0.24751381215469614,
+            "f1": 0.23728813559322035
+          },
+          "test_transferred_threshold": {
+            "precision": 0.23091603053435114,
+            "recall": 0.24974200206398348,
+            "review_rate": 0.04953677443751182
+          },
+          "test_exact_capacity": {
+            "capacity": 0.05,
+            "queue_size": 1058,
+            "precision": 0.23062381852551986,
+            "recall": 0.2518059855521156,
+            "f1": 0.2407498766650222
+          }
+        },
+        "0.1": {
+          "validation_threshold": 0.27014801372233466,
+          "validation_topk": {
+            "capacity": 0.1,
+            "queue_size": 1965,
+            "precision": 0.1460559796437659,
+            "recall": 0.31712707182320443,
+            "f1": 0.19999999999999998
+          },
+          "test_transferred_threshold": {
+            "precision": 0.1327713382507903,
+            "recall": 0.39009287925696595,
+            "review_rate": 0.13457175269427113
+          },
+          "test_exact_capacity": {
+            "capacity": 0.1,
+            "queue_size": 2116,
+            "precision": 0.16871455576559546,
+            "recall": 0.3684210526315789,
+            "f1": 0.2314424635332253
+          }
+        }
+      }
+    }
+  },
+  "validation_selection": {
+    "catboost:1": 0.11044689393120005,
+    "catboost:2": 0.09733876611939624,
+    "lightgbm:1": 0.12035610473896496,
+    "lightgbm:2": 0.11887265988705012,
+    "xgboost:1": 0.11767611792164698,
+    "xgboost:2": 0.11668709193227864
+  },
+  "validation_rows": [
+    {
+      "fold": 1,
+      "model": "xgboost",
+      "config": 1,
+      "validation_pr_auc": 0.11225014594383784,
+      "validation_roc_auc": 0.598485735535279
+    },
+    {
+      "fold": 1,
+      "model": "xgboost",
+      "config": 2,
+      "validation_pr_auc": 0.11140316634731458,
+      "validation_roc_auc": 0.6019686598493419
+    },
+    {
+      "fold": 1,
+      "model": "catboost",
+      "config": 1,
+      "validation_pr_auc": 0.11489091514305658,
+      "validation_roc_auc": 0.6114925734205463
+    },
+    {
+      "fold": 1,
+      "model": "catboost",
+      "config": 2,
+      "validation_pr_auc": 0.07094127191349081,
+      "validation_roc_auc": 0.5477047199452851
+    },
+    {
+      "fold": 1,
+      "model": "lightgbm",
+      "config": 1,
+      "validation_pr_auc": 0.11624761556711696,
+      "validation_roc_auc": 0.6025972903131109
+    },
+    {
+      "fold": 1,
+      "model": "lightgbm",
+      "config": 2,
+      "validation_pr_auc": 0.11262914003787577,
+      "validation_roc_auc": 0.5997032692756834
+    },
+    {
+      "fold": 2,
+      "model": "xgboost",
+      "config": 1,
+      "validation_pr_auc": 0.1231020898994561,
+      "validation_roc_auc": 0.6194280326053982
+    },
+    {
+      "fold": 2,
+      "model": "xgboost",
+      "config": 2,
+      "validation_pr_auc": 0.12197101751724271,
+      "validation_roc_auc": 0.6227163121859831
+    },
+    {
+      "fold": 2,
+      "model": "catboost",
+      "config": 1,
+      "validation_pr_auc": 0.10600287271934354,
+      "validation_roc_auc": 0.6156157213714969
+    },
+    {
+      "fold": 2,
+      "model": "catboost",
+      "config": 2,
+      "validation_pr_auc": 0.12373626032530165,
+      "validation_roc_auc": 0.6288248582849767
+    },
+    {
+      "fold": 2,
+      "model": "lightgbm",
+      "config": 1,
+      "validation_pr_auc": 0.12446459391081297,
+      "validation_roc_auc": 0.6198420779662767
+    },
+    {
+      "fold": 2,
+      "model": "lightgbm",
+      "config": 2,
+      "validation_pr_auc": 0.12511617973622446,
+      "validation_roc_auc": 0.6155251599357145
+    }
+  ],
+  "feature_groups": {
+    "temporal_behavior": [
+      "user_events_prior",
+      "user_seconds_since_prior",
+      "user_seconds_since_first",
+      "user_events_prior_7d",
+      "user_events_prior_30d",
+      "device_events_prior",
+      "device_seconds_since_prior",
+      "device_seconds_since_first",
+      "device_events_prior_7d",
+      "device_events_prior_30d",
+      "ip_events_prior",
+      "ip_seconds_since_prior",
+      "ip_seconds_since_first",
+      "ip_events_prior_7d",
+      "ip_events_prior_30d",
+      "user_device_events_prior",
+      "user_device_seconds_since_prior",
+      "user_ip_events_prior",
+      "user_ip_seconds_since_prior",
+      "device_ip_events_prior",
+      "device_ip_seconds_since_prior",
+      "user_events_per_day_since_prior",
+      "user_recent_activity_ratio_7d_30d",
+      "user_burst_7d_vs_history",
+      "device_events_per_day_since_prior",
+      "device_recent_activity_ratio_7d_30d",
+      "device_burst_7d_vs_history",
+      "ip_events_per_day_since_prior",
+      "ip_recent_activity_ratio_7d_30d",
+      "ip_burst_7d_vs_history"
+    ],
+    "temporal_edges": [
+      "user_device_events_prior",
+      "user_device_seconds_since_prior",
+      "user_ip_events_prior",
+      "user_ip_seconds_since_prior",
+      "device_ip_events_prior",
+      "device_ip_seconds_since_prior",
+      "device_ip_neighborhood_degree",
+      "device_ip_neighborhood_product",
+      "user_device_novelty",
+      "user_ip_novelty",
+      "device_ip_novelty"
+    ],
+    "graph_neighborhood": [
+      "device_prior_distinct_users",
+      "ip_prior_distinct_users",
+      "device_ip_neighborhood_degree",
+      "device_ip_neighborhood_product",
+      "user_device_novelty",
+      "user_ip_novelty",
+      "device_ip_novelty"
+    ]
+  },
+  "graph_svd_used": false,
+  "protocol": "Candidate selection uses only folds 1-2 validation PR-AUC. Fold 3 test is untouched until one final evaluation. New graph features are causal event-time edge histories and local neighborhood aggregates; old graph SVD coordinates are excluded.",
+  "external_validation": {
+    "status": "blocked_pending_independent_labeled_data",
+    "reason": "The repository dataset ends in 2015. IEEE-CIS 2019 requires Kaggle-authenticated files; no licensed later-period raw dataset is present in this repository. Do not treat a different-domain or verification-biased dataset as a comparable temporal holdout.",
+    "required_files": [
+      "data/external/Fraud_Data_later.csv"
+    ],
+    "expected_schema": "Same e-commerce schema and independently adjudicated class labels, with purchase_time strictly later than the existing dataset."
+  },
+  "runtime_seconds": 104.25
+}
