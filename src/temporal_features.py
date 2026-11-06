@@ -1,5 +1,9 @@
 """
 Temporal feature engineering for e-commerce fraud / anomaly detection.
+
+The historical batch helpers are retained for descriptive graph exploration.
+They are not suitable as pre-transaction features for future-period validation:
+full-frame entity totals include events occurring after individual rows.
 """
 from __future__ import annotations
 
@@ -8,9 +12,7 @@ import pandas as pd
 
 
 def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add account age, hour-of-day, day-of-week, and related temporal signals.
-    """
+    """Add calendar fields and account age for each transaction."""
     x = df.copy()
     for c in ["signup_time", "purchase_time"]:
         if c in x.columns and not pd.api.types.is_datetime64_any_dtype(x[c]):
@@ -18,9 +20,9 @@ def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
 
     if {"signup_time", "purchase_time"} <= set(x.columns):
         delta = x["purchase_time"] - x["signup_time"]
-        x["account_age_hours"] = delta.dt.total_seconds() / 3600.0
-        x["account_age_seconds"] = delta.dt.total_seconds()
-        # Very short time between signup and purchase is a classic fraud signal
+        hours = delta.dt.total_seconds() / 3600.0
+        x["account_age_hours"] = hours.where(hours >= 0)
+        x["account_age_seconds"] = delta.dt.total_seconds().where(hours >= 0)
         x["instant_purchase"] = (x["account_age_seconds"] <= 1).astype(int)
         x["same_day_purchase"] = (x["account_age_hours"] <= 24).astype(int)
 
@@ -34,34 +36,78 @@ def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     return x
 
 
-def add_velocity_features(df: pd.DataFrame, time_col: str = "purchase_time") -> pd.DataFrame:
+def add_historical_velocity_features(
+    df: pd.DataFrame,
+    time_col: str = "purchase_time",
+) -> pd.DataFrame:
     """
-    Per-entity velocity / frequency features computed chronologically.
-    These are computed on the full frame for simplicity; for production
-    streaming they would be maintained as rolling state.
+    Calculate entity counts and time-since-previous using strictly prior events.
+
+    Rows sharing an entity and timestamp are treated as simultaneous. They
+    receive the same prior count and the same time gap from the previous
+    distinct timestamp; events at the current timestamp are not counted yet.
     """
     x = df.copy()
     if time_col not in x.columns:
         return x
 
-    x = x.sort_values(time_col)
+    x[time_col] = pd.to_datetime(x[time_col], errors="coerce", utc=True)
+    x["_original_order"] = np.arange(len(x))
 
-    for entity, prefix in [
+    entities = [
         ("user_id", "user"),
         ("device_id", "device"),
         ("ip_address", "ip"),
-    ]:
+    ]
+    for entity, prefix in entities:
         if entity not in x.columns:
             continue
-        # Transaction count (global for this snapshot)
-        counts = x[entity].value_counts()
-        x[f"{prefix}_tx_count"] = x[entity].map(counts).astype(float)
 
-        # Time since previous transaction for same entity
-        x[f"{prefix}_time_since_prev"] = (
-            x.groupby(entity)[time_col].diff().dt.total_seconds()
+        # Unique entity/timestamp rows ensure simultaneous transactions share
+        # identical history. The shift excludes the current timestamp group.
+        timeline = (
+            x.loc[x[entity].notna() & x[time_col].notna(), [entity, time_col]]
+             .groupby([entity, time_col], dropna=False)
+             .size()
+             .rename("events_at_time")
+             .reset_index()
+             .sort_values([entity, time_col], kind="mergesort")
         )
-        # Fill first occurrence with large value (no previous)
-        x[f"{prefix}_time_since_prev"] = x[f"{prefix}_time_since_prev"].fillna(1e7)
+        grouped = timeline.groupby(entity, sort=False, dropna=False)
+        timeline[f"{prefix}_prior_count"] = (
+            grouped["events_at_time"].cumsum() - timeline["events_at_time"]
+        ).astype(float)
+        timeline[f"{prefix}_previous_time"] = grouped[time_col].shift()
+        timeline[f"{prefix}_time_since_prev_seconds"] = (
+            timeline[time_col] - timeline[f"{prefix}_previous_time"]
+        ).dt.total_seconds().fillna(1e7)
 
-    return x
+        keys_frame = pd.DataFrame({
+            entity: x[entity].to_numpy(),
+            time_col: x[time_col].to_numpy(),
+        })
+        aligned = keys_frame.merge(
+            timeline[[entity, time_col, f"{prefix}_prior_count",
+                      f"{prefix}_time_since_prev_seconds"]],
+            on=[entity, time_col],
+            how="left",
+            sort=False,
+            validate="many_to_one",
+        )
+        x[f"{prefix}_tx_count_prior"] = aligned[f"{prefix}_prior_count"].fillna(0).to_numpy(dtype=float)
+        x[f"{prefix}_time_since_prev_seconds"] = aligned[f"{prefix}_time_since_prev_seconds"].fillna(1e7).to_numpy(dtype=float)
+
+    return x.sort_values("_original_order", kind="mergesort").drop(columns="_original_order")
+
+
+def add_velocity_features(
+    df: pd.DataFrame,
+    time_col: str = "purchase_time",
+) -> pd.DataFrame:
+    """
+    Backwards-compatible alias for historical velocity features.
+
+    Unlike the legacy full-frame counts, values are based strictly on records
+    at earlier timestamps. Prefer add_historical_velocity_features explicitly.
+    """
+    return add_historical_velocity_features(df, time_col=time_col)

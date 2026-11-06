@@ -1,0 +1,28 @@
+{
+  "created_utc": "2026-11-06T12:48:06.329630+00:00",
+  "git_sha": "63d1678ed67f4bc1181a06d71d915909263c12ee",
+  "python": "3.11.18",
+  "pandas": "2.3.3",
+  "numpy": "2.4.6",
+  "scikit_learn": "1.9.1",
+  "torch": "2.15.0+cu132",
+  "dataset_rows": 151112,
+  "fraud_rate": 0.09364577267192546,
+  "results": [
+    {
+      "protocol": "random",
+      "selected_model": "mlp_128_64",
+      "threshold": 0.9363325238227844,
+      "validation_metrics": {"pr_auc":0.6868934716055631,"roc_auc":0.8241231576943227,"precision":0.9685863874345549,"recall":0.5228450306170513,"f1":0.6791067604772102},
+      "test_metrics": {"pr_auc":0.6898593433823331,"roc_auc":0.8214951134827598,"accuracy":0.955485948736048,"precision":0.9712108382726503,"recall":0.5405278039585297,"f1":0.6945201332122314,"balanced_accuracy":0.7694364500444875,"tn":20511,"fp":34,"fn":975,"tp":1147,"precision_at_k":0.6343072573044298,"enrichment_at_k":6.775609142940391}
+    },
+    {
+      "protocol": "chronological",
+      "selected_model": "mlp_128_64",
+      "threshold": 0.18504157662391663,
+      "validation_metrics": {"pr_auc":0.0951551603124607,"roc_auc":0.5903511300984446,"precision":0.21321793863099922,"recall":0.19412607449856734,"f1":0.2032245969253843},
+      "test_metrics": {"pr_auc":0.09821168109728579,"roc_auc":0.5880031338493129,"accuracy":0.9313767660391092,"precision":0.21434528773978315,"recall":0.18502519798416125,"f1":0.19860896445131376,"balanced_accuracy":0.5761777165616165,"tn":27892,"fp":942,"fn":1132,"tp":257,"precision_at_k":0.2044636429085673,"enrichment_at_k":4.448887458333786}
+    }
+  ],
+  "interpretation": "The random split is an IID benchmark only. The chronological test is the appropriate future-period stress test and demonstrates severe temporal drift. These metrics are separate protocols and must not be merged."
+}

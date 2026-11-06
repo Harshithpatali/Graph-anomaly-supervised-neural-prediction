@@ -64,30 +64,19 @@ A portfolio-grade e-commerce fraud intelligence system combining **unsupervised 
 
 ---
 
-## 📊 Key Metrics at a Glance
+## 📊 Reported Metrics — Existing Random-Split Run (Historical)
 
-Final locked-test performance of the supervised neural champion (PyTorch MLP):
+The previously saved neural-classifier figures below belong to a **stratified random 70/15/15 split**. They are a controlled IID benchmark, not evidence of future-period performance. The saved README badge figures and `artifacts/neural_fraud_summary.json` are from different experiment outputs and are **not consistent**; do not quote either as the current verified result until the GitHub Actions audit regenerates the metrics.
 
-![PR-AUC](https://img.shields.io/badge/PR--AUC-0.6956-2563EB)
-![ROC-AUC](https://img.shields.io/badge/ROC--AUC-0.8294-2563EB)
-![Accuracy](https://img.shields.io/badge/Accuracy-95.59%25-64748B)
-![Precision](https://img.shields.io/badge/Precision-97.95%25-16A34A)
-![Recall](https://img.shields.io/badge/Recall-54.05%25-F59E0B)
-![F1](https://img.shields.io/badge/F1-0.6966-16A34A)
-![Threshold](https://img.shields.io/badge/Decision%20Threshold-0.9374-6D28D9)
+| Existing report | PR-AUC | ROC-AUC | Split |
+|---|---:|---:|---|
+| README / Notebook 13 snapshot | 0.6956 | 0.8294 | Stratified random |
+| `artifacts/neural_fraud_summary.json` | 0.6896 | 0.8212 | Stratified random |
+| `reports/final_metrics.json` (graph anomaly track) | 0.0707 | 0.5394 | Chronological |
 
-| Metric | Result |
-|---|---:|
-| Threshold | **0.937358** |
-| PR-AUC | **0.695629** |
-| ROC-AUC | **0.829392** |
-| Accuracy | **0.955927** |
-| Precision | **0.979505** |
-| Recall | **0.540528** |
-| F1 | **0.696629** |
-| Balanced Accuracy | **0.769680** |
+These values refer to different models and evaluation protocols. In particular, the anomaly-track PR-AUC must not be compared directly with the supervised neural benchmark as if they were the same model.
 
-The model is deliberately **high-precision / conservative-recall**: it rarely flags a legitimate transaction as fraud, but knowingly misses some fraud in exchange for that reliability — full reasoning in [Precision vs Recall](#-precision-vs-recall).
+**Fresh reproducible metrics:** GitHub Actions creates `reports/audit/random_metrics.json`, `reports/audit/chronological_metrics.json`, and `reports/audit/audit_manifest.json`. Those generated reports, rather than the historical numbers above, are the source of truth for the audit branch.
 
 ---
 
@@ -673,6 +662,26 @@ flowchart TD
 ```
 
 ---
+
+## 🧪 Reproducible GitHub Actions Audit — Results (6 November 2026)
+
+The audit workflow trained two MLP configurations on GitHub-hosted CPU runners using the committed 151,112-row Fraud_Data dataset. Metrics below are from run 7; exact split information, configurations, confusion matrices, and full reports are in `reports/audit/`.
+
+| Test protocol | Fraud base rate | PR-AUC | ROC-AUC | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|---:|---:|
+| Stratified random 70/15/15 | 9.36% | **0.6899** | **0.8215** | 97.12% | 54.05% | 0.6945 |
+| Chronological 60/20/20 | 4.60% | **0.0982** | **0.5880** | 21.43% | 18.50% | 0.1986 |
+
+**Interpretation:** the random split is an IID benchmark, not a future-period deployment estimate. Chronological evaluation is the more relevant future-period stress test and shows weak generalization under temporal drift. Its PR-AUC is only about 2.14× the 4.60% test fraud base rate. The model currently misses 1,132 of 1,389 fraud cases at the validation-selected threshold.
+
+The audit does not justify claiming production-ready future-period fraud detection. Treat the model as a historical-pattern ranking aid that needs temporal feature redesign, drift monitoring, and retraining strategy before real deployment.
+
+The workflow also saves:
+- `artifacts/audit/random_neural_model.joblib` and `artifacts/audit/chronological_neural_model.joblib`
+- The matching held-out test predictions CSVs
+- `reports/audit/random_metrics.json`, `chronological_metrics.json`, and `audit_manifest.json`
+
+To rerun from GitHub, open **Actions → Fraud model audit and retraining → Run workflow** and select `both`, `random`, or `chronological`. Validation is used for model selection and threshold selection; the corresponding test partition is held out.
 
 ## ⚠️ Limitations
 
