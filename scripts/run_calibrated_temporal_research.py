@@ -137,7 +137,7 @@ def main():
     # Only folds 1 and 2 validation partitions participate in model selection.
     for fold, train_end, val_end, _test_end in fold_bounds[:2]:
         train, valid = df.iloc[:train_end].copy(), df.iloc[train_end:val_end].copy()
-        Xtr, Xv, _future_only, _graph, _medians = make_features(train, valid, df.iloc[val_end:_test_end].copy())
+        Xtr, Xv, _future_only, _graph, _medians = make_features(train, valid, df.iloc[val_end:val_end + 1].copy())
         ytr, yv = train["class"].to_numpy(), valid["class"].to_numpy()
         for config_id, params in enumerate(TUNING_GRID, 1):
             model = build_model(params, SEED + fold * 100 + config_id)
@@ -168,9 +168,14 @@ def main():
     p_val_raw = _safe_probs(model.predict_proba(Xv)[:, 1])
     p_test_raw = _safe_probs(model.predict_proba(Xt)[:, 1])
 
+    # Fit calibration on the earlier half of validation and assess on the later half.
+    calibration_cut = max(1, len(yv) // 2)
+    if np.unique(yv[:calibration_cut]).size < 2 or np.unique(yv[calibration_cut:]).size < 2:
+        raise ValueError("Validation calibration subwindows must each contain both classes")
     calibrator = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds="clip")
-    calibrator.fit(p_val_raw, yv)
-    p_val_cal = _safe_probs(calibrator.predict(p_val_raw))
+    calibrator.fit(p_val_raw[:calibration_cut], yv[:calibration_cut])
+    p_val_cal = _safe_probs(calibrator.predict(p_val_raw[calibration_cut:]))
+    y_cal = yv[calibration_cut:]
     p_test_cal = _safe_probs(calibrator.predict(p_test_raw))
 
     threshold_rows = {}
@@ -179,7 +184,7 @@ def main():
         threshold = float(np.sort(p_val_cal)[-k])
         threshold_rows[str(capacity)] = {
             "validation_threshold": threshold,
-            "validation_metrics": metric_at_capacity(yv, p_val_cal, capacity),
+            "validation_metrics": metric_at_capacity(y_cal, p_val_cal, capacity),
             "test_threshold_metrics": {
                 "precision": float(((p_test_cal >= threshold) & (yt == 1)).sum() / max((p_test_cal >= threshold).sum(), 1)),
                 "recall": float(((p_test_cal >= threshold) & (yt == 1)).sum() / max(int(yt.sum()), 1)),
@@ -188,8 +193,8 @@ def main():
             "test_top_k_metrics": metric_at_capacity(yt, p_test_cal, capacity),
         }
 
-    ece_raw, bins_raw = expected_calibration_error(yv, p_val_raw)
-    ece_cal, bins_cal = expected_calibration_error(yv, p_val_cal)
+    ece_raw, bins_raw = expected_calibration_error(y_cal, p_val_raw[calibration_cut:])
+    ece_cal, bins_cal = expected_calibration_error(y_cal, p_val_cal)
     feature_drift = {}
     for col in Xtr.columns:
         if col.startswith("graph_svd_"):
@@ -214,7 +219,7 @@ def main():
             "metrics": {
                 "raw": {"pr_auc": float(average_precision_score(yt, p_test_raw)), "roc_auc": float(roc_auc_score(yt, p_test_raw)), "brier": float(brier_score_loss(yt, p_test_raw))},
                 "isotonic_calibrated": {"pr_auc": float(average_precision_score(yt, p_test_cal)), "roc_auc": float(roc_auc_score(yt, p_test_cal)), "brier": float(brier_score_loss(yt, p_test_cal))},
-                "validation_calibration": {"raw_brier": float(brier_score_loss(yv, p_val_raw)), "calibrated_brier": float(brier_score_loss(yv, p_val_cal)), "raw_ece": ece_raw, "calibrated_ece": ece_cal, "raw_bins": bins_raw, "calibrated_bins": bins_cal},
+                "validation_calibration": {"calibration_fit_rows": int(calibration_cut), "calibration_assessment_rows": int(len(y_cal)), "raw_brier": float(brier_score_loss(y_cal, p_val_raw[calibration_cut:])), "calibrated_brier": float(brier_score_loss(y_cal, p_val_cal)), "raw_ece": ece_raw, "calibrated_ece": ece_cal, "raw_bins": bins_raw, "calibrated_bins": bins_cal},
                 "capacity_thresholds": threshold_rows,
             },
             "feature_drift": feature_drift,
