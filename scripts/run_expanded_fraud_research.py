@@ -127,7 +127,8 @@ def main():
     selected_name, selected_config = selected_key.split(":")
     selected = next(c for c in CANDIDATES if c["name"] == selected_name and c["config"] == int(selected_config))
 
-    # Untouched third chronological fold: no model or threshold selection here.
+    # Untouched third chronological fold: evaluate the validation-selected
+    # configuration from each model family once on the same final test window.
     fold, train_end, valid_end, test_end = folds[2]
     train, valid, test = (df.iloc[:train_end].copy(), df.iloc[train_end:valid_end].copy(),
                           df.iloc[valid_end:test_end].copy())
@@ -135,14 +136,44 @@ def main():
     graph_cols = [c for c in x_train.columns if c.startswith("graph_svd_")]
     x_train, x_valid, x_test = (x.drop(columns=graph_cols) for x in (x_train, x_valid, x_test))
     y_train, y_valid, y_test = (x["class"].to_numpy() for x in (train, valid, test))
-    model = make_model(selected, SEED + 999)
-    fit_candidate(model, selected_name, x_train, y_train, x_valid, y_valid)
-    p_valid = model.predict_proba(x_valid)[:, 1]
-    p_test = model.predict_proba(x_test)[:, 1]
+    selected_by_model = {}
+    for name in sorted({candidate["name"] for candidate in CANDIDATES}):
+        options = [candidate for candidate in CANDIDATES if candidate["name"] == name]
+        selected_by_model[name] = max(
+            options, key=lambda candidate: summary[f"{name}:{candidate['config']}"]
+        )
+    final_models = {}
+    for idx, (name, candidate) in enumerate(selected_by_model.items()):
+        fitted = make_model(candidate, SEED + 999 + idx)
+        fit_candidate(fitted, name, x_train, y_train, x_valid, y_valid)
+        p_valid_family = fitted.predict_proba(x_valid)[:, 1]
+        p_test_family = fitted.predict_proba(x_test)[:, 1]
+        cap_results = {str(cap): threshold_transfer(y_valid, p_valid_family, y_test, p_test_family, cap)
+                       for cap in CAPACITIES}
+        final_models[name] = {
+            "selected_config": candidate,
+            "validation_pr_auc": summary[f"{name}:{candidate['config']}"],
+            "test_pr_auc": float(average_precision_score(y_test, p_test_family)),
+            "test_roc_auc": float(roc_auc_score(y_test, p_test_family)),
+            "pr_auc_lift_over_prevalence": float(average_precision_score(y_test, p_test_family) / max(float(y_test.mean()), 1e-12)),
+            "capacity": cap_results,
+            "_model": fitted,
+            "_p_valid": p_valid_family,
+            "_p_test": p_test_family,
+        }
 
-    capacities = {str(cap): threshold_transfer(y_valid, p_valid, y_test, p_test, cap)
-                  for cap in CAPACITIES}
+    champion_name = max(summary, key=summary.get).split(":")[0]
+    selected = selected_by_model[champion_name]
+    selected_name = champion_name
+    model = final_models[champion_name]["_model"]
+    p_valid = final_models[champion_name]["_p_valid"]
+    p_test = final_models[champion_name]["_p_test"]
+    capacities = final_models[champion_name]["capacity"]
     prevalence = float(y_test.mean())
+    final_test_comparison = {
+        name: {k: v for k, v in result.items() if not k.startswith("_")}
+        for name, result in final_models.items()
+    }
     report = {
         "created_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         "git_sha": os.getenv("GITHUB_SHA", "local"),
@@ -158,12 +189,14 @@ def main():
             "test": {"rows": len(test), "start": str(test.purchase_time.min()), "end": str(test.purchase_time.max())},
             "selected_model": selected_name,
             "selected_config": selected,
+            "model_comparison": final_test_comparison,
             "metrics": {"pr_auc": float(average_precision_score(y_test, p_test)),
                         "roc_auc": float(roc_auc_score(y_test, p_test)),
                         "pr_auc_lift_over_prevalence": float(average_precision_score(y_test, p_test) / max(prevalence, 1e-12)),
                         "capacity": capacities},
         },
         "validation_selection": summary,
+        "final_test_model_comparison": final_test_comparison,
         "validation_rows": [{k: v for k, v in row.items() if k != "params"} for row in validation_rows],
         "feature_groups": {
             "temporal_behavior": [c for c in x_train.columns if any(s in c for s in ("events_prior", "seconds_since", "events_per_day", "activity_ratio", "burst"))],
@@ -191,8 +224,14 @@ def main():
                  "selected_model": selected_name, "selected_config": selected},
                 ART / "expanded_temporal_champion.joblib")
     pd.DataFrame({"actual": y_test, "score": p_test}).to_csv(OUT / "expanded_final_predictions.csv", index=False)
+    pd.DataFrame([{"model": name, "test_pr_auc": result["test_pr_auc"],
+                   "test_roc_auc": result["test_roc_auc"],
+                   "validation_pr_auc": result["validation_pr_auc"]}
+                  for name, result in final_test_comparison.items()]).to_csv(
+                      OUT / "expanded_final_model_comparison.csv", index=False)
     print(json.dumps({"selected": selected_name, "config": selected_config,
                       "final_test": report["final_fold"]["metrics"],
+                      "final_test_model_comparison": report["final_test_model_comparison"],
                       "external_validation": report["external_validation"],
                       "runtime_seconds": report["runtime_seconds"]}, indent=2), flush=True)
 
