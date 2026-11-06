@@ -39,6 +39,20 @@ def _safe_probs(values):
     return np.clip(np.asarray(values, dtype=float), 1e-6, 1 - 1e-6)
 
 
+def metric_at_capacity_tiebreak(y, p, secondary, fraction):
+    y = np.asarray(y, dtype=int)
+    p = np.asarray(p, dtype=float)
+    secondary = np.asarray(secondary, dtype=float)
+    k = max(1, int(np.ceil(len(y) * fraction)))
+    order = np.lexsort((-secondary, -p))
+    selected = order[:k]
+    tp = int(y[selected].sum())
+    precision = tp / k
+    recall = tp / max(int(y.sum()), 1)
+    return {"queue_fraction": fraction, "queue_size": k, "precision": precision,
+            "recall": recall, "f1": 2 * precision * recall / max(precision + recall, 1e-12)}
+
+
 def expected_calibration_error(y, p, bins=10):
     y = np.asarray(y, dtype=int)
     p = _safe_probs(p)
@@ -233,13 +247,13 @@ def main():
         threshold_rows[str(capacity)] = {
             "validation_threshold": calibrated_cutoff,
             "raw_score_tie_break_threshold": raw_tie_cutoff,
-            "validation_metrics": metric_at_capacity(y_cal, p_val_cal, capacity),
+            "validation_metrics": metric_at_capacity_tiebreak(y_cal, p_val_cal, raw_val_assessment, capacity),
             "test_threshold_metrics": {
                 "precision": float(((test_selected) & (yt == 1)).sum() / max(test_selected.sum(), 1)),
                 "recall": float(((test_selected) & (yt == 1)).sum() / max(int(yt.sum()), 1)),
                 "review_rate": float(test_selected.mean()),
             },
-            "test_top_k_metrics": metric_at_capacity(yt, p_test_cal, capacity),
+            "test_top_k_metrics": metric_at_capacity_tiebreak(yt, p_test_cal, p_test_raw, capacity),
         }
 
     ece_raw, bins_raw = expected_calibration_error(y_cal, p_val_raw[calibration_cut:])
