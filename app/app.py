@@ -24,6 +24,26 @@ section[data-testid="stSidebar"]{background:#0e192a}
 [data-baseweb="popover"],[role="listbox"],[role="option"]{background:#101d30!important;color:#f4f7fc!important}
 .stButton>button,.stDownloadButton>button{background:#173b54;color:#fff!important;border:1px solid #438eaf}
 .intel-kicker{color:#54c7ec;text-transform:uppercase;letter-spacing:.16em;font-size:.75rem;font-weight:700}
+
+/* Stable system typography and accessible BaseWeb portal menus. */
+.stApp,[data-testid="stMain"],[data-testid="stMarkdownContainer"]{
+  font-family="Segoe UI, Arial, sans-serif";
+  font-family: "Segoe UI", Arial, sans-serif !important;
+}
+body > div [data-baseweb="popover"],[data-baseweb="popover"],[data-baseweb="menu"],
+[data-baseweb="popover"] [role="listbox"],[role="listbox"]{
+  background: #111e31 !important;
+  background: #101d30 !important;
+  color: #f4f7fc !important;
+  z-index: 999999 !important;
+}
+[data-baseweb="popover"] [role="option"],[role="option"]{
+  background: #101d30 !important;color:#f4f7fc !important;
+}
+[data-baseweb="popover"] [role="option"]:hover,[role="option"][data-highlighted="true"]{
+  background: #24415d !important;
+  background: #294967 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
