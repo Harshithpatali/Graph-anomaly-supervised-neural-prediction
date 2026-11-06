@@ -22,11 +22,16 @@ from run_walk_forward_benchmark import DATA, OUT, ART, build_folds, make_feature
 
 SEED = 42
 CAPACITIES = (0.01, 0.02, 0.05)
-TUNING_GRID = [
+TUNING_PARAMS = [
     {"n_estimators": 250, "max_depth": 3, "learning_rate": 0.03, "min_child_weight": 5, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 5},
     {"n_estimators": 400, "max_depth": 4, "learning_rate": 0.03, "min_child_weight": 8, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 8},
     {"n_estimators": 350, "max_depth": 5, "learning_rate": 0.04, "min_child_weight": 5, "subsample": 0.85, "colsample_bytree": 0.85, "reg_lambda": 5},
     {"n_estimators": 500, "max_depth": 3, "learning_rate": 0.025, "min_child_weight": 10, "subsample": 0.9, "colsample_bytree": 0.9, "reg_lambda": 10},
+]
+TUNING_GRID = [
+    {"params": params, "include_graph_embeddings": include_embeddings}
+    for include_embeddings in (True, False)
+    for params in TUNING_PARAMS
 ]
 
 
@@ -157,11 +162,19 @@ def main():
         train, valid = df.iloc[:train_end].copy(), df.iloc[train_end:val_end].copy()
         Xtr, Xv, _future_only, _graph, _medians = make_features(train, valid, df.iloc[val_end:val_end + 1].copy())
         ytr, yv = train["class"].to_numpy(), valid["class"].to_numpy()
-        for config_id, params in enumerate(TUNING_GRID, 1):
+        for config_id, config in enumerate(TUNING_GRID, 1):
+            params = config["params"]
+            include_embeddings = config["include_graph_embeddings"]
+            if include_embeddings:
+                Xtr_cfg, Xv_cfg = Xtr, Xv
+            else:
+                graph_cols = [col for col in Xtr.columns if col.startswith("graph_svd_")]
+                Xtr_cfg, Xv_cfg = Xtr.drop(columns=graph_cols), Xv.drop(columns=graph_cols)
             model = build_model(params, SEED + fold * 100 + config_id)
-            model.fit(Xtr, ytr, eval_set=[(Xv, yv)], verbose=False)
-            p = model.predict_proba(Xv)[:, 1]
+            model.fit(Xtr_cfg, ytr, eval_set=[(Xv_cfg, yv)], verbose=False)
+            p = model.predict_proba(Xv_cfg)[:, 1]
             tuning_rows.append({"fold": fold, "config_id": config_id,
+                                "include_graph_embeddings": include_embeddings,
                                 "validation_pr_auc": float(average_precision_score(yv, p)),
                                 "validation_roc_auc": float(roc_auc_score(yv, p)),
                                 "params": params})
@@ -171,7 +184,9 @@ def main():
     for row in tuning_rows:
         scores.setdefault(row["config_id"], []).append(row["validation_pr_auc"])
     selected_id = max(scores, key=lambda k: (float(np.mean(scores[k])), -k))
-    selected_params = TUNING_GRID[selected_id - 1]
+    selected_config = TUNING_GRID[selected_id - 1]
+    selected_params = selected_config["params"]
+    selected_include_embeddings = selected_config["include_graph_embeddings"]
 
     # Final fold is reserved: fit once, calibrate on its validation segment,
     # then score its test segment once. No test-driven model/threshold choices.
@@ -181,6 +196,11 @@ def main():
     test = df.iloc[val_end:test_end].copy()
     Xtr, Xv, Xt, graph, medians = make_features(train, valid, test)
     ytr, yv, yt = train["class"].to_numpy(), valid["class"].to_numpy(), test["class"].to_numpy()
+    if not selected_include_embeddings:
+        graph_cols = [col for col in Xtr.columns if col.startswith("graph_svd_")]
+        Xtr = Xtr.drop(columns=graph_cols)
+        Xv = Xv.drop(columns=graph_cols)
+        Xt = Xt.drop(columns=graph_cols)
     model = build_model(selected_params, SEED + 300)
     model.fit(Xtr, ytr, eval_set=[(Xv, yv)], verbose=False)
     p_val_raw = _safe_probs(model.predict_proba(Xv)[:, 1])
@@ -199,14 +219,25 @@ def main():
     threshold_rows = {}
     for capacity in CAPACITIES:
         k = max(1, int(np.ceil(len(p_val_cal) * capacity)))
-        threshold = float(np.sort(p_val_cal)[-k])
+        # Isotonic calibration creates tied scores. Use the raw model score as
+        # a deterministic secondary rank so a validation capacity is not
+        # accidentally inflated by a broad >= calibrated-score cutoff.
+        raw_val_assessment = p_val_raw[calibration_cut:]
+        val_order = np.lexsort((-raw_val_assessment, -p_val_cal))
+        selected_val = val_order[:k]
+        calibrated_cutoff = float(p_val_cal[selected_val[-1]])
+        cutoff_ties = selected_val[p_val_cal[selected_val] == calibrated_cutoff]
+        raw_tie_cutoff = float(raw_val_assessment[cutoff_ties].min())
+        test_selected = ((p_test_cal > calibrated_cutoff) |
+                         ((p_test_cal == calibrated_cutoff) & (p_test_raw >= raw_tie_cutoff)))
         threshold_rows[str(capacity)] = {
-            "validation_threshold": threshold,
+            "validation_threshold": calibrated_cutoff,
+            "raw_score_tie_break_threshold": raw_tie_cutoff,
             "validation_metrics": metric_at_capacity(y_cal, p_val_cal, capacity),
             "test_threshold_metrics": {
-                "precision": float(((p_test_cal >= threshold) & (yt == 1)).sum() / max((p_test_cal >= threshold).sum(), 1)),
-                "recall": float(((p_test_cal >= threshold) & (yt == 1)).sum() / max(int(yt.sum()), 1)),
-                "review_rate": float((p_test_cal >= threshold).mean()),
+                "precision": float(((test_selected) & (yt == 1)).sum() / max(test_selected.sum(), 1)),
+                "recall": float(((test_selected) & (yt == 1)).sum() / max(int(yt.sum()), 1)),
+                "review_rate": float(test_selected.mean()),
             },
             "test_top_k_metrics": metric_at_capacity(yt, p_test_cal, capacity),
         }
@@ -227,6 +258,7 @@ def main():
         "protocol": "config selection on folds 1-2 validation only; fold 3 untouched until one final evaluation; isotonic calibration fitted on fold 3 validation",
         "selected_config_id": selected_id,
         "selected_params": selected_params,
+        "selected_include_graph_embeddings": bool(selected_include_embeddings),
         "tuning": tuning_rows,
         "tuning_config_mean_validation_pr_auc": {str(k): float(np.mean(v)) for k, v in scores.items()},
         "final_fold": {
@@ -253,7 +285,7 @@ def main():
     pd.DataFrame([{"feature": k, **v} for k, v in feature_drift.items()]).to_csv(OUT / "final_feature_psi.csv", index=False)
     joblib.dump({"model": model, "calibrator": calibrator, "graph_svd": graph,
                  "feature_columns": list(Xtr.columns), "medians": medians,
-                 "selected_params": selected_params, "validation_thresholds": threshold_rows},
+                 "selected_params": selected_params, "include_graph_embeddings": bool(selected_include_embeddings), "validation_thresholds": threshold_rows},
                 ART / "calibrated_xgboost_final_fold.joblib")
     pd.DataFrame({"actual": yt, "probability_raw": p_test_raw,
                   "probability_calibrated": p_test_cal}).to_csv(OUT / "final_fold_predictions.csv", index=False)
