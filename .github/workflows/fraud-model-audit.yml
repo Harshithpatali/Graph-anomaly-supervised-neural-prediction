@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,7 +49,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-ci.txt
-          # Replace the default CUDA-enabled torch wheel with CPU-only PyTorch.
+          # Remove the default CUDA wheel and install the CPU-only PyTorch build.
           pip uninstall -y torch
           pip install --index-url https://download.pytorch.org/whl/cpu torch
 
@@ -76,15 +78,17 @@ jobs:
 
       - name: Commit reproducible audit outputs
         if: startsWith(github.ref, 'refs/heads/audit/')
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin "${GITHUB_REF_NAME}"
-          git rebase "origin/${GITHUB_REF_NAME}"
+          git fetch origin "$BRANCH_NAME"
+          git rebase "origin/$BRANCH_NAME"
           git add reports/audit artifacts/audit
           if git diff --cached --quiet; then
             echo "No generated outputs changed."
           else
             git commit -m "Add reproducible fraud model audit results"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            git push origin "HEAD:$BRANCH_NAME"
           fi
