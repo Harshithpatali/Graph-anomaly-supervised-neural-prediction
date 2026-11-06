@@ -9,6 +9,7 @@ on:
       - "scripts/run_expanded_fraud_research.py"
       - "scripts/run_rolling_robustness.py"
       - "scripts/run_walk_forward_benchmark.py"
+      - "scripts/run_rolling_robustness.py"
       - "src/causal_graph_features.py"
       - "src/graph_embedding.py"
       - "tests/test_calibrated_research.py"
@@ -132,7 +133,6 @@ jobs:
             reports/research/expanded_model_validation.csv
             reports/research/expanded_capacity_metrics.csv
             reports/research/expanded_final_predictions.csv
-            reports/research/expanded_final_model_comparison.csv reports/research/rolling_robustness_report.json reports/research/rolling_robustness_summary.csv reports/research/rolling_robustness_capacity.csv
             reports/research/rolling_robustness_report.json
             reports/research/rolling_robustness_summary.csv
             reports/research/rolling_robustness_capacity.csv
@@ -144,7 +144,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports/research/calibrated_temporal_report.json reports/research/tuning_validation_summary.csv reports/research/final_feature_psi.csv reports/research/final_fold_predictions.csv reports/research/expanded_model_comparison.json reports/research/expanded_model_validation.csv reports/research/expanded_capacity_metrics.csv reports/research/expanded_final_predictions.csv reports/research/expanded_final_model_comparison.csv
+          git add reports/research/calibrated_temporal_report.json reports/research/tuning_validation_summary.csv reports/research/final_feature_psi.csv reports/research/final_fold_predictions.csv reports/research/expanded_model_comparison.json reports/research/expanded_model_validation.csv reports/research/expanded_capacity_metrics.csv reports/research/expanded_final_predictions.csv reports/research/expanded_final_model_comparison.csv reports/research/rolling_robustness_report.json reports/research/rolling_robustness_summary.csv reports/research/rolling_robustness_capacity.csv
           if git diff --cached --quiet; then
             echo "Research report unchanged"
           else
