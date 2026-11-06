@@ -341,6 +341,28 @@ st.markdown(
         -webkit-text-fill-color: currentColor !important;
     }}
 
+    /* Structured JSON/code panels: avoid Streamlit's default white JSON viewer. */
+    [data-testid="stCodeBlock"],
+    [data-testid="stCodeBlock"] > div,
+    [data-testid="stCodeBlock"] pre,
+    [data-testid="stCodeBlock"] code {{
+        background: #0b1422 !important;
+        color: #e8f0fa !important;
+        border: 1px solid #2b405b !important;
+        border-radius: 10px !important;
+        font-family: Consolas, "SFMono-Regular", monospace !important;
+        font-size: .9rem !important;
+        line-height: 1.65 !important;
+    }}
+    [data-testid="stCodeBlock"] span {{
+        opacity: 1 !important;
+    }}
+    [data-testid="stCodeBlock"] button {{
+        color: #e8f0fa !important;
+        background: #1a2a40 !important;
+        border: 1px solid #38516d !important;
+    }}
+
     /* Tables: readable header/body and clear row separation. */
     [data-testid="stDataFrame"] *,
     [data-testid="stTable"] * {{
@@ -741,7 +763,8 @@ elif page == "🔍 Investigation Workbench":
     }
     if "account_age_hours" in row:
         info["account_age_hours"] = float(row["account_age_hours"]) if pd.notna(row["account_age_hours"]) else None
-    st.json(info)
+    import json as _json
+    st.code(_json.dumps(info, indent=2, ensure_ascii=False), language="json", line_numbers=True)
 
     same_user = df[df["user_id"] == row["user_id"]]
     same_device = df[df["device_id"] == row["device_id"]]
