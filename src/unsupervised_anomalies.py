@@ -12,7 +12,7 @@ def score_anomalies(frame: pd.DataFrame, feature_columns: list[str] | None = Non
     if len(frame) < 10:
         raise ValueError("At least 10 rows are required for anomaly scoring.")
     excluded = {"user_id", "first_purchase", "last_purchase", "as_of", "class",
-                "anomaly_score", "anomaly_rank", "segment_id"}
+                "anomaly_score", "anomaly_rank", "segment_id", "behavioral_risk_index"}
     if feature_columns is None:
         feature_columns = [c for c in frame.select_dtypes(include=[np.number]).columns if c not in excluded]
     if not feature_columns:
