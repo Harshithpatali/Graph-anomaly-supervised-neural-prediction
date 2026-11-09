@@ -37,6 +37,12 @@ def main():
         tx_features[f'{col}_frequency'] = tx_features[col].map(tx_features[col].value_counts())
     cols = [c for c in ['purchase_value', 'age', 'purchase_hour', 'purchase_dayofweek', 'user_id_frequency', 'device_id_frequency', 'ip_address_frequency'] if c in tx_features]
     transactions, tx_meta = score_anomalies(tx_features, cols)
+    # Bounded customer purchase histories power Customer 360 timelines.
+    timeline_cols = [c for c in ['user_id', 'purchase_time', 'purchase_value', 'device_id', 'ip_address', 'source', 'browser', 'sex', 'age'] if c in tx.columns]
+    timeline = tx.sort_values('purchase_time').groupby('user_id', sort=False).tail(50)[timeline_cols]
+    timeline.to_parquet(output / 'customer_purchase_timeline.parquet', index=False)
+    # Export graph edges for entity/customer investigations; the graph itself remains capped at 50k transactions.
+    pd.DataFrame(list(graph.edges())[:100000], columns=['source', 'target']).to_csv(output / 'graph_edges.csv', index=False)
     profiles.to_parquet(output / 'customer_profiles.parquet', index=False)
     customers.to_parquet(output / 'customer_intelligence.parquet', index=False)
     transactions.head(10000).to_parquet(output / 'top_transaction_anomalies.parquet', index=False)
@@ -49,10 +55,10 @@ def main():
     )
     metadata = {'project': 'Graph-Based Customer Intelligence', 'label_used_for_features_or_training': False,
                 'transactions': len(tx), 'customers': len(profiles), 'graph_nodes': graph.number_of_nodes(),
-                'graph_edges': graph.number_of_edges(), 'segmentation': segment_meta['metadata'],
+                'graph_edges': graph.number_of_edges(), 'timeline_rows': len(timeline), 'exported_graph_edges': min(graph.number_of_edges(), 100000), 'segmentation': segment_meta['metadata'],
                 'customer_anomaly': customer_meta, 'transaction_anomaly': tx_meta,
                 'limitations': ['Risk index is a relative heuristic, not fraud probability.',
-                                'Graph uses the first 50,000 input transactions.',
+                                'Graph uses the first 50,000 input transactions; exported investigation edges are capped at 100,000.', 'Customer purchase timeline retains at most 50 most recent transactions per customer.',
                                 'Entity frequencies are full-snapshot descriptive features, not point-in-time predictions.']}
     (output / 'run_metadata.json').write_text(json.dumps(metadata, indent=2))
     print(json.dumps(metadata, indent=2))
