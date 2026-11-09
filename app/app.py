@@ -343,7 +343,20 @@ elif page=="Customer 360":
         if not links.empty:
             links=links.copy()
             links["shared_entity"]=links.apply(lambda x:x.target if x.source==node else x.source,axis=1)
-            st.dataframe(links[["shared_entity"]],use_container_width=True,hide_index=True)
+            shared=links["shared_entity"].drop_duplicates().tolist()
+            st.markdown("**Shared devices and IP entities**")
+            st.dataframe(pd.DataFrame({"shared_entity":shared}),use_container_width=True,hide_index=True)
+            related=set()
+            for entity in shared:
+                matches=graph_edges[(graph_edges.source==entity)|(graph_edges.target==entity)]
+                for endpoint in pd.concat([matches.source,matches.target]).astype(str).unique():
+                    if endpoint.startswith("user::") and endpoint != node: related.add(endpoint.replace("user::","",1))
+            st.markdown("**Other customers connected through those entities**")
+            if related:
+                related_frame=customers[customers.user_id.astype(str).isin(related)]
+                cols=[c for c in ["user_id","segment_id","transaction_count","behavioral_risk_band","anomaly_band"] if c in related_frame]
+                st.dataframe(related_frame[cols],use_container_width=True,hide_index=True)
+            else: st.info("No other customer nodes were found through the exported shared entities.")
         else: st.info("No exported graph links for this customer in the bounded graph snapshot.")
     else: st.info("Graph edge investigation data is not in this bundle.")
 
