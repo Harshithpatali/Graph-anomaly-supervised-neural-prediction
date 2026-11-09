@@ -190,7 +190,8 @@ def executive_pdf(customers: pd.DataFrame, segments: pd.DataFrame, meta: dict) -
     doc.build(story)
     return buffer.getvalue()
 
-\ndef graph_network_figure(edge_frame: pd.DataFrame, entity_frame: pd.DataFrame):
+
+def graph_network_figure(edge_frame: pd.DataFrame, entity_frame: pd.DataFrame):
     """Render a small deterministic sample of the user-device-IP graph."""
     if edge_frame.empty or not {'source', 'target'}.issubset(edge_frame.columns): return None
     graph = nx.from_pandas_edgelist(edge_frame.head(350), source='source', target='target')
@@ -248,7 +249,9 @@ segments=data.get("segment_summary.csv",pd.DataFrame())
 metrics=data.get("segmentation_metrics.csv",pd.DataFrame())
 entities=data.get("graph_entity_metrics.csv",pd.DataFrame())
 communities=data.get("graph_communities.csv",pd.DataFrame())
-transactions=data.get("top_transaction_anomalies.parquet")\ntimeline=data.get("customer_purchase_timeline.parquet",pd.DataFrame())\ngraph_edges=data.get("graph_edges.csv",data.get("graph_edges_sample.csv",pd.DataFrame()))
+transactions=data.get("top_transaction_anomalies.parquet")
+timeline=data.get("customer_purchase_timeline.parquet",pd.DataFrame())
+graph_edges=data.get("graph_edges.csv",data.get("graph_edges_sample.csv",pd.DataFrame()))
 
 if page=="Overview":
     st.subheader("Executive overview")
@@ -545,7 +548,9 @@ elif page=="Methodology":
 - Customer profiles summarize purchase frequency, value, timing, recency and device/IP diversity.
 - Segmentation uses robust scaling and K-means; candidate cluster counts use sample silhouette and Davies–Bouldin diagnostics.
 - Customer anomaly ranking combines Isolation Forest and Local Outlier Factor percentile scores.
-- Graph intelligence links users to device and IP entities and summarizes degree, connected components, betweenness and Louvain communities.\n- Customer 360 retains up to 50 recent purchases per customer; graph relationship exploration uses exported edges from the bounded graph snapshot.\n- Segment narratives compare measured segment medians with full-cohort medians. Anomaly evidence uses robust feature deviations and is not a model-explanation attribution.
+- Graph intelligence links users to device and IP entities and summarizes degree, connected components, betweenness and Louvain communities.
+- Customer 360 retains up to 50 recent purchases per customer; graph relationship exploration uses exported edges from the bounded graph snapshot.
+- Segment narratives compare measured segment medians with full-cohort medians. Anomaly evidence uses robust feature deviations and is not a model-explanation attribution.
 
 **Interpretation**
 - Behavioral risk index is a cohort-relative heuristic (0–100), not a probability.
