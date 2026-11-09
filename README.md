@@ -11,10 +11,12 @@ An unsupervised customer intelligence research platform built around customer be
 | Workspace | What it answers |
 |---|---|
 | **Overview** | Executive KPIs, customer value distribution, risk and anomaly cohorts, segment comparisons |
-| **Customer 360** | Individual profile, retained purchase timeline, behavioral indicators and available graph connections |\n| **Customer Explorer** | Filter, rank and inspect customer profiles with transparent behavioral evidence |
+| **Customer 360** | Individual profile, retained purchase timeline, behavioral indicators and available graph connections |
+| **Customer Explorer** | Filter, rank and inspect customer profiles with transparent behavioral evidence |
 | **Customer Segments** | Behavioral groups plus automatically generated, cohort-relative segment descriptions |
 | **Graph Intelligence** | Interactive sampled user-device-IP network, entity connectivity, component distributions and community structure |
-| **Anomaly Lab** | Ranked candidates with robust feature-deviation evidence and transaction anomaly review |\n| **Executive Report** | Downloadable customer/segment/graph CSVs and a PDF methodology summary |
+| **Anomaly Lab** | Ranked candidates with robust feature-deviation evidence and transaction anomaly review |
+| **Executive Report** | Downloadable customer/segment/graph CSVs and a PDF methodology summary |
 | **Methodology** | Data provenance, methods, interpretation and limitations |
 
 ## Research architecture
@@ -60,7 +62,9 @@ The app reads precomputed files from `reports/customer_intelligence/`:
 - `segmentation_metrics.csv`
 - `graph_entity_metrics.csv`
 - `graph_communities.csv`
-- `graph_edges_sample.csv` (bounded interactive network sample)\n- `graph_edges.csv` (up to 100,000 investigation edges from the bounded graph)\n- `customer_purchase_timeline.parquet` (up to 50 most recent transactions per customer)
+- `graph_edges_sample.csv` (bounded interactive network sample)
+- `graph_edges.csv` (up to 100,000 investigation edges from the bounded graph)
+- `customer_purchase_timeline.parquet` (up to 50 most recent transactions per customer)
 - `run_metadata.json`
 
 The GitHub Actions workflow builds and publishes the latest bundle to `public-data/customer-intelligence-research.zip` in this public repository. Streamlit downloads and caches it automatically; manual ZIP upload remains as a fallback. The dashboard does not train models or rebuild the graph during startup. Customer purchase history is bounded to 50 records per customer; graph investigation edges are bounded to 100,000. The source benchmark identifiers and exported data are in a public repository, so do not reuse this publication pattern for private customer data.
