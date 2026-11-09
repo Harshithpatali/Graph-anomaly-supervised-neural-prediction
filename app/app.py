@@ -545,7 +545,7 @@ elif page=="Methodology":
 - Customer profiles summarize purchase frequency, value, timing, recency and device/IP diversity.
 - Segmentation uses robust scaling and K-means; candidate cluster counts use sample silhouette and Davies–Bouldin diagnostics.
 - Customer anomaly ranking combines Isolation Forest and Local Outlier Factor percentile scores.
-- Graph intelligence links users to device and IP entities and summarizes degree, connected components, betweenness and Louvain communities.
+- Graph intelligence links users to device and IP entities and summarizes degree, connected components, betweenness and Louvain communities.\n- Customer 360 retains up to 50 recent purchases per customer; graph relationship exploration uses exported edges from the bounded graph snapshot.\n- Segment narratives compare measured segment medians with full-cohort medians. Anomaly evidence uses robust feature deviations and is not a model-explanation attribution.
 
 **Interpretation**
 - Behavioral risk index is a cohort-relative heuristic (0–100), not a probability.
