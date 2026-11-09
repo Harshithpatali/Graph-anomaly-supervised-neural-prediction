@@ -39,3 +39,13 @@ def test_anomaly_model_excludes_heuristic_risk_index():
     profiles = build_behavioral_risk(build_customer_profiles(sample()))
     scored, meta = score_anomalies(profiles)
     assert "behavioral_risk_index" not in meta["feature_columns"]
+
+
+def test_anomaly_bands_are_rank_based_and_not_all_extreme():
+    profiles = build_customer_profiles(sample())
+    scored, meta = score_anomalies(profiles)
+    counts = scored.anomaly_band.value_counts()
+    assert counts.get("Extreme", 0) == 1
+    assert counts.get("Unusual", 0) == 1
+    assert counts.get("Typical", 0) == 13
+    assert meta["anomaly_band_counts"] == {k: int(v) for k, v in counts.to_dict().items()}
