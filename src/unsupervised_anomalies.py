@@ -40,12 +40,27 @@ def score_anomalies(frame: pd.DataFrame, feature_columns: list[str] | None = Non
     result["isolation_forest_score"] = iso_score
     result["lof_score"] = lof_score
     result["anomaly_score"] = combined
-    result["anomaly_rank"] = result["anomaly_score"].rank(ascending=False, method="first").astype(int)
-    result["anomaly_band"] = pd.cut(result["anomaly_score"], bins=[-.001, .90, .98, 1.001],
-                                    labels=["Typical", "Unusual", "Extreme"]).astype(str)
-    return result.sort_values("anomaly_score", ascending=False), {
-        "rows_scored": int(len(result)), "feature_columns": feature_columns,
+    # Use the combined ranking, not fixed score cutoffs. The weighted average
+    # of two percentile scores is NOT itself uniformly distributed; applying
+    # 0.90/0.98 score thresholds can therefore produce misleading bucket sizes.
+    result["anomaly_rank"] = result["anomaly_score"].rank(
+        ascending=False, method="first"
+    ).astype(int)
+    n = len(result)
+    extreme_n = max(1, int(np.ceil(0.02 * n)))
+    review_n = max(extreme_n, int(np.ceil(0.10 * n)))
+    result["anomaly_band"] = np.select(
+        [result["anomaly_rank"] <= extreme_n, result["anomaly_rank"] <= review_n],
+        ["Extreme", "Unusual"],
+        default="Typical"
+    )
+    band_counts = result["anomaly_band"].value_counts().to_dict()
+    return result.sort_values(["anomaly_rank", "anomaly_score"], ascending=[True, False]), {
+        "rows_scored": int(n), "feature_columns": feature_columns,
         "contamination_parameter": contamination,
-        "score_definition": "0.60 * IsolationForest percentile + 0.40 * LOF percentile",
+        "band_policy": "Top 2% Extreme; next 8% Unusual; remaining 90% Typical (rank-based, deterministic tie break).",
+        "anomaly_band_counts": {k: int(v) for k, v in band_counts.items()},
+        "anomaly_band_shares": {k: round(float(v) / n, 4) for k, v in band_counts.items()},
+        "score_definition": "0.60 * IsolationForest percentile + 0.40 * LOF percentile; bands use combined rank, not raw score cutoffs.",
         "warning": "Relative unsupervised ranking; not a fraud probability or confirmed fraud label."
     }
