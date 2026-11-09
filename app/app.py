@@ -309,8 +309,16 @@ elif page=="Customer 360":
     st.subheader("Customer 360")
     st.caption("A unified customer profile combining purchase history, behavioral indicators, cohort context and network connections.")
     if "user_id" not in customers: st.warning("Customer identifiers are unavailable."); st.stop()
-    ids=customers.user_id.astype(str).tolist()
-    selected=st.text_input("Search customer ID",value=ids[0],key="customer360_id").strip()
+    # A native searchable selectbox exposes the complete customer population.
+    # Streamlit's built-in type-to-search avoids rendering a massive HTML dropdown.
+    ids=sorted(customers.user_id.dropna().astype(str).unique().tolist())
+    selected=st.selectbox(
+        "Search or select any customer ID",
+        options=ids,
+        index=0 if ids else None,
+        key="customer360_id",
+        help=f"All {len(ids):,} customer IDs are available. Start typing an ID to jump to it."
+    )
     matched=customers[customers.user_id.astype(str)==selected]
     if matched.empty: st.warning("No customer matches that ID in the loaded research snapshot."); st.stop()
     row=matched.iloc[0]
