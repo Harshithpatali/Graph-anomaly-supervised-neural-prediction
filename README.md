@@ -1,6 +1,6 @@
-# ◈ Graph-Based Customer Intelligence
+# ◈ Customer Intelligence Analytics
 
-**Discover customers · Understand behavior · Identify risk · Find hidden anomalies**
+**Understand customer behavior · Discover segments · Prioritize anomalies · Explore relationship networks**
 
 [Live Streamlit app](https://graph-anomaly-supervised-neural-prediction-v1.streamlit.app/) · [GitHub repository](https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction) · [Research workflow](https://github.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction/actions/workflows/customer-intelligence-research.yml)
 
@@ -10,8 +10,8 @@ An unsupervised customer intelligence research platform built around customer be
 
 | Workspace | What it answers |
 |---|---|
-| **Overview** | Customer, transaction, graph and segment counts; cohort-level risk and anomaly distributions |
-| **Customer Explorer** | Individual purchase behavior and reasons a profile was surfaced |
+| **Overview** | Executive KPIs, customer value distribution, risk and anomaly cohorts, segment comparisons |
+| **Customer Explorer** | Filter, rank and inspect customer profiles with transparent behavioral evidence |
 | **Customer Segments** | Behavioral groups discovered through unsupervised clustering |
 | **Graph Intelligence** | Interactive sampled user-device-IP network, entity connectivity, component distributions and community structure |
 | **Anomaly Lab** | Customers and transactions that are unusual under unsupervised scoring |
@@ -39,11 +39,15 @@ flowchart TD
 - The historical `class` label is dropped before customer feature generation.
 - It is not used in segmentation, behavioral risk ranking, graph construction or unsupervised anomaly scoring.
 - Behavioral risk is a **cohort-relative heuristic from 0–100**, not a calibrated probability.
-- Customer anomaly ranking combines Isolation Forest percentile (60%) and Local Outlier Factor percentile (40%).
+- Customer anomaly ranking combines Isolation Forest percentile (60%) and Local Outlier Factor percentile (40%); the heuristic behavioral-risk index is excluded from anomaly-model inputs to avoid circular scoring.
 - Segment IDs are arbitrary cluster identifiers, not ordinal value tiers.
 - Graph construction currently uses at most the first 50,000 input transactions.
 - Entity frequency features are full-snapshot descriptive counts, not point-in-time predictive features.
 - Outputs are exploratory decision-support signals. Do not use them alone to block, accuse or penalize customers.
+
+## Product experience
+
+The dashboard is designed as an analytics workflow: start with the executive overview, investigate a customer cohort, compare segments, explore shared entities, then inspect anomaly candidates and methodology. The UI reads precomputed reports so application startup does not trigger expensive model fitting. The product distinguishes measured customer behavior from heuristic review-priority scores and unsupervised anomaly rankings.
 
 ## Dashboard data
 
@@ -88,7 +92,7 @@ macOS/Linux activation: `source .venv/bin/activate`
 ## Project structure
 
 ```text
-app/app.py                         # Graph-Based Customer Intelligence UI
+app/app.py                         # Customer Intelligence analytics workspace
 src/customer_intelligence.py       # User-level behavioral profiles
 src/customer_risk.py               # Explainable relative risk index
 src/customer_segmentation.py       # Unsupervised K-means segmentation
