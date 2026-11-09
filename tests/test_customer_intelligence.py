@@ -33,3 +33,9 @@ def test_unsupervised_anomaly_ranking():
     assert scored.anomaly_rank.min() == 1
     assert scored.anomaly_score.between(0, 1).all()
     assert 'not a fraud probability' in meta['warning']
+
+
+def test_anomaly_model_excludes_heuristic_risk_index():
+    profiles = build_behavioral_risk(build_customer_profiles(sample()))
+    scored, meta = score_anomalies(profiles)
+    assert "behavioral_risk_index" not in meta["feature_columns"]
