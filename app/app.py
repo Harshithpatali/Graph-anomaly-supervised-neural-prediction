@@ -486,6 +486,15 @@ elif page=="Anomaly Lab":
         show=[c for c in ["user_id","anomaly_score","anomaly_rank","anomaly_band","behavioral_risk_index","transaction_count","total_spend","risk_explanations"] if c in ranked]
         st.dataframe(ranked[show],use_container_width=True,height=420,hide_index=True)
         download(ranked[show],"top_customer_anomalies.csv","Download customer anomaly ranking")
+        st.markdown("#### Anomaly investigation")
+        selected_anomaly=st.selectbox("Select a customer to explain",ranked.user_id.astype(str).tolist(),key="anomaly_explain_id")
+        candidate=customers[customers.user_id.astype(str)==selected_anomaly].iloc[0]
+        evidence=anomaly_evidence(candidate,customers)
+        if not evidence.empty:
+            plot(px.bar(evidence.sort_values("absolute_deviation"),x="robust_deviation",y="indicator",orientation="h",
+                        title="Largest behavioral deviations from cohort median",color="robust_deviation",color_continuous_scale="RdYlBu_r"),390)
+            st.dataframe(evidence.drop(columns="absolute_deviation"),use_container_width=True,hide_index=True)
+        st.caption("Robust deviation = (observed value − cohort median) / (IQR / 1.349). These comparisons explain feature unusualness; they are not a decomposition of the Isolation Forest/LOF score.")
     if transactions is not None and not transactions.empty:
         st.markdown("#### Transaction anomaly candidates")
         st.dataframe(transactions.head(500),use_container_width=True,height=380,hide_index=True)
