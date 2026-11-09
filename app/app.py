@@ -10,7 +10,7 @@ import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_DIR = ROOT / "reports" / "customer_intelligence"
-st.set_page_config(page_title="Customer Intelligence", page_icon="◈", layout="wide")
+st.set_page_config(page_title="Customer Intelligence | Analytics", page_icon="◈", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
@@ -41,11 +41,14 @@ hr{border-color:#30445e!important}
 .stApp [data-testid='stFileUploader'] span,.stApp [data-testid='stFileUploader'] small{color:#dce8f5!important}
 .stApp button{color:#fff!important}
 .intel-kicker{color:#65d5f4!important;text-transform:uppercase;letter-spacing:.16em;font-size:.75rem;font-weight:800}
-.dashboard-note{background:#14243a;border:1px solid #304762;border-radius:12px;padding:12px 16px;color:#dce9f7!important}
+.dashboard-note{background:linear-gradient(110deg,#14243a,#10283a);border:1px solid #34536d;border-radius:12px;padding:14px 18px;color:#e4f1fc!important}
+.product-subtitle{color:#b7c9dc!important;font-size:1rem}
+.section-eyebrow{color:#72d7f2!important;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:800}
+[data-testid="stDataFrame"] th{background:#1a3049!important;color:#fff!important}
+.stApp [data-testid="stAlert"]{border-radius:10px}
 
 /* Stable system typography and accessible BaseWeb portal menus. */
 .stApp,[data-testid="stMain"],[data-testid="stMarkdownContainer"]{
-  font-family="Segoe UI, Arial, sans-serif";
   font-family: "Segoe UI", Arial, sans-serif !important;
 }
 body > div [data-baseweb="popover"],[data-baseweb="popover"],[data-baseweb="menu"],
@@ -138,7 +141,7 @@ def graph_network_figure(edge_frame: pd.DataFrame, entity_frame: pd.DataFrame):
     return fig
 
 st.sidebar.markdown('<div class="intel-kicker">Customer intelligence platform</div>',unsafe_allow_html=True)
-st.sidebar.title("◈ Graph & Behavior")
+st.sidebar.title("◈ Intelligence Hub")
 st.sidebar.caption("Discover customers · Understand behavior · Surface anomalies")
 data=load_local()
 if "customer_intelligence.parquet" not in data:
@@ -157,9 +160,9 @@ pages=["Overview","Customer Explorer","Customer Segments","Graph Intelligence","
 page=st.sidebar.radio("Workspace",pages)
 st.sidebar.caption("Descriptive signals only. No fraud probability is produced.")
 st.markdown('<div class="intel-kicker">Behavioral analytics · Network science · Unsupervised discovery</div>',unsafe_allow_html=True)
-st.title("Graph-Based Customer Intelligence")
-st.markdown("### Discover customers. Understand behavior. Identify risk. Find hidden anomalies.")
-st.caption("A label-free research workspace for customer behavior, segmentation, entity relationships and anomaly prioritization.")
+st.title("Customer Intelligence")
+st.markdown('<div class="product-subtitle">Understand customer behavior. Discover meaningful segments. Prioritize unusual activity. Explore hidden relationships.</div>',unsafe_allow_html=True)
+st.caption("Decision-support analytics built from precomputed, label-free customer behavior features.")
 
 customers=data.get("customer_intelligence.parquet")
 if customers is None or customers.empty:
@@ -176,16 +179,17 @@ communities=data.get("graph_communities.csv",pd.DataFrame())
 transactions=data.get("top_transaction_anomalies.parquet")
 
 if page=="Overview":
-    st.subheader("Executive analytics overview")
+    st.subheader("Executive overview")
     st.markdown('<div class="dashboard-note">A portfolio-grade view of customer behavior, cohort composition, anomaly signals and shared-entity network structure. All metrics are descriptive and label-free.</div>',unsafe_allow_html=True)
     risk_col="behavioral_risk_index" if "behavioral_risk_index" in customers else None
     spend_col="total_spend" if "total_spend" in customers else None
     txn_col="transaction_count" if "transaction_count" in customers else None
     cols=st.columns(5)
+    high_risk=int((customers["behavioral_risk_band"]=="High").sum()) if "behavioral_risk_band" in customers else 0
+    extreme=int((customers["anomaly_band"]=="Extreme").sum()) if "anomaly_band" in customers else 0
     vals=[("Customers",f"{len(customers):,}"),("Transactions",f"{meta.get('transactions',0):,}"),
-          ("Total customer spend",f"{customers[spend_col].sum():,.0f}" if spend_col else "—"),
-          ("Graph entities",f"{len(entities):,}" if not entities.empty else f"{meta.get('graph_nodes',0):,}"),
-          ("Segments",str(customers.segment_id.nunique()) if "segment_id" in customers else "—")]
+          ("Customer spend",f"{customers[spend_col].sum():,.0f}" if spend_col else "—"),
+          ("High relative-risk",f"{high_risk:,}"),("Extreme anomalies",f"{extreme:,}")]
     for col,(label,value) in zip(cols,vals): col.metric(label,value)
     st.markdown("#### Customer behavior")
     left,right=st.columns(2)
@@ -228,6 +232,7 @@ if page=="Overview":
 
 elif page=="Customer Explorer":
     st.subheader("Customer Explorer")
+    st.caption("Filter the cohort, rank profiles for review and inspect the behavioral evidence behind an individual record.")
     bands=sorted(customers.behavioral_risk_band.dropna().astype(str).unique()) if "behavioral_risk_band" in customers else []
     c1,c2,c3=st.columns(3)
     selected_bands=c1.multiselect("Behavioral risk band",bands,default=bands)
@@ -255,7 +260,8 @@ elif page=="Customer Explorer":
         st.write("**Why surfaced:**",row.get("risk_explanations","No explanation available."))
 
 elif page=="Customer Segments":
-    st.subheader("Customer Segmentation")
+    st.subheader("Customer Segments")
+    st.caption("Compare discovered behavioral groups by size, purchase activity, spend and recency. Segment IDs are labels, not rankings.")
     if "segment_id" not in customers: st.warning("Segment labels unavailable."); st.stop()
     counts=customers.segment_id.value_counts().sort_index().rename_axis("segment_id").reset_index(name="customers")
     left,right=st.columns(2)
