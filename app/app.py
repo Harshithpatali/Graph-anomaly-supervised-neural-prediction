@@ -84,7 +84,7 @@ def read_zip(upload):
             with zf.open(matches[0]) as f: out["run_metadata.json"]=json.loads(f.read().decode())
     return out
 
-@st.cache_data(show_spinner="Fetching the latest public research bundle…", ttl=3600)
+@st.cache_data(show_spinner="Fetching the latest public research bundle…", ttl=300)
 def load_github_bundle():
     """Download the portfolio research bundle from this public GitHub repository."""
     url = "https://raw.githubusercontent.com/Harshithpatali/Graph-anomaly-supervised-neural-prediction/main/public-data/customer-intelligence-research.zip"
@@ -96,10 +96,10 @@ def load_github_bundle():
 @st.cache_data(show_spinner=False)
 def load_local():
     out={}
-    for name in ("customer_intelligence.parquet","customer_profiles.parquet","top_transaction_anomalies.parquet"):
+    for name in ("customer_intelligence.parquet","customer_profiles.parquet","top_transaction_anomalies.parquet","customer_purchase_timeline.parquet"):
         p=REPORT_DIR/name
         if p.exists(): out[name]=pd.read_parquet(p)
-    for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv","graph_edges_sample.csv"):
+    for name in ("segment_summary.csv","segmentation_metrics.csv","graph_entity_metrics.csv","graph_communities.csv","graph_edges_sample.csv","graph_edges.csv"):
         p=REPORT_DIR/name
         if p.exists(): out[name]=pd.read_csv(p)
     p=REPORT_DIR/"run_metadata.json"
@@ -216,7 +216,8 @@ def graph_network_figure(edge_frame: pd.DataFrame, entity_frame: pd.DataFrame):
 st.sidebar.markdown('<div class="intel-kicker">Customer intelligence platform</div>',unsafe_allow_html=True)
 st.sidebar.title("◈ Intelligence Hub")
 st.sidebar.caption("Discover customers · Understand behavior · Surface anomalies")
-data=load_local()
+refresh_requested=st.sidebar.button("Refresh published research bundle",help="Fetch the latest completed GitHub research export instead of using local report files.")
+data=load_github_bundle() if refresh_requested else load_local()
 if "customer_intelligence.parquet" not in data:
     try:
         data=load_github_bundle()
