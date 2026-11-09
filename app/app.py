@@ -310,8 +310,10 @@ elif page=="Customer 360":
     st.caption("A unified customer profile combining purchase history, behavioral indicators, cohort context and network connections.")
     if "user_id" not in customers: st.warning("Customer identifiers are unavailable."); st.stop()
     ids=customers.user_id.astype(str).tolist()
-    selected=st.selectbox("Select customer",ids,key="customer360_id")
-    row=customers[customers.user_id.astype(str)==selected].iloc[0]
+    selected=st.text_input("Search customer ID",value=ids[0],key="customer360_id").strip()
+    matched=customers[customers.user_id.astype(str)==selected]
+    if matched.empty: st.warning("No customer matches that ID in the loaded research snapshot."); st.stop()
+    row=matched.iloc[0]
     m1,m2,m3,m4=st.columns(4)
     m1.metric("Transactions",f"{row.get('transaction_count',0):,.0f}")
     m2.metric("Lifetime spend",f"{row.get('total_spend',0):,.2f}")
