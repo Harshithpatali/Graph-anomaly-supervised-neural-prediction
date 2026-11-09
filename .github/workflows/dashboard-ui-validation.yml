@@ -33,7 +33,7 @@ jobs:
           from pathlib import Path
           source = Path("app/app.py").read_text(encoding="utf-8")
           assert "fonts.googleapis.com" not in source, "Dashboard still depends on a remote Google Font"
-          assert 'family="Segoe UI, Arial, sans-serif"' in source, "Dashboard must use a locally available system font stack"
+          assert 'font-family: "Segoe UI", Arial, sans-serif !important' in source, "Dashboard must use a locally available system font stack"
           assert "background-clip: text" not in source, "Gradient text can become invisible in unsupported browsers"
           # Verify the dark menu portal itself is styled (menus render outside widgets).
           for selector in ('[data-baseweb="popover"]', '[data-baseweb="menu"]', '[role="listbox"]', '[role="option"]'):
