@@ -6,6 +6,8 @@
 
 An unsupervised customer intelligence research platform built around customer behavior, network relationships, segmentation and anomaly discovery. The primary product is **not a supervised fraud classifier**.
 
+**Decision-maker brief:** [Customer anomaly investigation brief](docs/DECISION_BRIEF.md) — defines the analyst workflow, review guardrails and outcome metrics needed before claiming operational impact.
+
 ## Product experience
 
 | Workspace | What it answers |
