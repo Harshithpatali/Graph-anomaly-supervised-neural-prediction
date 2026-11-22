@@ -63,6 +63,7 @@ The app reads precomputed files from `reports/customer_intelligence/`:
 - `segment_summary.csv`
 - `segmentation_metrics.csv`
 - `graph_entity_metrics.csv`
+- `graph_validation_metrics.json` (node/edge integrity, components and shared-entity connectivity)
 - `graph_communities.csv`
 - `graph_edges_sample.csv` (bounded interactive network sample)
 - `graph_edges.csv` (up to 100,000 investigation edges from the bounded graph)
