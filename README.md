@@ -63,6 +63,7 @@ The app reads precomputed files from `reports/customer_intelligence/`:
 - `segment_summary.csv`
 - `segmentation_metrics.csv`
 - `graph_entity_metrics.csv`
+- `graph_validation_metrics.json` (node/edge integrity, components and shared-entity connectivity)
 - `graph_communities.csv`
 - `graph_edges_sample.csv` (bounded interactive network sample)
 - `graph_edges.csv` (up to 100,000 investigation edges from the bounded graph)
@@ -117,3 +118,17 @@ Earlier supervised fraud-classification and chronological validation experiments
 ## Author
 
 **Harshith Devaraja** · [GitHub](https://github.com/Harshithpatali)
+
+ 
+## Structural validation and model card
+
+The customer-intelligence build now emits `graph_validation_metrics.json` alongside the other research artifacts. It reports node/edge type integrity, component structure, graph density, isolated nodes and the number/share of customers connected through shared devices or IPs. These are graph-quality diagnostics, not fraud-detection metrics.
+
+Run the structural tests and rebuild:
+
+```bash
+pytest -q
+python scripts/build_customer_intelligence.py
+```
+
+See [Model Card](docs/MODEL_CARD.md) for intended use, data scope, evaluation limits and analyst guardrails. Shared devices/IPs and anomaly ranks are investigation signals only; they are not evidence of fraud or calibrated fraud probabilities.

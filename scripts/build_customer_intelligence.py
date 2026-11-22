@@ -8,7 +8,7 @@ from src.customer_intelligence import build_customer_profiles
 from src.customer_segmentation import segment_customers
 from src.customer_risk import build_behavioral_risk
 from src.unsupervised_anomalies import score_anomalies
-from src.graph_intelligence import build_entity_graph, graph_entity_metrics, community_summary
+from src.graph_intelligence import build_entity_graph, graph_entity_metrics, community_summary, graph_quality_metrics
 
 
 def main():
@@ -30,6 +30,8 @@ def main():
     graph = build_entity_graph(tx, max_transactions=50000)
     entities = graph_entity_metrics(graph)
     communities = community_summary(graph)
+    graph_validation = graph_quality_metrics(graph)
+    (output / 'graph_validation_metrics.json').write_text(json.dumps(graph_validation, indent=2))
     tx_features = tx.copy()
     tx_features['purchase_hour'] = tx_features['purchase_time'].dt.hour
     tx_features['purchase_dayofweek'] = tx_features['purchase_time'].dt.dayofweek
@@ -55,7 +57,7 @@ def main():
     )
     metadata = {'project': 'Graph-Based Customer Intelligence', 'label_used_for_features_or_training': False,
                 'transactions': len(tx), 'customers': len(profiles), 'graph_nodes': graph.number_of_nodes(),
-                'graph_edges': graph.number_of_edges(), 'timeline_rows': len(timeline), 'exported_graph_edges': min(graph.number_of_edges(), 100000), 'segmentation': segment_meta['metadata'],
+                'graph_edges': graph.number_of_edges(), 'graph_validation': graph_validation, 'timeline_rows': len(timeline), 'exported_graph_edges': min(graph.number_of_edges(), 100000), 'segmentation': segment_meta['metadata'],
                 'customer_anomaly': customer_meta, 'transaction_anomaly': tx_meta,
                 'limitations': ['Risk index is a relative heuristic, not fraud probability.',
                                 'Graph uses the first 50,000 input transactions; exported investigation edges are capped at 100,000.', 'Customer purchase timeline retains at most 50 most recent transactions per customer.',

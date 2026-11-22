@@ -49,3 +49,38 @@ def test_anomaly_bands_are_rank_based_and_not_all_extreme():
     assert counts.get("Unusual", 0) == 1
     assert counts.get("Typical", 0) == 13
     assert meta["anomaly_band_counts"] == {k: int(v) for k, v in counts.to_dict().items()}
+
+
+def test_graph_quality_metrics_measure_shared_entities_and_edge_integrity():
+    from src.graph_intelligence import build_entity_graph, graph_quality_metrics
+
+    transactions = pd.DataFrame([
+        {"user_id": 1, "device_id": "shared-device", "ip_address": "shared-ip"},
+        {"user_id": 2, "device_id": "shared-device", "ip_address": "ip-2"},
+        {"user_id": 3, "device_id": "device-3", "ip_address": "shared-ip"},
+    ])
+    graph = build_entity_graph(transactions)
+    metrics = graph_quality_metrics(graph)
+
+    assert metrics["nodes"] == 7
+    assert metrics["edges"] == 6
+    assert metrics["node_type_counts"] == {"user": 3, "device": 2, "ip": 2}
+    assert metrics["edge_type_counts"] == {"user-device": 3, "user-ip": 3, "other": 0}
+    assert metrics["invalid_edge_count"] == 0
+    assert metrics["connected_components"] == 1
+    assert metrics["largest_component_share"] == 1.0
+    assert metrics["shared_device_entity_count"] == 1
+    assert metrics["shared_ip_entity_count"] == 1
+    assert metrics["users_with_any_shared_entity_count"] == 3
+    assert "not fraud evidence" in metrics["interpretation"]
+
+
+def test_graph_quality_metrics_handle_empty_graph():
+    import networkx as nx
+    from src.graph_intelligence import graph_quality_metrics
+
+    metrics = graph_quality_metrics(nx.Graph())
+    assert metrics["nodes"] == 0
+    assert metrics["edges"] == 0
+    assert metrics["connected_components"] == 0
+    assert metrics["largest_component_share"] == 0.0
