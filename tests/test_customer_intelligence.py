@@ -84,3 +84,36 @@ def test_graph_quality_metrics_handle_empty_graph():
     assert metrics["edges"] == 0
     assert metrics["connected_components"] == 0
     assert metrics["largest_component_share"] == 0.0
+
+
+def test_graph_collapses_duplicate_relationships_and_ignores_missing_entities():
+    from src.graph_intelligence import build_entity_graph, graph_quality_metrics
+
+    transactions = pd.DataFrame([
+        {"user_id": "u1", "device_id": "d1", "ip_address": "ip1"},
+        {"user_id": "u1", "device_id": "d1", "ip_address": "ip1"},
+        {"user_id": "u2", "device_id": None, "ip_address": "ip1"},
+        {"user_id": None, "device_id": "d3", "ip_address": "ip3"},
+    ])
+    graph = build_entity_graph(transactions)
+    metrics = graph_quality_metrics(graph)
+
+    assert metrics["nodes"] == 4
+    assert metrics["edges"] == 3
+    assert metrics["invalid_edge_count"] == 0
+    assert metrics["self_loop_count"] == 0
+    assert metrics["shared_ip_entity_count"] == 1
+    assert metrics["users_with_any_shared_entity_count"] == 2
+
+
+def test_graph_transaction_cap_is_respected():
+    from src.graph_intelligence import build_entity_graph
+
+    transactions = pd.DataFrame([
+        {"user_id": f"u{i}", "device_id": f"d{i}", "ip_address": f"ip{i}"}
+        for i in range(4)
+    ])
+    graph = build_entity_graph(transactions, max_transactions=2)
+
+    assert graph.number_of_nodes() == 6
+    assert graph.number_of_edges() == 4

@@ -132,3 +132,8 @@ python scripts/build_customer_intelligence.py
 ```
 
 See [Model Card](docs/MODEL_CARD.md) for intended use, data scope, evaluation limits and analyst guardrails. Shared devices/IPs and anomaly ranks are investigation signals only; they are not evidence of fraud or calibrated fraud probabilities.
+
+
+## Quantitative graph validation
+
+See [Graph Quantitative Validation](docs/GRAPH_QUANTITATIVE_VALIDATION.md) for graph metric definitions, structural acceptance checks, reproducible commands and the next leakage-safe experiment required to establish incremental predictive value. Structural validity is not evidence of fraud-detection lift.
